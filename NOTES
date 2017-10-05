@@ -1,0 +1,35 @@
+Based around texts.
+Each text has a bag (ie. ordered set) of chinese words. There exists a bag of sentences where each sentence cover a new word from the word bag.
+
+
+Course:
+  - Text (ground truth)
+  - Owner
+  - Private/Public
+  - Bag of chinese words. Derived from source truth.
+  - Bag of introduction sentences. The "easiest" to learn set of sentences that cover all words in the word bag. Will never have more members than the word bag. Not all words in the word bag are guaranteed to be covered.
+  - Bag of relevant sentences. Includes any and all sentences that contain at least one word from the word bag. Always a superset of introduction sentences.
+
+
+Review:
+  Find relevant course sentences.
+  Left join with review dates.
+  Sort by review date, youngest first, discarding any from the future.
+  Group by review dates, sort by LastSeen date, youngest first. Take 1 from group.
+  Take 10.
+
+Advance:
+  Take next from introduction bag that doesn't have a review date.
+
+
+Offer help / Receive help:
+
+Text annotations:
+  - Each annotation span a section of a text.
+  - Annotations are public.
+  - Annotations can receive comments.
+  - Annotations/Comments can be marked as "Want Help".
+  - When someone replies, the parent comment are cleared of this mark.
+  - Comments have a score (hearts).
+  - Comments are not threaded.
+  - Comments have an optional 'Replied-to' field. Display using the icon for each user.

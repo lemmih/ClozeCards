@@ -1,0 +1,142 @@
+<html>
+  <head>
+    <script src="https://code.jquery.com/jquery-3.2.1.min.js">
+    </script>
+    <script>
+      function setHeights() {
+        const children = $('#text').children();
+        var bottom = 0;
+        $('.annotation').each(function(idx, ann) {
+          var child = children[$(ann).attr('x-index')];
+          var top = Math.max(bottom,child.offsetTop);
+          $(ann).css('top', top);
+          bottom = ann.offsetHeight + top + 10;
+          $(ann).hover(function() {
+            $(child).addClass('hover');
+            return true;
+          }, function() {
+            $(child).removeClass('hover');
+            return true;
+          })
+        });
+      }
+    </script>
+    <style>
+      * {
+        box-sizing: border-box;
+      }
+      .hover {
+        background: yellow;
+      }
+      div {
+        border: 1px solid black;
+      }
+      #text {
+        width: 50%;
+        float: left;
+      }
+      #annotations {
+        width: 50%;
+        float: left;
+      }
+      .annotation {
+        position: absolute;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="text">
+      <p>Text goes here</p>
+      <p>Annotations can refer to any part of this.</p>
+      <p>Or maybe restrict to HTML elements?</p>
+      <p>Text goes here</p>
+      <p>Annotations can refer to any part of this.</p>
+      <p>Or maybe restrict to HTML elements?</p>
+      <p>Text goes here</p>
+      <p>Annotations can refer to any part of this.</p>
+      <p>Or maybe restrict to HTML elements?</p>
+      <p>Text goes here</p>
+      <p>Annotations can refer to any part of this.</p>
+      <p>Or maybe restrict to HTML elements?</p>
+      <p>Text goes here</p>
+      <p>Annotations can refer to any part of this.</p>
+      <p>Or maybe restrict to HTML elements?</p>
+      <p>Text goes here</p>
+      <p>Annotations can refer to any part of this.</p>
+      <p>Or maybe restrict to HTML elements?</p>
+      <p>Text goes here</p>
+      <p>Annotations can refer to any part of this.</p>
+      <p>Or maybe restrict to HTML elements?</p>
+      <p>Text goes here</p>
+      <p>Annotations can refer to any part of this.</p>
+      <p>Or maybe restrict to HTML elements?</p>
+      <p>Text goes here</p>
+      <p>Annotations can refer to any part of this.</p>
+      <p>Or maybe restrict to HTML elements?</p>
+      <p>Text goes here</p>
+      <p>Annotations can refer to any part of this.</p>
+      <p>Or maybe restrict to HTML elements?</p>
+      <p>Text goes here</p>
+      <p>Annotations can refer to any part of this.</p>
+      <p>Or maybe restrict to HTML elements?</p>
+      <p>Text goes here</p>
+      <p>Annotations can refer to any part of this.</p>
+      <p>Or maybe restrict to HTML elements?</p>
+      <p>Text goes here</p>
+      <p>Annotations can refer to any part of this.</p>
+      <p>Or maybe restrict to HTML elements?</p>
+      <p>Text goes here</p>
+      <p>Annotations can refer to any part of this.</p>
+      <p>Or maybe restrict to HTML elements?</p>
+      <p>Text goes here</p>
+      <p>Annotations can refer to any part of this.</p>
+      <p>Or maybe restrict to HTML elements?</p>
+      <p>Text goes here</p>
+      <p>Annotations can refer to any part of this.</p>
+      <p>Or maybe restrict to HTML elements?</p>
+      <p>Text goes here</p>
+      <p>Annotations can refer to any part of this.</p>
+      <p>Or maybe restrict to HTML elements?</p>
+      <p>Text goes here</p>
+      <p>Annotations can refer to any part of this.</p>
+      <p>Or maybe restrict to HTML elements?</p>
+      <p>Text goes here</p>
+      <p>Annotations can refer to any part of this.</p>
+      <p>Or maybe restrict to HTML elements?</p>
+      <p>Text goes here</p>
+      <p>Annotations can refer to any part of this.</p>
+      <p>Or maybe restrict to HTML elements?</p>
+      <p>Text goes here</p>
+      <p>Annotations can refer to any part of this.</p>
+      <p>Or maybe restrict to HTML elements?</p>
+    </div>
+    <div id="annotations">
+      Annotations go here.
+      <div x-index="2" class="annotation">
+        <p>This is an annotation.</p>
+        <p>They may span many lines</p>
+      </div>
+      <div x-index="3" class="annotation">
+        <p>This is an annotation.</p>
+        <p>They may span many lines</p>
+      </div>
+      <div x-index="10" class="annotation">
+        <p>This is an annotation.</p>
+        <p>They may span many lines</p>
+      </div>
+      <div x-index="11" class="annotation">
+        <p>This is an annotation.</p>
+        <p>They may span many lines</p>
+      </div>
+      <div x-index="12" class="annotation">
+        <p>This is an annotation.</p>
+        <p>They may span many lines</p>
+      </div>
+    </div>
+    <script>
+      $(document).ready(function() {
+        setHeights();
+      });
+    </script>
+  </body>
+</html>
