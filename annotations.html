@@ -32,15 +32,18 @@
         border: 1px solid black;
       }
       #text {
-        width: 50%;
+        width: 60%;
         float: left;
       }
       #annotations {
-        width: 50%;
+        width: 40%;
         float: left;
       }
       .annotation {
         position: absolute;
+      }
+      .annotation:hover {
+        background: yellow;
       }
     </style>
   </head>
@@ -113,7 +116,7 @@
     <div id="annotations">
       Annotations go here.
       <div x-index="2" class="annotation">
-        <p>This is an annotation.</p>
+        <p>This is an annotation. This is an annotation. This is an annotation. This is an annotation. This is an annotation. This is an annotation. This is an annotation. This is an annotation. This is an annotation. This is an annotation. This is an annotation. This is an annotation.</p>
         <p>They may span many lines</p>
       </div>
       <div x-index="3" class="annotation">
@@ -137,6 +140,9 @@
       $(document).ready(function() {
         setHeights();
       });
+      $(window).resize(function() {
+        setHeights();
+      })
     </script>
   </body>
 </html>
