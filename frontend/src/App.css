@@ -1,19 +1,42 @@
+* {
+  box-sizing: border-box;
+}
 body {
-  background: #333;
+  background: #aaa;
 }
 .chinese {
-  border-bottom: 2px solid green;
-  margin-left: 5px;
-  margin-right: 5px;
+  /*border-bottom: 2px solid green;*/
+  /*margin-left: 5px;*/
+  /*margin-right: 5px;*/
+  /*padding-left: 5px;*/
+  /*padding-right: 5px;*/
 }
 .chinese:nth-child(odd) {
-  background-color: lightblue;
+  /*background-color: lightblue;*/
+  border-bottom: 2px solid green;
+}
+.chinese:nth-child(even) {
+  /*background-color: lightblue;*/
+  border-top: 2px solid green;
+}
+.AnnotationBlock {
+  /*background-color: lightblue;*/
+  user-select:none;
+  /*text-align: right;*/
+  /*display: none;*/
+  margin-left: 1em;
+  padding-left: 20px;
+  /*border-left: 20px solid black;*/
+  font-style: italic;
 }
 
 .DraftEditor-root {
+  width: 50%;
+  float: left;
   background: #fff;
   border-radius: 0.3em;
   padding: 1em;
+  border: 1px solid black;
 }
 .public-DraftEditorPlaceholder-inner {
   position: absolute;
