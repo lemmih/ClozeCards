@@ -7,6 +7,7 @@ import { Editor, EditorState, convertToRaw, convertFromRaw, RichUtils,
          DefaultDraftBlockRenderMap, DraftEditorBlock } from 'draft-js'
 import './App.css';
 import $ from 'jquery'
+import {ResizeSensor} from 'css-element-queries'
 
 class AnnotationBlock extends Component {
   constructor(props) {
@@ -217,6 +218,8 @@ class App extends Component {
     const editorBlocks = $(this.refs.editor.refs.editor).find('[data-editor]');
     const annBlocks = $(this.refs.ann.refs.editor).find('[data-editor]');
     const minBlocks = Math.min(editorBlocks.length, annBlocks.length);
+    const bottom = editorBlocks[minBlocks-1].children[0].offsetHeight -
+                   annBlocks[minBlocks-1].children[0].offsetHeight;
     var dirty = false;
     for(var i=1; i < minBlocks; i++) {
       const editTop = editorBlocks[i].offsetTop;
@@ -241,24 +244,50 @@ class App extends Component {
       const sharedAdded = Math.min(annAdded, editAdded);
       let delta = 0;
 
-      if( annTop < editTop ) {
-        delta = editTop-editAdded-annTop;
-        $(annBlocks[i-1]).css(prop, (delta+annAdded+annExtra) + 'px')
-        $(editorBlocks[i-1]).css(prop, '0px')
-      } else if( annTop > editTop ) {
-        delta = annTop-annAdded-editTop;
-        $(editorBlocks[i-1]).css(prop, (delta+editAdded+editExtra) + 'px')
-        $(annBlocks[i-1]).css(prop, '0px')
-      } else {
-        // $(editorBlocks[i-1]).css(prop,'0px');
-        // $(annBlocks[i-1]).css(prop,'0px');
+      if( annTop !== editTop ) {
+        if( annTop-annAdded < editTop-editAdded ) {
+          delta = (editTop-editAdded)-(annTop-annAdded);
+          $(annBlocks[i-1]).css(prop, (delta+annExtra) + 'px')
+          $(editorBlocks[i-1]).css(prop, '0px')
+        } else if( annTop-annAdded > editTop-editAdded ) {
+          delta = (annTop-annAdded)-(editTop-editAdded);
+          $(editorBlocks[i-1]).css(prop, (delta+editExtra) + 'px')
+          $(annBlocks[i-1]).css(prop, '0px')
+        } else {
+          $(editorBlocks[i-1]).css(prop,'0px');
+          $(annBlocks[i-1]).css(prop,'0px');
+        }
       }
+      // console.log(i, editTop, annTop, editAdded, annAdded, delta);
+    }
+    if( bottom < 0) {
+      $(editorBlocks[minBlocks-1]).css('padding-bottom',Math.abs(bottom)+'px');
+      $(annBlocks[minBlocks-1]).css('padding-bottom','0px');
+    } else {
+      $(editorBlocks[minBlocks-1]).css('padding-bottom','0px');
+      $(annBlocks[minBlocks-1]).css('padding-bottom',bottom+'px');
+    }
+    for(var i=minBlocks;i<editorBlocks.length;i++) {
+      $(editorBlocks[i]).css('min-height','0px');
+    }
+    for(var i=minBlocks;i<annBlocks.length;i++) {
+      $(annBlocks[i]).css('min-height','0px');
     }
   }
-  alignText = _.debounce(this.alignTextRaw, 250)
+  alignText = _.debounce(this.alignTextRaw, 250, {leading: true})
 
   componentDidMount = () => {
+    // console.log('Element', ElementQueries.ResizeSensor);
     this.alignText();
+    const self = this;
+    new ResizeSensor(this.refs.ann.refs.editor, () => {
+      // console.log('Resize');
+      self.alignText();
+    });
+    new ResizeSensor(this.refs.editor.refs.editor, () => {
+      // console.log('Resize');
+      self.alignText();
+    });
   }
 
   render() {
@@ -279,7 +308,7 @@ class App extends Component {
         <div onClick={this.focusAnn}>
           <Editor
             editorState={this.state.annState}
-            onChange={(editorState) => { this.alignText(); this.setState({...this.state, annState: editorState})}}
+            onChange={(editorState) => { this.setState({...this.state, annState: editorState})}}
             placeholder="Enter text here..."
             ref="ann"
           />

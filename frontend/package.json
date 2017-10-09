@@ -4,6 +4,7 @@
   "private": true,
   "dependencies": {
     "axios": "^0.16.2",
+    "css-element-queries": "^0.4.0",
     "draft-js": "^0.10.3",
     "jquery": "^3.2.1",
     "react": "^16.0.0",
