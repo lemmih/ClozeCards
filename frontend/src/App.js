@@ -61,7 +61,7 @@ class App extends Component {
                 'that annotations line up with the content.'
         , type: 'unstyled'},
         { text: 'This is further complicated by things like lists and images. ' +
-                'Even Chinese characters pose a problem because they are higher ' +
+                'Even Chinese characters pose a problem because they are taller ' +
                 'than latin letters.'
         , type: 'unordered-list-item'
         , depth: 1},
@@ -218,8 +218,6 @@ class App extends Component {
     const annBlocks = $(this.refs.ann.refs.editor).find('[data-editor]');
     const minBlocks = Math.min(editorBlocks.length, annBlocks.length);
     var dirty = false;
-    let annDyn = 0;
-    let editDyn = 0;
     for(var i=1; i < minBlocks; i++) {
       const editTop = editorBlocks[i].offsetTop;
       const annTop  = annBlocks[i].offsetTop;
@@ -243,41 +241,19 @@ class App extends Component {
       const sharedAdded = Math.min(annAdded, editAdded);
       let delta = 0;
 
-      if( annTop+annDyn < editTop+editDyn ) {
+      if( annTop < editTop ) {
         delta = editTop-editAdded-annTop;
         $(annBlocks[i-1]).css(prop, (delta+annAdded+annExtra) + 'px')
         $(editorBlocks[i-1]).css(prop, '0px')
-        // annDyn += editTop-editAdded-annTop;
-      } else if( annTop+annDyn > editTop+editDyn ) {
+      } else if( annTop > editTop ) {
         delta = annTop-annAdded-editTop;
         $(editorBlocks[i-1]).css(prop, (delta+editAdded+editExtra) + 'px')
         $(annBlocks[i-1]).css(prop, '0px')
-        // editDyn += annTop-annAdded-editTop;
       } else {
         // $(editorBlocks[i-1]).css(prop,'0px');
         // $(annBlocks[i-1]).css(prop,'0px');
       }
-      // console.log(i,annAdded, editAdded, sharedAdded, annTop, editTop, annDyn, editDyn, delta, annExtra, editExtra);
-      // if( $(editorBlocks[i-1]).css(prop) !== '0px' &&
-      //     $(annBlocks[i-1]).css(prop) !== '0px'
-      //     ) {
-      //   $(editorBlocks[i-1]).css(prop,'0px');
-      //   $(annBlocks[i-1]).css(prop,'0px');
-      //   dirty = true;
-      // }
-      // if( parseInt($(editorBlocks[i]).css(prop)) !== 0 &&
-      //     parseInt($(annBlocks[i]).css(prop)) !== 0
-      //     ) {
-      //   $(editorBlocks[i]).css(prop,'0px');
-      //   $(annBlocks[i]).css(prop,'0px');
-      //   dirty = true;
-      // }
     }
-    // console.log('Called');
-    // if(dirty)
-    // _.debounce(this.alignText, 0, {leading: false});
-    // if(dirty)
-    //   setTimeout(this.alignTextRaw,0);
   }
   alignText = _.debounce(this.alignTextRaw, 250)
 
