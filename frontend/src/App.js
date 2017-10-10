@@ -1,7 +1,7 @@
 import _ from 'lodash'
 import React, { Component } from 'react'
 import { EditorState, convertFromRaw, RichUtils } from 'draft-js'
-import PluginEditor from 'draft-js-plugins-editor'
+import Editor from 'draft-js-plugins-editor'
 import './App.css';
 import {ResizeSensor} from 'css-element-queries'
 import createChinesePlugin from './chinese-plugin.js'
@@ -35,7 +35,7 @@ class App extends Component {
     });
     const annBlocks = convertFromRaw({
       blocks: [
-        { text: 'Line 1'
+        { text: 'Line 1你好吗？'
         , type: 'unstyled'},
         { text: 'Line 2'
         , type: 'unstyled'},
@@ -61,13 +61,10 @@ class App extends Component {
   }
 
 
-  onChange = (editorState) => {
-    this.setState({editorState: editorState});
-  };
   handleKeyCommandA = (command, editorState) => {
     const newState = RichUtils.handleKeyCommand(editorState, command);
     if (newState) {
-      this.setState({...this.state, editorState: newState});
+      this.setState({editorState: newState});
       return 'handled';
     }
     return 'not-handled';
@@ -75,7 +72,7 @@ class App extends Component {
   handleKeyCommandB = (command, editorState) => {
     const newState = RichUtils.handleKeyCommand(editorState, command);
     if (newState) {
-      this.setState({...this.state, annState: newState});
+      this.setState({annState: newState});
       return 'handled';
     }
     return 'not-handled';
@@ -99,22 +96,22 @@ class App extends Component {
       <div className="App">
         <p>Editor with Chinese support.</p>
         <div onClick={this.focus}>
-          <PluginEditor
+          <Editor
             editorState={this.state.editorState}
             handleKeyCommand={this.handleKeyCommandA}
-            onChange={this.onChange}
+            onChange={(editorState) => this.setState({editorState})}
             plugins={this.textPlugins}
-            placeholder="Enter text here..."
+            placeholder="Left placeholder"
             ref="editor"
           />
         </div>
         <div onClick={this.focusAnn}>
-          <PluginEditor
+          <Editor
             editorState={this.state.annState}
-            onChange={(editorState) => { this.setState({...this.state, annState: editorState})}}
+            onChange={(annState) => this.setState({annState})}
             handleKeyCommand={this.handleKeyCommandB}
             plugins={this.annPlugins}
-            placeholder="Enter text here..."
+            placeholder="Right placeholder"
             ref="ann"
           />
         </div>

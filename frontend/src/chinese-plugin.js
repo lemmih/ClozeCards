@@ -49,7 +49,7 @@ export default () => {
       // console.log('Request', req);
       dirtyBlocks = Set();
       // this.setState({...this.state, dirtyBlocks: Set()});
-      // console.log('Fetching entries: ', req);
+      // console.log('Fetching entries: ', req, editor.getEditorRef().props.placeholder);
       axios.post('http://localhost:8000/segmentation/',req)
            .then((response) => {
             //  console.log('Got response', response.data);
