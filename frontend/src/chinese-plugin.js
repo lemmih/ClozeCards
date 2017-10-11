@@ -50,12 +50,12 @@ export default () => {
       dirtyBlocks = Set();
       // this.setState({...this.state, dirtyBlocks: Set()});
       // console.log('Fetching entries: ', req, editor.getEditorRef().props.placeholder);
-      axios.post('http://localhost:8000/segmentation/',req)
+      axios.post('/segmentation/',req)
            .then((response) => {
             //  console.log('Got response', response.data);
              var contentState = editor.getEditorState().getCurrentContent();
              Object.keys(response.data).forEach(key => {
-               if(!dirtyBlocks.has(key)) {
+               if(!dirtyBlocks.has(key) && contentState.getBlockForKey(key)) {
                  // Clear all entities in block.
                  const entireBlock = SelectionState.createEmpty(key).set('focusOffset', req[key].length);
                  contentState = applyEntity(contentState, entireBlock, null);

@@ -44,16 +44,16 @@ main = do
       [dir "status" $ do
         method GET
         ok $ toResponse ("OK"::String)
-      ,dir "segmentation" $ do
-        method OPTIONS
-        ok $ setHeader "Access-Control-Allow-Origin" "*"
-           $ setHeader "Access-Control-Allow-Headers" "Content-type"
-              $ toResponse ()
+      -- ,dir "segmentation" $ do
+      --   method OPTIONS
+      --   ok $ setHeader "Access-Control-Allow-Origin" "*"
+      --      $ setHeader "Access-Control-Allow-Headers" "Content-type"
+      --         $ toResponse ()
+      -- $ setHeader "Access-Control-Allow-Origin" "*"
       ,dir "segmentation" $ do
         method POST
         blocks <- jsonBody :: ServerPart Aeson.Object
-        ok $ setHeader "Access-Control-Allow-Origin" "*"
-           $ toResponse $ Aeson.Object (HM.map segmentate blocks)
+        ok $ toResponse $ Aeson.Object (HM.map segmentate blocks)
       ])
   where
     jsonBody :: Aeson.FromJSON a => ServerPart a

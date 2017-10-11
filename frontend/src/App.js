@@ -78,17 +78,21 @@ class App extends Component {
     return 'not-handled';
   }
 
-  alignText = _.debounce(() => alignContent(this.refs.editor.editor, this.refs.ann.editor), 250, {leading: true})
+  alignText = _.throttle(() => alignContent(this.refs.editor.editor, this.refs.ann.editor), 250)
 
   componentDidMount = () => {
     this.alignText();
     const self = this;
-    new ResizeSensor(this.refs.ann.editor.refs.editor, () => {
+    this.rightSensor = new ResizeSensor(this.refs.ann.editor.refs.editor, () => {
       self.alignText();
     });
-    new ResizeSensor(this.refs.editor.editor.refs.editor, () => {
+    this.leftSensor = new ResizeSensor(this.refs.editor.editor.refs.editor, () => {
       self.alignText();
     });
+  }
+  componentWillUnmount = () => {
+    this.rightSensor.detach();
+    this.leftSensor.detach();
   }
 
   render() {
