@@ -8,6 +8,7 @@
     "css-element-queries": "^0.4.0",
     "draft-js": "^0.10.3",
     "draft-js-plugins-editor": "^2.0.0-rc8",
+    "draft-js-static-toolbar-plugin": "^2.0.0-rc4",
     "jquery": "^3.2.1",
     "prop-types": "^15.6.0",
     "react": "^16.0.0",
@@ -15,6 +16,7 @@
     "react-router": "^4.2.0",
     "react-router-dom": "^4.2.2",
     "react-scripts": "0.9.5",
+    "semantic-ui-css": "^2.2.12",
     "semantic-ui-react": "^0.74.2"
   },
   "devDependencies": {},
