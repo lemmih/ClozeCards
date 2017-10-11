@@ -23,7 +23,6 @@ class Layout extends Component {
             </Menu.Menu>
           </Menu>
           <Route path="/" exact={true} component={LandingPage}/>
-          <Route path="/content/" exact={true} component={App}/>
           <Route path="/new-content/" exact={true} render={() => <Post editable={true}/>}/>
         </div>
       </Router>
