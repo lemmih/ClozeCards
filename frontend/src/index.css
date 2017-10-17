@@ -1,3 +1,14 @@
 body {
   background: #e6edf4;
 }
+
+.sticky div {
+  z-index: 1;
+}
+.comment .author {
+  display: inline-block;
+}
+
+.ui.floating.label {
+  opacity: 0.8;
+}

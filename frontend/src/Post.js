@@ -1,124 +1,113 @@
+import _ from 'lodash'
 import React, { Component } from 'react'
-import {Container, Input, Sticky, Item, Label, Icon, Segment} from 'semantic-ui-react'
-import { EditorState, convertFromRaw, RichUtils } from 'draft-js'
-import Editor from 'draft-js-plugins-editor'
-import createToolbarPlugin from 'draft-js-static-toolbar-plugin'
+import { withRouter, Redirect } from 'react-router-dom'
+import { connect } from 'react-redux'
 import {
-  ItalicButton,
-  BoldButton,
-  UnderlineButton,
-  CodeButton,
-  HeadlineOneButton,
-  HeadlineTwoButton,
-  HeadlineThreeButton,
-  UnorderedListButton,
-  OrderedListButton,
-  BlockquoteButton,
-  CodeBlockButton,
-} from 'draft-js-buttons'
+  Container, Item,
+} from 'semantic-ui-react'
+import { Set } from 'immutable'
 import './App.css';
-import {ResizeSensor} from 'css-element-queries'
-import createChinesePlugin from './chinese-plugin.js'
-import alignContent from './align.js'
-import 'draft-js-static-toolbar-plugin/lib/plugin.css'
+import uuid from 'uuid/v4'
 
-const inlineToolbarPlugin = createToolbarPlugin({
-  structure: [
-    ItalicButton,
-    BoldButton,
-    UnderlineButton,
-    CodeButton,
-    HeadlineOneButton,
-    HeadlineTwoButton,
-    HeadlineThreeButton,
-    UnorderedListButton,
-    OrderedListButton,
-    BlockquoteButton,
-    CodeBlockButton,
-  ]
-});
-const { Toolbar } = inlineToolbarPlugin;
+import PostItem from './PostItem.js'
+import PostBody from './PostBody.js'
+import PostComments from './PostComments.js'
 
-class Post extends Component {
-  constructor(props) {
-    super(props);
-    this.state = {
-      postEditor: EditorState.createEmpty(),
-      annotationEditor: EditorState.createEmpty()
-    };
-    this.postEditorFocus = () => this.postEditor.focus();
-    this.annotationEditorFocus = () => this.anotationEditor.focus();
-    this.postEditorPlugins = [ createChinesePlugin(), inlineToolbarPlugin ];
-    this.annotationEditorPlugins = [ createChinesePlugin() ];
+import {receivePost} from './actions/postActions'
+import {receiveContent} from './actions/contentActions'
+
+import mkSlug from './misc/slugs'
+
+function toViewPostProps(store, ownProps) {
+  const slug = ownProps.slug;
+  const post = store.posts.find((post) => _.includes(post.slugs,slug));
+  const content = post ? store.content.get(post.id) : null;
+  return {
+    takenSlugs: store.posts.map(p => post&&p.id===post.id ? Set() : Set(p.slugs)).toSet().flatten(),
+    post: post,
+    content: content
+  };
+}
+export const ViewPost = connect(toViewPostProps)(class ViewPost extends Component {
+  state = { editable: false }
+
+  handleEdit = () => {
+    this.setState({ editable: true });
   }
-  editorStyles = {
-    minHeight: "10em",
-    backgroundColor: "white"
+  handleSave = (post) => {
+    const takenSlugs = this.props.takenSlugs;
+    const slug = mkSlug(post.title, takenSlugs);
+    const slugs = _.uniq([slug].concat(post.slugs));
+    const postId = uuid();
+    this.props.dispatch(receivePost(post.id, post.title, post.tags, post.types, slugs,0,0));
+    this.props.dispatch(receiveContent(post.id, this.bodyRef.postEditorRaw()));
+    this.setState({ editable: false });
+    // this.props.history.push('/posts/'+slug);
   }
-  handleRef = (ref) => this.setState({ref})
+  handleBodyRef = (ref) => this.bodyRef = ref;
+
+  render = () => {
+    if( !this.props.post )
+      return <Redirect to="/"/>
+    return(
+      <div>
+        <Container style={{paddingTop: "2em"}}>
+          <Item.Group>
+            <PostItem
+              post={this.props.post}
+              editable={this.state.editable}
+              onEdit={this.handleEdit}
+              onSave={this.handleSave}
+              mayEdit={true}/>
+          </Item.Group>
+
+          <PostBody
+            postContent={this.props.content}
+            editable={this.state.editable}
+            showAnnotations={false}
+            ref={this.handleBodyRef} />
+
+          { false && <PostComments/>}
+        </Container>
+      </div>
+    );
+  }
+})
+
+function toNewPostProps(store) {
+  return {
+    posts: store.posts
+  };
+}
+
+const NewPost = withRouter(connect(toNewPostProps)(class NewPost extends Component {
+  onSave = (post) => {
+    const takenSlugs = this.props.posts.map(post => Set(post.slugs)).toSet().flatten();
+    const slug = mkSlug(post.title, takenSlugs);
+    const postId = uuid();
+    this.props.dispatch(receivePost(postId, post.title, post.tags, post.types, [slug],0,0));
+    this.props.dispatch(receiveContent(postId, this.bodyRef.postEditorRaw()));
+    this.props.history.push('/posts/'+slug);
+  }
+  handleBodyRef = (ref) => this.bodyRef = ref;
 
   render = () => {
     return(
       <div>
         <Container style={{paddingTop: "2em"}}>
           <Item.Group>
-            <Item>
-              <Item.Image>
-                <Segment style={{background: 'cornsilk'}}>
-                  <Label style={{textAlign: 'center'}} attached='bottom'>Word List</Label>
-                  <Icon name="file word outline" size="huge" style={{display: 'block', marginLeft: 'auto', marginRight: 'auto'}}/>
-                </Segment>
-              </Item.Image>
-
-              <Item.Content verticalAlign='middle'>
-                <Item.Header style={{display: "flex"}} as={Input} transparent={true} fluid={true} placeholder="Title...">
-                </Item.Header>
-                <Item.Meta>
-                  <Label color="teal">tag</Label>
-                </Item.Meta>
-                <Item.Extra>
-                  <span style={{float: "right"}}>
-                    <Icon name="save" size="large"/>
-                    <Icon name="write" size="big"/>
-                    <Icon style={{marginLeft: "1em"}} name="remove" size="big"/>
-                  </span>
-                  <Icon name="student" size="big"/>
-                  <Icon name="edit" size="big"/>
-                  <span style={{position: "relative", paddingLeft: '1em'}}>
-                    <Icon name="empty heart" size="big"/>
-                    <Label circular color="grey" floating>34</Label>
-                  </span>
-                  <span style={{position: "relative", paddingLeft: '1em'}}>
-                    <Icon name="comments" size="big"/>
-                    <Label circular color="grey" floating>520</Label>
-                  </span>
-                </Item.Extra>
-              </Item.Content>
-
-            </Item>
-          </Item.Group>
-          <div ref={this.handleRef} className="editor">
-            <Sticky context={this.state.ref}>
-              <Toolbar/>
-            </Sticky>
-            <div onClick={this.postEditorFocus} >
-              <Editor
-                editorState={this.state.postEditor}
-                handleKeyCommand={this.handleKeyCommandA}
-                onChange={(postEditor) => this.setState({postEditor})}
-                plugins={this.postEditorPlugins}
-                placeholder="Post content..."
-                ref={(ref) => this.postEditor = ref}
+            <PostItem
+              mayEdit={true}
+              editable={true}
+              onSave={this.onSave}
               />
-            </div>
-          </div>
-          <div>Post Comments</div>
-          <div>Annotation Comments</div>
-          <div>Similar posts</div>
+          </Item.Group>
+
+          <PostBody ref={this.handleBodyRef} editable={true} showAnnotations={false}/>
         </Container>
       </div>
     );
   }
-}
+}))
 
-export default Post;
+export { NewPost };
