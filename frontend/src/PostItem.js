@@ -9,24 +9,30 @@ import { Link } from 'react-router-dom'
 const opt = val => {return {key: val, text: val, value: val}};
 
 
+const defaultState = props => {
+  return { options: [
+              opt('Audio'),
+              opt('Comprehensive'),
+              opt('Exam'),
+              opt('Audio Book'),
+              opt('Free'),opt('Non-Free'),
+              opt('Mandarin Companion'),
+              opt('Graded Reader'),
+              opt('Slow Chinese')],
+            title: (props.post && props.post.title) || '',
+            currentValues: (props.post && props.post.tags) || [],
+          };
+}
 // editable
 // mayEdit
 class PostItem extends Component {
 
   constructor(props) {
     super(props);
-    this.state = { options: [
-                opt('Audio'),
-                opt('Comprehensive'),
-                opt('Exam'),
-                opt('Audio Book'),
-                opt('Free'),opt('Non-Free'),
-                opt('Mandarin Companion'),
-                opt('Graded Reader'),
-                opt('Slow Chinese')],
-              title: (props.post && props.post.title) || '',
-              currentValues: (props.post && props.post.tags) || [],
-            }
+    this.state = defaultState(props);
+  }
+  initialize = () => {
+    this.setState(defaultState(this.props));
   }
 
   handleAddition = (e, { value }) => {
@@ -43,22 +49,26 @@ class PostItem extends Component {
       type: 'word-list',
     });
   }
+  getPost = () => {
+    return {...this.props.post,
+      title: this.state.title.trim() || 'Untitled',
+      tags: this.state.currentValues,
+      type: 'word-list',
+    };
+  }
 
   render = () => {
-    const {mayEdit, editable, post} = this.props;
+    const {mayEdit, editable, notesVisible, post} = this.props;
+    const slug = post ? post.slugs[0] : null;
+    const postLink = '/posts/' + slug;
 
     const studyBase =
       <Popup content="Study" position="top center" trigger={<Icon name="student" size="big"/>}/>;
-    const studyActive = <Link to="/">{studyBase}</Link>;
+    const studyActive = <Link to={postLink + '/study'}>{studyBase}</Link>;
 
     const notesBase =
       <Popup content="Notes" position="top center" trigger={<Icon name="edit" size="big"/>}/>;
-    const notesActive = <Link to="/">{notesBase}</Link>
-
-    const saveBase =
-      <Popup content="Save" position="top center" trigger={<Icon name="save" size="big"/>}/>;
-    const saveActive =
-      <a onClick={this.handleSave}>{saveBase}</a>
+    const notesActive = <Link to={postLink + '/notes'}>{notesBase}</Link>
 
     const editBase = <Popup content="Edit post" position="top center" trigger={<Icon name="write" size="big"/>}/>;
     const editActive = <a onClick={this.props.onEdit}>{editBase}</a>;
@@ -85,7 +95,7 @@ class PostItem extends Component {
                            fluid={true}
                            placeholder="Title..."></Item.Header> }
             { !editable &&
-              <Item.Header><Link to={'/posts/'+post.slugs[0]}>{this.state.title}</Link></Item.Header> }
+              <Item.Header><Link to={postLink}>{this.state.title}</Link></Item.Header> }
             <Item.Meta>
               { editable && <Dropdown
                 options={this.state.options}
@@ -103,16 +113,13 @@ class PostItem extends Component {
                     { editable
                         ? studyBase
                         : studyActive }
-                    { editable
+                    { editable || notesVisible
                         ? notesBase
                         : notesActive }
                   </Grid.Column>
 
                   { mayEdit
                     ? <Grid.Column textAlign="center">
-                        { editable
-                          ? saveActive
-                          : saveBase }
                         { editable
                           ? editBase
                           : editActive }

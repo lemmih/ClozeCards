@@ -5,7 +5,6 @@ import {
   Container, Item
 } from 'semantic-ui-react'
 import Loading from './components/Loading.js'
-import './App.css';
 
 import PostItem from './PostItem.js'
 

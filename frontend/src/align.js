@@ -10,6 +10,21 @@ export default (editorA, editorB) => {
   const dynamicProp = 'min-height';
   const staticProp = 'padding-bottom';
 
+  {
+    const topA = blocksA[0].offsetTop;
+    const topB  = blocksB[0].offsetTop;
+
+    if( topA !== topB ) {
+      const addedA = getPadded(blocksA[0]);
+      const addedB = getPadded(blocksB[0]);
+      const deltaB = (topA-addedA)-(topB-addedB);
+      const deltaA = (topB-addedB)-(topA-addedA);
+      $(blocksB[0]).css('margin-top', Math.max(0, deltaB) + 'px')
+      $(blocksA[0]).css('margin-top', Math.max(0, deltaA) + 'px')
+      // console.log(0, topA, topB, addedA, addedB, deltaA, deltaB);
+    }
+  }
+
   for(var i=1; i < minBlocks; i++) {
     const topA = blocksA[i].offsetTop;
     const topB  = blocksB[i].offsetTop;
@@ -24,9 +39,9 @@ export default (editorA, editorB) => {
       const addedB = getAdded(blocksB[i-1]);
       const deltaB = (topA-addedA)-(topB-addedB);
       const deltaA = (topB-addedB)-(topA-addedA);
-      $(prevB).css(dynamicProp, Math.max(0, deltaB+prevBSize) + 'px')
-      $(prevA).css(dynamicProp, Math.max(0, deltaA+prevASize) + 'px')
-      // console.log(i, topA, topB, addedA, addedB, delta);
+      $(prevB).css(dynamicProp, Math.max(0, deltaB)+prevBSize + 'px')
+      $(prevA).css(dynamicProp, Math.max(0, deltaA)+prevASize + 'px')
+      // console.log(i, topA, topB, addedA, addedB, deltaA, deltaB);
     }
     $(blocksA[i]).css(staticProp,'0px');
     $(blocksB[i]).css(staticProp,'0px');
@@ -47,4 +62,7 @@ export default (editorA, editorB) => {
 
 function getAdded(elt) {
   return Math.max(0, parseInt($(elt).css('min-height'), 10) - elt.children[0].offsetHeight);
+}
+function getPadded(elt) {
+  return Math.max(0, parseInt($(elt).css('margin-top'), 10));
 }

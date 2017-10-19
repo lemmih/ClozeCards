@@ -1,6 +1,6 @@
 import _ from 'lodash'
 import React, { Component } from 'react'
-import { BrowserRouter as Router, Route, Link } from 'react-router-dom'
+import { BrowserRouter as Router, Route, Link, Switch } from 'react-router-dom'
 import LandingPage from './LandingPage'
 import {Menu} from 'semantic-ui-react'
 import { connect } from 'react-redux'
@@ -10,7 +10,13 @@ import BrowsePosts from './BrowsePosts'
 
 class Layout extends Component {
   matchViewPost = ({match}) => {
-    return <ViewPost slug={match.params.slug}/>
+    return <ViewPost slug={match.params.slug}/>;
+  }
+  matchViewNotes = ({match}) => {
+    return <ViewPost slug={match.params.slug} notes/>;
+  }
+  matchStudy = ({match}) => {
+    return <ViewPost slug={match.params.slug} study/>;
   }
   render = () => {
     return(
@@ -28,10 +34,14 @@ class Layout extends Component {
               <Menu.Item as={Link} to={"/login/"}name="login"/>
             </Menu.Menu>
           </Menu>
-          <Route path="/" exact={true} component={LandingPage}/>
-          <Route path="/top/" exact={true} render={() => <BrowsePosts/>}/>
-          <Route path="/new-content/" exact={true} render={() => <NewPost/>}/>
-          <Route path="/posts/:slug" exact={true} render={this.matchViewPost}/>
+          <Switch>
+            <Route path="/" exact={true} component={LandingPage}/>
+            <Route path="/top/" exact={true} render={() => <BrowsePosts/>}/>
+            <Route path="/new-content/" exact={true} render={() => <NewPost/>}/>
+            <Route path="/posts/:slug" exact={true} render={this.matchViewPost}/>
+            <Route path="/posts/:slug/notes" exact={true} render={this.matchViewNotes}/>
+            <Route path="/posts/:slug/study" exact={true} render={this.matchStudy}/>
+          </Switch>
         </div>
       </Router>
     );

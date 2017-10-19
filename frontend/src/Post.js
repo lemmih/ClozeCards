@@ -6,7 +6,6 @@ import {
   Container, Item,
 } from 'semantic-ui-react'
 import { Set } from 'immutable'
-import './App.css';
 import uuid from 'uuid/v4'
 
 import PostItem from './PostItem.js'
@@ -29,22 +28,46 @@ function toViewPostProps(store, ownProps) {
   };
 }
 export const ViewPost = connect(toViewPostProps)(class ViewPost extends Component {
-  state = { editable: false }
+  constructor(props) {
+    super(props);
+    const {study, notes} = props;
+    this.state = { editable: false, study, notes };
+    console.log('ViewPost Constructor', !!study, !!notes);
+  }
+  componentDidUpdate = (prevProps) => {
+    // console.log('Did update', this.props.study, this.props.notes, this.state);
+  }
+  componentWillReceiveProps = (nextProps) => {
+    console.log('Will receive', nextProps);
+    if( nextProps.study === undefined && nextProps.notes === undefined)
+      this.setState({study: false, notes: false});
+    if(nextProps.study !== undefined)
+      this.setState({study: nextProps.study});
+    if(nextProps.notes !== undefined)
+      this.setState({notes: nextProps.notes});
+  }
 
   handleEdit = () => {
     this.setState({ editable: true });
   }
-  handleSave = (post) => {
+  handleSave = () => {
+    const post = this.itemRef.getPost();
     const takenSlugs = this.props.takenSlugs;
     const slug = mkSlug(post.title, takenSlugs);
     const slugs = _.uniq([slug].concat(post.slugs));
-    const postId = uuid();
     this.props.dispatch(receivePost(post.id, post.title, post.tags, post.types, slugs,0,0));
     this.props.dispatch(receiveContent(post.id, this.bodyRef.postEditorRaw()));
     this.setState({ editable: false });
+    this.bodyRef.setState({editNotes: false});
     // this.props.history.push('/posts/'+slug);
   }
+  handleDiscard = () => {
+    this.itemRef.initialize();
+    this.bodyRef.initialize();
+    this.setState({ editable: false });
+  }
   handleBodyRef = (ref) => this.bodyRef = ref;
+  handlePostItemRef = (ref) => this.itemRef = ref;
 
   render = () => {
     if( !this.props.post )
@@ -54,17 +77,21 @@ export const ViewPost = connect(toViewPostProps)(class ViewPost extends Componen
         <Container style={{paddingTop: "2em"}}>
           <Item.Group>
             <PostItem
+              ref={this.handlePostItemRef}
               post={this.props.post}
               editable={this.state.editable}
               onEdit={this.handleEdit}
               onSave={this.handleSave}
-              mayEdit={true}/>
+              notesVisible={this.state.notes}
+              mayEdit={true && !this.state.notes && !this.state.study}/>
           </Item.Group>
 
           <PostBody
             postContent={this.props.content}
             editable={this.state.editable}
-            showAnnotations={false}
+            showAnnotations={this.state.notes}
+            onSave={this.handleSave}
+            onDiscard={this.handleDiscard}
             ref={this.handleBodyRef} />
 
           { false && <PostComments/>}
