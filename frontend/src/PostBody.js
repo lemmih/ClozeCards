@@ -5,29 +5,11 @@ import {
 } from 'semantic-ui-react'
 import { EditorState, convertToRaw, convertFromRaw } from 'draft-js'
 import Editor from 'draft-js-plugins-editor'
-import {ResizeSensor} from 'css-element-queries'
-import createChinesePlugin from './chinese-plugin.js'
+import createChinesePlugin from './plugins/chinese-plugin.js'
+import createResizePlugin from './plugins/resize'
 import alignContent from './align.js'
 import 'draft-js-static-toolbar-plugin/lib/plugin.css'
 import mkToolbar from './components/Toolbar'
-
-// const staticToolbarPlugin = createToolbarPlugin({
-//   structure: [
-//     ItalicButton,
-//     BoldButton,
-//     UnderlineButton,
-//     CodeButton,
-//     HeadlineOneButton,
-//     HeadlineTwoButton,
-//     HeadlineThreeButton,
-//     UnorderedListButton,
-//     OrderedListButton,
-//     BlockquoteButton,
-//     CodeBlockButton,
-//   ]
-// });
-// const { Toolbar } = staticToolbarPlugin;
-
 
 // editable
 // !editable
@@ -51,8 +33,8 @@ class PostBody extends Component {
       };
     this.postEditorFocus = () => this.postEditor.focus();
     this.annotationEditorFocus = () => this.annotationEditor.focus();
-    this.postEditorPlugins = [ createChinesePlugin() ];
-    this.annotationEditorPlugins = [ createChinesePlugin() ];
+    this.postEditorPlugins = [ createChinesePlugin(), createResizePlugin(this.alignText) ];
+    this.annotationEditorPlugins = [ createChinesePlugin(), createResizePlugin(this.alignText) ];
   }
   initialize = () => {
     if( this.props.postContent )
@@ -80,37 +62,10 @@ class PostBody extends Component {
   }
 
 
-  alignText = _.throttle(() => alignContent(this.postEditor.editor, this.annotationEditor.editor), 250)
-
-  componentDidMount = () => {
-    this.alignText();
-
-    this.leftSensor = new ResizeSensor(this.postEditor.editor.refs.editor, () => {
-      this.alignText();
-    });
-    this.rightSensor = new ResizeSensor(this.annotationEditor.editor.refs.editor, () => {
-      this.alignText();
-    });
-  }
-  componentDidUpdate = (prevProps) => {
-    if( prevProps.showAnnotations !== this.props.showAnnotations) {
-      this.alignText();
-      if( this.rightSensor )
-        this.rightSensor.detach();
-      if( this.leftSensor )
-        this.leftSensor.detach();
-      this.leftSensor = new ResizeSensor(this.postEditor.editor.refs.editor, () => {
-        this.alignText();
-      });
-      this.rightSensor = new ResizeSensor(this.annotationEditor.editor.refs.editor, () => {
-        this.alignText();
-      });
-    }
-  }
-  componentWillUnmount = () => {
-    this.rightSensor.detach();
-    this.leftSensor.detach();
-  }
+  alignText = _.throttle(() => {
+    if( this.props.showAnnotations )
+      alignContent(this.postEditor.editor, this.annotationEditor.editor);}
+  , 250)
 
   handlePostEditorChange = postEditor => this.setState({postEditor});
   handleAnnotationEditorChange = annotationEditor => this.setState({annotationEditor});
@@ -128,7 +83,7 @@ class PostBody extends Component {
     const showAnnotations = !!this.props.showAnnotations;
     const mayEditNotes = (this.state.selection === 'self' || !this.state.selection);
     const editPost = this.props.editable;
-    const anyEditable = editPost || editNotes;
+    const anyEditable = editPost || (showAnnotations && editNotes);
     const Toolbar = editPost
                     ? mkToolbar(this.state.postEditor, this.handlePostEditorChange)
                     : mkToolbar(this.state.annotationEditor, this.handleAnnotationEditorChange);
@@ -190,7 +145,7 @@ class PostBody extends Component {
           <div className="editor">
             <Grid padded={false} celled="internally">
               <Grid.Row>
-                <Grid.Column width={showAnnotations ? 10 : 16} onClick={() => this.postEditorFocus()}>
+                <Grid.Column width={showAnnotations ? 10 : 16} onClick={this.postEditorFocus}>
                   <Editor
                     editorState={this.state.postEditor}
                     onChange={this.handlePostEditorChange}
@@ -200,16 +155,17 @@ class PostBody extends Component {
                     ref={(ref) => this.postEditor = ref}
                   />
                 </Grid.Column>
-                <Grid.Column style={{display: showAnnotations ? 'initial' : 'none'}} width={6} onClick={() => this.annotationEditorFocus()}>
-                  <Editor
-                    editorState={this.state.annotationEditor}
-                    onChange={this.handleAnnotationEditorChange}
-                    plugins={this.annotationEditorPlugins}
-                    placeholder={editNotes ? "Write personal notes here." : ""}
-                    readOnly={!editNotes}
-                    ref={(ref) => this.annotationEditor = ref}
-                  />
-                </Grid.Column>
+                { showAnnotations &&
+                  <Grid.Column width={6} onClick={this.annotationEditorFocus}>
+                    <Editor
+                      editorState={this.state.annotationEditor}
+                      onChange={this.handleAnnotationEditorChange}
+                      plugins={this.annotationEditorPlugins}
+                      placeholder={editNotes ? "Write personal notes here." : ""}
+                      readOnly={!editNotes}
+                      ref={(ref) => this.annotationEditor = ref}
+                    />
+                  </Grid.Column> }
               </Grid.Row>
             </Grid>
           </div>
