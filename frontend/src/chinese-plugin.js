@@ -65,7 +65,7 @@ export default () => {
                  });
 
                } else {
-                 console.log('Got dirty in transfer.');
+                //  console.log('Got dirty in transfer.');
                }
              });
              const newState = EditorState.set(editor.getEditorState(), {currentContent: contentState, lastChangeType: 'mark-chinese'});

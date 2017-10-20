@@ -83,22 +83,33 @@ class PostBody extends Component {
   alignText = _.throttle(() => alignContent(this.postEditor.editor, this.annotationEditor.editor), 250)
 
   componentDidMount = () => {
-    if( this.annotationEditor ) {
+    this.alignText();
+
+    this.leftSensor = new ResizeSensor(this.postEditor.editor.refs.editor, () => {
       this.alignText();
-      const self = this;
-      this.rightSensor = new ResizeSensor(this.postEditor.editor.refs.editor, () => {
-        self.alignText();
+    });
+    this.rightSensor = new ResizeSensor(this.annotationEditor.editor.refs.editor, () => {
+      this.alignText();
+    });
+  }
+  componentDidUpdate = (prevProps) => {
+    if( prevProps.showAnnotations !== this.props.showAnnotations) {
+      this.alignText();
+      if( this.rightSensor )
+        this.rightSensor.detach();
+      if( this.leftSensor )
+        this.leftSensor.detach();
+      this.leftSensor = new ResizeSensor(this.postEditor.editor.refs.editor, () => {
+        this.alignText();
       });
-      this.leftSensor = new ResizeSensor(this.annotationEditor.editor.refs.editor, () => {
-        self.alignText();
+      this.rightSensor = new ResizeSensor(this.annotationEditor.editor.refs.editor, () => {
+        this.alignText();
       });
     }
   }
   componentWillUnmount = () => {
-    if( this.annotationEditor ) {
-      this.rightSensor.detach();
-      this.leftSensor.detach();
-    }
+    this.rightSensor.detach();
+    this.leftSensor.detach();
   }
 
   handlePostEditorChange = postEditor => this.setState({postEditor});
