@@ -1,60 +1,85 @@
 {-# LANGUAGE OverloadedStrings #-}
-module Main where
+module Main (main) where
 
 import           Control.Concurrent
 import           Control.Exception
 import           Control.Monad
 import           Control.Monad.Trans
-import qualified Data.Text as T
+import           Data.Aeson                 (Value (..), object, (.=))
 import qualified Data.Aeson                 as Aeson
-import Data.Aeson (Value(..), (.=), object)
 import qualified Data.ByteString.Char8      as B8
+import qualified Data.HashMap.Strict        as HM
 import           Data.Pool
+import qualified Data.Text                  as T
+import qualified Data.Vector                as V
 import           System.Environment
 import           System.IO.Error
-import qualified Data.HashMap.Strict as HM
-import qualified Data.Vector as V
 
 import           Happstack.Server
-import qualified Happstack.Server           as Happstack
+import qualified Network.WebSockets         as WS
+import           WebSockets
 
 import qualified Database.PostgreSQL.Simple as PSQL
 
 import           Data.Chinese.CCDict
 import           Data.Chinese.Segmentation
 
+import           CLI.Audio
+import           CLI.Tatoeba
+import           CLI.Users
+import           Client
+import qualified Daemons
+import           DB
+import qualified Worker
+
 instance ToMessage Aeson.Value where
   toContentType _ = "text/json"
   toMessage       = Aeson.encode
 
+oneSecond :: Int
+oneSecond = 10^6
 
 mkDatabasePool :: IO (Pool PSQL.Connection)
 mkDatabasePool = do
-  dbAddr <- getEnv "SQL_DB" `catchIOError` \_ -> return "host=localhost user=lemmih"
+  dbAddr <- getEnv "SQL_DB" `catchIOError` \_ -> return "dbname=ClozeCards user=lemmih"
   createPool (PSQL.connectPostgreSQL (B8.pack dbAddr)) PSQL.close
     1 -- One stripe.
     (60*60) -- Keep connections open for an hour.
     5 -- Max five connections per stripe.
 
-
 main :: IO ()
 main = do
     pool <- mkDatabasePool
-    simpleHTTP nullConf (msum
-      [dir "status" $ do
-        method GET
-        ok $ toResponse ("OK"::String)
-      -- ,dir "segmentation" $ do
-      --   method OPTIONS
-      --   ok $ setHeader "Access-Control-Allow-Origin" "*"
-      --      $ setHeader "Access-Control-Allow-Headers" "Content-type"
-      --         $ toResponse ()
-      -- $ setHeader "Access-Control-Allow-Origin" "*"
-      ,dir "segmentation" $ do
-        method POST
-        blocks <- jsonBody :: ServerPart Aeson.Object
-        ok $ toResponse $ Aeson.Object (HM.map segmentate blocks)
-      ])
+    runDB pool $ \_ -> return ()
+    args <- getArgs
+    case args of
+      [] -> do
+        group <- Worker.new
+        Worker.forkIO group $ forever $ do
+          runDBUnsafe pool $ Daemons.updSentenceWords
+          threadDelay oneSecond
+        Worker.forkIO group $ forever $ do
+          runDBUnsafe pool $ Daemons.updDirtyDecks
+          threadDelay oneSecond
+        Worker.forkIO group $ forever $ do
+          runDBUnsafe pool $ Daemons.updSchedule
+          threadDelay (oneSecond * 1)
+        simpleHTTP nullConf (msum
+          [dir "status" $ do
+            method GET
+            ok $ toResponse ("OK"::String)
+          ,dir "segmentation" $ do
+            method POST
+            blocks <- jsonBody :: ServerPart Aeson.Object
+            ok $ toResponse $ Aeson.Object (HM.map segmentate blocks)
+          ,dir "ws" $ runWebSocketsHappstack $ \pc -> do
+            conn <- WS.acceptRequest pc
+            handleNewWS pool conn
+          ]) `finally` Worker.killAll group
+      ["tatoeba", sentences, links] -> runDB pool $ \conn -> tatoeba conn sentences links
+      ["audio", dest] -> runDB pool $ \conn -> fetchAudio conn dest
+      ["users", userFile] -> runDB pool $ \conn -> importUsers conn userFile
+      _ -> putStrLn "Usag: prog tatoeba sentences links"
   where
     jsonBody :: Aeson.FromJSON a => ServerPart a
     jsonBody = do

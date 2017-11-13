@@ -1,5 +1,5 @@
-
 export const RECEIVE_CONTENT = "RECEIVE_CONTENT";
+export const FETCH_CONTENT = "FETCH_CONTENT";
 
 //
 // shouldFetchContent(contentId):bool
@@ -10,12 +10,18 @@ export const RECEIVE_CONTENT = "RECEIVE_CONTENT";
 // receiveContent(contentId, content)
 //
 
-export function receiveContent(contentId, content) {
+export function receiveContent(id, content) {
   return {
     type: RECEIVE_CONTENT,
     payload: {
-      contentId,
+      id,
       content,
     }
+  }
+}
+export function fetchContent(id) {
+  return {
+    type: FETCH_CONTENT,
+    payload: id
   }
 }

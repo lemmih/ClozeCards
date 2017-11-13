@@ -23,7 +23,7 @@ import {
 // import createChinesePlugin from './chinese-plugin.js'
 // import alignContent from './align.js'
 
-class PostComments extends Component {
+class DeckComments extends Component {
   render = () => {
     return(
       <div>
@@ -119,4 +119,4 @@ class PostComments extends Component {
   }
 }
 
-export default PostComments;
+export default DeckComments;

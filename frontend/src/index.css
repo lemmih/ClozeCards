@@ -1,4 +1,8 @@
 body {
+  font-family: 'Helvetica Neue', 'Helvetica', 'sans-serif', /* basic */
+               "Noto Sans CJK SC Regular", "AR PL UMing CN", /* linux */
+               "Hiragino Sans GB", "STHeiti",  /*mac*/
+               "Microsoft Yahei", 'SimHei';
   background: #e6edf4;
 }
 
@@ -39,6 +43,8 @@ body {
 }
 
 .public-DraftEditor-content {
+  font-size: 150%;
+  line-height: 1.4285em;
   overflow: hidden;
 }
 .toolbar .buttons {
@@ -55,4 +61,59 @@ body {
 
 .ui.floating.label {
   opacity: 0.8;
+}
+
+
+
+/* Cloze input */
+.blocks ::-webkit-input-placeholder {
+  text-align: center;
+}
+.blocks :-moz-input-placeholder {
+  text-align: center;
+}
+.blocks ::-moz-input-placeholder {
+  text-align: center;
+}
+.blocks :-ms-input-placeholder {
+  text-align: center;
+}
+.blocks ul {
+  display: inline;
+  list-style: none;
+  padding: 0px;
+  padding-left: 3px;
+  padding-right: 3px;
+}
+.blocks ul li {
+  display: inline;
+}
+.blocks li + li:before {
+  content: ",";
+}
+
+.deck-item .column {
+  padding: 0px !important;
+}
+.deck-item .row {
+  padding: 0px !important;
+}
+.deck-item .segment {
+  width: 115px;
+  height: 115px;
+  border: 1px solid cornflowerblue;
+}
+.deck-item .content {
+  padding: 0px !important;
+}
+.deck-item .content .header {
+  padding-left: 1.5em;
+  border-bottom: 2px solid cornflowerblue;
+  width: 100%;
+}
+.deck-item .content .meta {
+  padding-left: 1.5em;
+}
+.deck-item .content .extra {
+  padding-left: 1.5em !important;
 }

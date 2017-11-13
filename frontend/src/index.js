@@ -5,12 +5,24 @@ import ReactDOM from 'react-dom'
 import { Provider } from 'react-redux'
 // import App from './App'
 import store from './Store.js'
-import Layout from './Layout'
+import Layout from './components/layout'
+import backend from './backend'
 import './index.css'
 
-ReactDOM.render(
-  <Provider store={store}>
-    <Layout />
-  </Provider>,
-  document.getElementById('root')
-);
+backend.connect();
+
+const rootElement = document.getElementById('root');
+if(rootElement.hasChildNodes()) {
+  ReactDOM.hydrate(
+    <Provider store={store}>
+      <Layout />
+    </Provider>,
+    rootElement);
+} else {
+  ReactDOM.render(
+    <Provider store={store}>
+      <Layout />
+    </Provider>,
+    rootElement
+  );
+}

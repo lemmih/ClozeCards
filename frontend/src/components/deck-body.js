@@ -5,48 +5,50 @@ import {
 } from 'semantic-ui-react'
 import { EditorState, convertToRaw, convertFromRaw } from 'draft-js'
 import Editor from 'draft-js-plugins-editor'
-import createChinesePlugin from './plugins/chinese-plugin.js'
-import createResizePlugin from './plugins/resize'
-import alignContent from './align.js'
 import 'draft-js-static-toolbar-plugin/lib/plugin.css'
-import mkToolbar from './components/Toolbar'
+
+import createChinesePlugin from '../plugins/chinese-plugin.js'
+import createResizePlugin from '../plugins/resize'
+import alignContent from '../align.js'
+import mkToolbar from './toolbar'
+import Loading from './loading'
 
 // editable
 // !editable
 // !editable && edit annotation
 // !editable && view annotation
-class PostBody extends Component {
+class DeckBody extends Component {
   constructor(props) {
     super(props);
-    if( props.postContent )
+    if( props.deckContent )
       this.state = {
         selection: 'self',
         editNotes: false,
-        postEditor: EditorState.createWithContent(convertFromRaw(props.postContent)),
+        deckEditor: EditorState.createWithContent(convertFromRaw(props.deckContent)),
         annotationEditor: EditorState.createEmpty()
       };
     else
       this.state = {
         selection: 'self',
-        postEditor: EditorState.createEmpty(),
+        deckEditor: EditorState.createEmpty(),
         annotationEditor: EditorState.createEmpty()
       };
-    this.postEditorFocus = () => this.postEditor.focus();
+    this.deckEditorFocus = () => this.deckEditor.focus();
     this.annotationEditorFocus = () => this.annotationEditor.focus();
-    this.postEditorPlugins = [ createChinesePlugin(), createResizePlugin(this.alignText) ];
+    this.deckEditorPlugins = [ createChinesePlugin(), createResizePlugin(this.alignText) ];
     this.annotationEditorPlugins = [ createChinesePlugin(), createResizePlugin(this.alignText) ];
   }
   initialize = () => {
-    if( this.props.postContent )
+    if( this.props.deckContent )
       this.setState({
         editNotes: false,
-        postEditor: EditorState.createWithContent(convertFromRaw(this.props.postContent)),
+        deckEditor: EditorState.createWithContent(convertFromRaw(this.props.deckContent)),
         annotationEditor: EditorState.createEmpty()
       });
     else
       this.setState({
         editNotes: false,
-        postEditor: EditorState.createEmpty(),
+        deckEditor: EditorState.createEmpty(),
         annotationEditor: EditorState.createEmpty()
       });
   }
@@ -57,17 +59,17 @@ class PostBody extends Component {
   }
   handleRef = (ref) => this.setState({ref})
 
-  postEditorRaw = () => {
-    return convertToRaw(this.state.postEditor.getCurrentContent())
+  deckEditorRaw = () => {
+    return convertToRaw(this.state.deckEditor.getCurrentContent())
   }
 
 
   alignText = _.throttle(() => {
     if( this.props.showAnnotations )
-      alignContent(this.postEditor.editor, this.annotationEditor.editor);}
+      alignContent(this.deckEditor.editor, this.annotationEditor.editor);}
   , 250)
 
-  handlePostEditorChange = postEditor => this.setState({postEditor});
+  handleDeckEditorChange = deckEditor => this.setState({deckEditor});
   handleAnnotationEditorChange = annotationEditor => this.setState({annotationEditor});
 
   handleSelectionChange = (e, {value}) => {
@@ -82,10 +84,10 @@ class PostBody extends Component {
     const { editNotes } = this.state;
     const showAnnotations = !!this.props.showAnnotations;
     const mayEditNotes = (this.state.selection === 'self' || !this.state.selection);
-    const editPost = this.props.editable;
-    const anyEditable = editPost || (showAnnotations && editNotes);
-    const Toolbar = editPost
-                    ? mkToolbar(this.state.postEditor, this.handlePostEditorChange)
+    const editDeck = this.props.editable;
+    const anyEditable = editDeck || (showAnnotations && editNotes);
+    const Toolbar = editDeck
+                    ? mkToolbar(this.state.deckEditor, this.handleDeckEditorChange)
                     : mkToolbar(this.state.annotationEditor, this.handleAnnotationEditorChange);
 
     const options =
@@ -94,6 +96,7 @@ class PostBody extends Component {
             ,{ flag: 'dk', value: 'david', text: 'David\'s Notes'}];
 
     return(
+      <Loading active>
       <div>
         { showAnnotations && !editNotes && <Grid>
           <Grid.Row>
@@ -145,14 +148,14 @@ class PostBody extends Component {
           <div className="editor">
             <Grid padded={false} celled="internally">
               <Grid.Row>
-                <Grid.Column width={showAnnotations ? 10 : 16} onClick={this.postEditorFocus}>
+                <Grid.Column width={showAnnotations ? 10 : 16} onClick={this.deckEditorFocus}>
                   <Editor
-                    editorState={this.state.postEditor}
-                    onChange={this.handlePostEditorChange}
-                    plugins={this.postEditorPlugins}
-                    placeholder="Post content..."
-                    readOnly={!editPost}
-                    ref={(ref) => this.postEditor = ref}
+                    editorState={this.state.deckEditor}
+                    onChange={this.handleDeckEditorChange}
+                    plugins={this.deckEditorPlugins}
+                    placeholder="Deck content..."
+                    readOnly={!editDeck}
+                    ref={(ref) => this.deckEditor = ref}
                   />
                 </Grid.Column>
                 { showAnnotations &&
@@ -171,8 +174,9 @@ class PostBody extends Component {
           </div>
         </div>
       </div>
+      </Loading>
     );
   }
 }
 
-export default PostBody;
+export default DeckBody;

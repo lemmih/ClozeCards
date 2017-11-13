@@ -1,5 +1,6 @@
 import _ from 'lodash'
 import React, { Component } from 'react'
+import { connect } from 'react-redux'
 import {
   Input, Item, Label, Icon, Segment, Popup,
   Dropdown, Grid
@@ -19,13 +20,11 @@ const defaultState = props => {
               opt('Mandarin Companion'),
               opt('Graded Reader'),
               opt('Slow Chinese')],
-            title: (props.post && props.post.title) || '',
-            currentValues: (props.post && props.post.tags) || [],
           };
 }
 // editable
 // mayEdit
-class PostItem extends Component {
+class DeckHeader extends Component {
 
   constructor(props) {
     super(props);
@@ -40,44 +39,39 @@ class PostItem extends Component {
       options: [{ text: value, value}, ...this.state.options]
     });
   }
-  handleChange = (e, { value }) => this.setState({ currentValues: value })
-  handleChangeTitle = (e, { value}) => this.setState({ title: value })
-  handleSave = () => {
-    this.props.onSave({...this.props.post,
-      title: this.state.title.trim() || 'Untitled',
-      tags: this.state.currentValues,
-      type: 'word-list',
-    });
+  handleChange = (e, { value }) => {
+    this.props.onChange({...this.props.deck,
+      tags: value});
   }
-  getPost = () => {
-    return {...this.props.post,
-      title: this.state.title.trim() || 'Untitled',
-      tags: this.state.currentValues,
-      type: 'word-list',
-    };
+  handleChangeTitle = (e, { value}) => {
+    this.props.onChange({...this.props.deck,
+      title: value});
   }
 
   render = () => {
-    const {mayEdit, editable, notesVisible, post} = this.props;
-    const slug = post ? post.slugs[0] : null;
-    const postLink = '/posts/' + slug;
+    const {editable, user, notesVisible, deck} = this.props;
+    const {title, tags} = this.props.deck;
+    const slug = (_.isArray(deck.slugs) && deck.slugs.length>0) ? deck.slugs[0] : null;
+    const deckLink = '/decks/' + slug;
+
+    const mayEdit = deck.owner === user.id && this.props.mayEdit;
 
     const studyBase =
       <Popup content="Study" position="top center" trigger={<Icon name="student" size="big"/>}/>;
-    const studyActive = <Link to={postLink + '/study'}>{studyBase}</Link>;
+    const studyActive = <Link to={deckLink + '/study'}>{studyBase}</Link>;
 
     const notesBase =
       <Popup content="Notes" position="top center" trigger={<Icon name="edit" size="big"/>}/>;
-    const notesActive = <Link to={postLink + '/notes'}>{notesBase}</Link>
+    const notesActive = <Link to={deckLink + '/notes'}>{notesBase}</Link>
 
-    const editBase = <Popup content="Edit post" position="top center" trigger={<Icon name="write" size="big"/>}/>;
+    const editBase = <Popup content="Edit deck" position="top center" trigger={<Icon name="write" size="big"/>}/>;
     const editActive = <a onClick={this.props.onEdit}>{editBase}</a>;
 
-    const removeBase = <Popup content="Remove post" position="top center" trigger={<Icon style={{marginLeft: "1em"}} name="remove" size="big"/>}/>;
+    const removeBase = <Popup content="Remove deck" position="top center" trigger={<Icon style={{marginLeft: "1em"}} name="remove" size="big"/>}/>;
     const removeActive = <a>{removeBase}</a>;
 
     return(
-      <Item>
+      <Item className="deck-item">
           <Item.Image className="ui">
             <Segment style={{background: 'cornsilk'}}>
               <Label style={{textAlign: 'center'}} attached='bottom'>Word List</Label>
@@ -90,21 +84,26 @@ class PostItem extends Component {
               <Item.Header style={{display: "flex"}}
                            as={Input}
                            onChange={this.handleChangeTitle}
-                           value={this.state.title}
+                           value={title}
                            transparent={true}
                            fluid={true}
                            placeholder="Title..."></Item.Header> }
             { !editable &&
-              <Item.Header><Link to={postLink}>{this.state.title}</Link></Item.Header> }
+              <Item.Header><Link to={deckLink}>{title}</Link></Item.Header> }
             <Item.Meta>
-              { editable && <Dropdown
+              { editable
+              ? <Dropdown
                 options={this.state.options}
                 placeholder="Add tags"
                 search selection fluid allowAdditions multiple
-                value={this.state.currentValues}
+                value={tags}
                 onAddItem={this.handleAddition}
-                onChange={this.handleChange} /> }
-              { !editable && <div>{post.tags.map(tag => <span key={tag}>{tag}</span>)}</div>}
+                onChange={this.handleChange} />
+              : <div>
+                  <span>Tags</span>
+                  {deck.tags.map(tag => <span key={tag}>{tag}</span>)}
+                </div>}
+              Published 10 minutes ago by ...
             </Item.Meta>
             <Item.Extra>
               <Grid columns={3}>
@@ -133,12 +132,12 @@ class PostItem extends Component {
                     { !editable &&<a>
                       <span style={{position: "relative", paddingLeft: '1em'}}>
                         <Icon name="empty heart" size="big"/>
-                        <Label circular color="grey" floating>{post.nLikes}</Label>
+                        <Label circular color="grey" floating>{deck.nLikes}</Label>
                       </span>
                     </a> }
                     { !editable && <a><span style={{position: "relative", paddingLeft: '1em'}}>
                       <Icon name="comments" size="big"/>
-                      <Label circular color="grey" floating>{post.nComments}</Label>
+                      <Label circular color="grey" floating>{deck.nComments}</Label>
                     </span></a> }
 
                     { editable &&
@@ -159,4 +158,4 @@ class PostItem extends Component {
   }
 }
 
-export default PostItem;
+export default connect(store => {return {user:store.user};})(DeckHeader);
