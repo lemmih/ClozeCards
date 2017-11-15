@@ -30,8 +30,9 @@ class DeckHeader extends Component {
     super(props);
     this.state = defaultState(props);
   }
-  initialize = () => {
-    this.setState(defaultState(this.props));
+
+  getDeck = () => {
+    return {...this.props.deck, type: 'word-list', title: '', tags: []};
   }
 
   handleAddition = (e, { value }) => {
@@ -40,11 +41,11 @@ class DeckHeader extends Component {
     });
   }
   handleChange = (e, { value }) => {
-    this.props.onChange({...this.props.deck,
+    this.props.onChange({...this.getDeck(),
       tags: value});
   }
   handleChangeTitle = (e, { value}) => {
-    this.props.onChange({...this.props.deck,
+    this.props.onChange({...this.getDeck(),
       title: value});
   }
 
