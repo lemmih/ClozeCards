@@ -2,7 +2,7 @@ import _ from 'lodash'
 import React, { Component } from 'react'
 import { Redirect } from 'react-router-dom'
 import {
-  Container, Form, Header
+  Container, Form
 } from 'semantic-ui-react'
 import { connect } from 'react-redux'
 

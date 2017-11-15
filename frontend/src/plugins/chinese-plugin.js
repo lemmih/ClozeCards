@@ -50,7 +50,7 @@ export default () => {
       dirtyBlocks = Set();
       // this.setState({...this.state, dirtyBlocks: Set()});
       // console.log('Fetching entries: ', req, editor.getEditorRef().props.placeholder);
-      axios.post('/segmentation/',req)
+      axios.post('/api/segmentation/',req)
            .then((response) => {
             //  console.log('Got response', response.data);
              var contentState = editor.getEditorState().getCurrentContent();

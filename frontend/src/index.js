@@ -8,7 +8,6 @@ import store from './Store.js'
 import Layout from './components/layout'
 import backend from './backend'
 import './index.css'
-import { setTimeout } from 'timers';
 
 backend.connect();
 

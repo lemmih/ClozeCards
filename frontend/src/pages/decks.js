@@ -148,7 +148,7 @@ function toNewDeckProps(store) {
 const NewDeck = withRouter(connect(toNewDeckProps)(class NewDeck extends Component {
   state = {};
   onSave = () => {
-    const deck = this.itemRef.getDeck();
+    const {deck} = this.state;
     const slug = mkSlug(deck.title);
     const contentId = uuid();
     const deckId = uuid();

@@ -68,7 +68,7 @@ main = do
           [dir "status" $ do
             method GET
             ok $ toResponse ("OK"::String)
-          ,dir "segmentation" $ do
+          ,dir "api" $ dir "segmentation" $ do
             method POST
             blocks <- jsonBody :: ServerPart Aeson.Object
             ok $ toResponse $ Aeson.Object (HM.map segmentate blocks)
