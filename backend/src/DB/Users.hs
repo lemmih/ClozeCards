@@ -5,11 +5,11 @@ module DB.Users where
 import           Crypto.BCrypt
 import           Crypto.Hash.SHA256
 import qualified Data.ByteString            as B
+import           Data.ByteString.Base16
 import qualified Data.Text                  as T
-import qualified Data.Text.Encoding                  as T
+import qualified Data.Text.Encoding         as T
 import           Data.UUID.V4               as UUID
 import           Database.PostgreSQL.Simple
-import Data.ByteString.Base16
 
 import           DB.Instances               ()
 import           DB.Misc

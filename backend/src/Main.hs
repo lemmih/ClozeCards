@@ -41,7 +41,7 @@ oneSecond = 10^6
 
 mkDatabasePool :: IO (Pool PSQL.Connection)
 mkDatabasePool = do
-  dbAddr <- getEnv "SQL_DB" `catchIOError` \_ -> return "dbname=ClozeCards user=lemmih"
+  dbAddr <- getEnv "SQL_DB" `catchIOError` \_ -> return "dbname=ClozeCards user=postgres port=5432 host=psql"
   createPool (PSQL.connectPostgreSQL (B8.pack dbAddr)) PSQL.close
     1 -- One stripe.
     (60*60) -- Keep connections open for an hour.
