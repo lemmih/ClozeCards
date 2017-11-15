@@ -32,7 +32,7 @@ class DeckHeader extends Component {
   }
 
   getDeck = () => {
-    return {...this.props.deck, type: 'word-list', title: '', tags: []};
+    return Object.assign({type: 'word-list', title: '', tags: []}, this.props.deck);
   }
 
   handleAddition = (e, { value }) => {
