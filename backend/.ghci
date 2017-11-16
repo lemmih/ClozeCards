@@ -1,0 +1,2 @@
+:set -Wunused-imports -Wincomplete-patterns -Werror
+
