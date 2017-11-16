@@ -41,7 +41,7 @@ oneSecond = 10^6
 
 mkDatabasePool :: IO (Pool PSQL.Connection)
 mkDatabasePool = do
-  dbAddr <- getEnv "SQL_DB" `catchIOError` \_ -> return "dbname=ClozeCards user=postgres port=5432 host=psql"
+  dbAddr <- getEnv "SQL_DB" `catchIOError` \_ -> return "dbname=ClozeCards"
   createPool (PSQL.connectPostgreSQL (B8.pack dbAddr)) PSQL.close
     1 -- One stripe.
     (60*60) -- Keep connections open for an hour.
@@ -64,11 +64,11 @@ main = do
         Worker.forkIO group $ forever $ do
           runDBUnsafe pool $ Daemons.updSchedule
           threadDelay (oneSecond * 1)
-        simpleHTTP nullConf (msum
+        simpleHTTP nullConf (dir "api" $ msum
           [dir "status" $ do
             method GET
             ok $ toResponse ("OK"::String)
-          ,dir "api" $ dir "segmentation" $ do
+          ,dir "segmentation" $ do
             method POST
             blocks <- jsonBody :: ServerPart Aeson.Object
             ok $ toResponse $ Aeson.Object (HM.map segmentate blocks)
