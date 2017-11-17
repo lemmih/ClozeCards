@@ -69,17 +69,15 @@ const BrowseDecks = connect(toProps)(class BrowseDecks extends Component {
     const done = rendered >= search.fetched.length && search.status === 'completed';
 
     return(
-      <Loading active >
-        <Container style={{paddingTop: "2em"}}>
-          <Visibility once={false} fireOnMount={true} onBottomVisible={this.fetchMoreRows} onBottomVisibleReverse={() => console.log('reverse')}>
-            <Item.Group divided>
-              { toBeRendered.map(id => <DeckHeader key={id} deck={decks.get(id)}/>) }
-            </Item.Group>
-          </Visibility>
-          <Loader inline='centered' active={!done}/>
-          Footer
-        </Container>
-      </Loading>
+      <Container style={{paddingTop: "2em"}}>
+        <Visibility once={false} fireOnMount={true} onBottomVisible={this.fetchMoreRows} onBottomVisibleReverse={() => console.log('reverse')}>
+          <Item.Group divided>
+            { toBeRendered.map(id => <DeckHeader key={id} deck={decks.get(id)}/>) }
+          </Item.Group>
+        </Visibility>
+        <Loader inline='centered' active={!done}/>
+        Footer
+      </Container>
     );
   }
 });
