@@ -30,7 +30,9 @@
   },
   "reactSnap": {
     "waitFor": 5000,
-    "puppeteerArgs": ["--no-sandbox", "--disable-setuid-sandbox"]
+    "puppeteerArgs": ["--no-sandbox", "--disable-setuid-sandbox"],
+    "inlineCss": true,
+    "preloadResources": true
   },
   "scripts": {
     "start": "react-scripts start",
