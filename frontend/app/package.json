@@ -26,10 +26,11 @@
     "uuid": "^3.1.0"
   },
   "devDependencies": {
-    "react-snap": "^0.7.4"
+    "react-snap": "^0.10.0"
   },
   "reactSnap": {
-    "waitFor": 5000
+    "waitFor": 5000,
+    "puppeteerArgs": ["--no-sandbox", "--disable-setuid-sandbox"]
   },
   "scripts": {
     "start": "react-scripts start",

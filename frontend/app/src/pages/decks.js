@@ -37,7 +37,7 @@ export const ViewDeck = connect(toViewDeckProps)(class ViewDeck extends Componen
   constructor(props) {
     super(props);
     const {study, notes} = props;
-    this.state = { editable: false, study, notes };
+    this.state = { editing: '', study, notes };
     // console.log('ViewDeck Constructor', !!study, !!notes);
   }
   componentWillReceiveProps = (nextProps) => {
@@ -51,28 +51,36 @@ export const ViewDeck = connect(toViewDeckProps)(class ViewDeck extends Componen
   }
 
   handleEdit = () => {
-    this.setState({ editable: true });
+    this.setState({ editing: 'deck' });
+  }
+  handleEditNotes = () => {
+    this.setState({ editing: 'notes' });
   }
   handleChange = deck => {
     this.setState({ deck });
   }
   handleSave = () => {
-    const deck = this.state.deck || this.props.deck;
-    const slug = mkSlug(deck.title);
-    const slugs = _.uniq([slug].concat(deck.slugs));
-    const contentId = uuid();
+    switch (this.state.editing) {
+      case 'deck':
+        const deck = this.state.deck || this.props.deck;
+        const slug = mkSlug(deck.title);
+        const slugs = _.uniq([slug].concat(deck.slugs));
+        const contentId = uuid();
 
 
-    backend.relay(receiveContent(contentId, this.bodyRef.deckEditorRaw()));
-    backend.relay(receiveDeck({...deck, slugs, contentId}));
+        backend.relay(receiveContent(contentId, this.bodyRef.deckEditorRaw()));
+        backend.relay(receiveDeck({...deck, slugs, contentId}));
 
-    this.setState({ editable: false });
-    this.bodyRef.setState({editNotes: false});
-    // this.props.history.push('/decks/'+slug);
+        this.setState({ editing: '' });
+        return;
+      case 'notes':
+        this.setState({ editing: '' });
+        return;
+    }
   }
   handleDiscard = () => {
     this.bodyRef.initialize();
-    this.setState({ editable: false, deck: undefined });
+    this.setState({ editing: '', deck: undefined });
   }
   handleBodyRef = (ref) => this.bodyRef = ref;
 
@@ -100,32 +108,36 @@ export const ViewDeck = connect(toViewDeckProps)(class ViewDeck extends Componen
   }
 
   render() {
-    const {deck, content, study} = this.props;
-    const hasDeck = _.isPlainObject(deck);
+    const {content, study} = this.props;
+    const {editing, notes} = this.state;
+    const deck = this.state.deck || this.props.deck;
+    const hasDeck = _.isPlainObject(this.props.deck);
     const hasContent = _.isPlainObject(content)
     if( this.props.deck === 'failed')
       return <Redirect to="/"/>
     if( !hasDeck )
       return (<Loader active/>)
-    const realDeck = this.state.deck || deck;
+
     return(
       <div>
         <Container style={{paddingTop: "2em"}}>
           <Item.Group>
             <DeckHeader
-              deck={realDeck}
-              editable={this.state.editable}
+              deck={deck}
+              editable={editing==='deck'}
               onEdit={this.handleEdit}
               onChange={this.handleChange}
-              notesVisible={this.state.notes}
-              mayEdit={true && !this.state.notes && !this.state.study}/>
+              notesVisible={notes}
+              mayEdit={!notes && !this.state.study}/>
           </Item.Group>
 
           { hasContent
           ? <DeckBody
             deckContent={this.props.content}
-            editable={this.state.editable}
+            editDeck={editing==='deck'}
+            editNotes={editing==='notes'}
             showAnnotations={this.state.notes}
+            onEditNotes={this.handleEditNotes}
             onSave={this.handleSave}
             onDiscard={this.handleDiscard}
             ref={this.handleBodyRef} />
@@ -178,7 +190,7 @@ const NewDeck = withRouter(connect(toNewDeckProps)(class NewDeck extends Compone
           </Item.Group>
           <DeckBody
             ref={this.handleBodyRef}
-            editable={true}
+            editDeck={true}
             showAnnotations={false}
             onSave={this.onSave}
             />

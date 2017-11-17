@@ -13,19 +13,15 @@ import alignContent from '../align.js'
 import mkToolbar from './toolbar'
 import Loading from './loading'
 
-// editable
-// !editable
-// !editable && edit annotation
-// !editable && view annotation
 class DeckBody extends Component {
   constructor(props) {
     super(props);
     if( props.deckContent )
       this.state = {
         selection: 'self',
-        editNotes: false,
         deckEditor: EditorState.createWithContent(convertFromRaw(props.deckContent)),
-        annotationEditor: EditorState.createEmpty()
+        // deckEditor: EditorState.createEmpty(),
+        annotationEditor: EditorState.createEmpty(),
       };
     else
       this.state = {
@@ -41,13 +37,11 @@ class DeckBody extends Component {
   initialize = () => {
     if( this.props.deckContent )
       this.setState({
-        editNotes: false,
         deckEditor: EditorState.createWithContent(convertFromRaw(this.props.deckContent)),
         annotationEditor: EditorState.createEmpty()
       });
     else
       this.setState({
-        editNotes: false,
         deckEditor: EditorState.createEmpty(),
         annotationEditor: EditorState.createEmpty()
       });
@@ -76,24 +70,20 @@ class DeckBody extends Component {
     this.setState({selection: value});
   }
 
-  handleEditNotes = () => {
-    this.setState({editNotes: true});
-  }
-
   render = () => {
-    const { editNotes } = this.state;
+    const { editNotes } = this.props;
     const showAnnotations = !!this.props.showAnnotations;
     const mayEditNotes = (this.state.selection === 'self' || !this.state.selection);
-    const editDeck = this.props.editable;
+    const editDeck = this.props.editDeck;
     const anyEditable = editDeck || (showAnnotations && editNotes);
     const Toolbar = editDeck
                     ? mkToolbar(this.state.deckEditor, this.handleDeckEditorChange)
                     : mkToolbar(this.state.annotationEditor, this.handleAnnotationEditorChange);
 
     const options =
-            [{ flag: 'dk', value: 'self', text: 'Personal Notes'}
-            ,{ flag: 'tw', value: 'ching', text: 'Ching\'s Notes'}
-            ,{ flag: 'dk', value: 'david', text: 'David\'s Notes'}];
+            [{ value: 'self', text: 'Personal Notes'}
+            ,{ value: 'ching', text: 'Author\'s Notes'}
+            ,{ value: 'david', text: 'David\'s Notes'}];
 
     return(
       <Loading active>
@@ -112,7 +102,7 @@ class DeckBody extends Component {
                 options={options}
                 onChange={this.handleSelectionChange}/>
               { mayEditNotes
-              ? <a onClick={this.handleEditNotes}><Icon name="write" size="big"/></a>
+              ? <a onClick={this.props.onEditNotes}><Icon name="write" size="big"/></a>
               : <Icon name="write" size="big"/> }
             </Grid.Column>
           </Grid.Row>

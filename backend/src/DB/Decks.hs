@@ -31,11 +31,18 @@ createSlugs conn deckId suggestedSlugs = do
   return slugs
 
 createDeck :: Connection -> Deck -> IO ()
-createDeck conn Deck{..} = do
-  void $ execute conn "DELETE FROM decks WHERE id = ? AND owner = ?" (deckId, deckOwner)
+createDeck conn Deck{..} =
+  -- Upsert decks, will quietly do nothing if row exists with different owner.
   void $ execute conn
       "INSERT INTO decks(id, owner, type, title, tags, slugs, text_id)\
-      \          VALUES (?,  ?,     ?,     ?,    ?,    ?,     ?)"
+      \          VALUES (?,  ?,     ?,     ?,    ?,    ?,     ?)\
+      \ ON CONFLICT (id) DO UPDATE\
+      \ SET type = EXCLUDED.type,\
+      \     tags = EXCLUDED.tags,\
+      \     title = EXCLUDED.title,\
+      \     slugs = EXCLUDED.slugs,\
+      \     text_id = EXCLUDED.text_id\
+      \ WHERE decks.owner = EXCLUDED.owner"
       ( deckId, deckOwner, deckType, deckTitle, V.fromList deckTags
       , V.fromList deckSlugs, deckContentId)
 
