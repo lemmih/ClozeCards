@@ -72,6 +72,13 @@ handleClient pool conn userId = do
         results <- searchDecks db [] [] ordering offset
         forM_ results $ \result -> sendJSON conn $ ReceiveDeck result
         sendJSON conn $ ReceiveSearchResults (map deckId results)
+    FetchNotes userId deckId ->
+      runDB pool $ \db -> do
+        mbContent <- fetchNote db userId deckId
+        sendJSON conn $ ReceiveNotes userId deckId mbContent
+    ReceiveNotes _userId _deckId Nothing -> return () -- Delete the entry?
+    ReceiveNotes _userId deckId (Just contentId) ->
+      runDB pool $ \db -> createNote db userId deckId contentId
     Login{} -> return ()
     Logout{} -> return ()
   case msg of
@@ -102,11 +109,11 @@ sendJSON conn msg = do
 
 receiveJSON conn = do
   text <- WS.receiveData conn
-  case Aeson.decode text of
-    Nothing  -> do
-      hPutStrLn stderr "Bad request:"
+  case Aeson.eitherDecode text of
+    Left err -> do
+      hPutStrLn stderr $ "Bad request: " ++ err
       BL8.hPutStrLn stderr text
       error "Bad request"
-    Just msg -> do
+    Right msg -> do
       debugLog' Green "RECEIVED " msg
       return msg

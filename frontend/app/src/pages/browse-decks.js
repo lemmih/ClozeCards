@@ -5,7 +5,6 @@ import {
   Container, Item, Visibility, Loader
 } from 'semantic-ui-react'
 
-import Loading from '../components/loading'
 import DeckHeader from '../components/deck-header'
 import {fetchSearchResults} from '../actions/search'
 import backend from '../backend'

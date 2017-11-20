@@ -10,12 +10,14 @@ import DeckBody from "../components/deck-body";
 import DeckComments from "../components/deck-comments";
 import Study from "../components/deck-study";
 
+import { receiveNotes } from "../actions/notes";
 import { receiveDeck, fetchDeck } from "../actions/decks";
 import { receiveContent, fetchContent } from "../actions/content";
 
 import mkSlug from "../misc/slugs";
 
 import backend from "../backend";
+import { getUser } from "../common";
 
 // states:
 //   not fetched => doesn't have key
@@ -36,7 +38,7 @@ export const ViewDeck = connect(toViewDeckProps)(
     constructor(props) {
       super(props);
       const { study, notes } = props;
-      this.state = { editing: "", study, notes };
+      this.state = { editing: "", study, notes, selection: getUser().id };
       // console.log('ViewDeck Constructor', !!study, !!notes);
     }
     componentWillReceiveProps = nextProps => {
@@ -58,23 +60,30 @@ export const ViewDeck = connect(toViewDeckProps)(
     handleChange = deck => {
       this.setState({ deck });
     };
-    handleSave = () => {
+    handleSave = content => {
       switch (this.state.editing) {
-        case "deck":
+        case "deck": {
           const deck = this.state.deck || this.props.deck;
           const slug = mkSlug(deck.title);
           const slugs = _.uniq([slug].concat(deck.slugs));
           const contentId = uuid();
 
-          backend.relay(
-            receiveContent(contentId, this.bodyRef.deckEditorRaw())
-          );
+          backend.relay(receiveContent(contentId, content));
           backend.relay(receiveDeck({ ...deck, slugs, contentId }));
 
           this.setState({ editing: "" });
           return;
-        case "notes":
+        }
+        case "notes": {
+          const deck = this.state.deck || this.props.deck;
+          const contentId = uuid();
+
+          backend.relay(receiveContent(contentId, content));
+          backend.relay(receiveNotes(getUser().id, deck.id, contentId));
           this.setState({ editing: "" });
+          return;
+        }
+        default:
           return;
       }
     };
@@ -107,6 +116,10 @@ export const ViewDeck = connect(toViewDeckProps)(
       }
     }
 
+    handleSelectionChange = selection => {
+      this.setState({ selection });
+    };
+
     render() {
       const { content, study } = this.props;
       const { editing, notes } = this.state;
@@ -132,7 +145,10 @@ export const ViewDeck = connect(toViewDeckProps)(
 
             {hasContent ? (
               <DeckBody
+                deck={deck}
                 deckContent={this.props.content}
+                selection={this.state.selection}
+                onSelectionChange={this.handleSelectionChange}
                 editDeck={editing === "deck"}
                 editNotes={editing === "notes"}
                 showAnnotations={this.state.notes}

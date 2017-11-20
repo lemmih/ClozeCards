@@ -3,20 +3,26 @@ import React, { Component } from "react";
 import { Sticky, Grid, Icon, Button, Dropdown } from "semantic-ui-react";
 import { EditorState, convertToRaw, convertFromRaw } from "draft-js";
 import Editor from "draft-js-plugins-editor";
+import { connect } from "react-redux";
 import "draft-js-static-toolbar-plugin/lib/plugin.css";
+// import uuid from "uuid/v4";
 
-import createChinesePlugin from "../plugins/chinese-plugin.js";
+import { fetchNotes } from "../actions/notes";
+import { fetchContent } from "../actions/content";
+import createChinesePlugin from "../plugins/chinese-plugin";
 import createResizePlugin from "../plugins/resize";
-import alignContent from "../align.js";
+import alignContent from "../align";
 import mkToolbar from "./toolbar";
 import Loading from "./loading";
+
+import backend from "../backend";
+// import { getUser } from "../common";
 
 class DeckBody extends Component {
   constructor(props) {
     super(props);
     if (props.deckContent)
       this.state = {
-        selection: "self",
         deckEditor: EditorState.createWithContent(
           convertFromRaw(props.deckContent)
         ),
@@ -25,12 +31,13 @@ class DeckBody extends Component {
       };
     else
       this.state = {
-        selection: "self",
         deckEditor: EditorState.createEmpty(),
         annotationEditor: EditorState.createEmpty()
       };
     this.deckEditorFocus = () => this.deckEditor.focus();
-    this.annotationEditorFocus = () => this.annotationEditor.focus();
+    this.annotationEditorFocus = () => {
+      this.annotationEditor.focus();
+    };
     this.deckEditorPlugins = [
       createChinesePlugin(),
       createResizePlugin(this.alignText)
@@ -40,6 +47,16 @@ class DeckBody extends Component {
       createResizePlugin(this.alignText)
     ];
   }
+  componentDidUpdate() {
+    this.alignText();
+  }
+  handleSave = () => {
+    const { editDeck, onSave } = this.props;
+    const editor = editDeck
+      ? this.state.deckEditor
+      : this.state.annotationEditor;
+    onSave(convertToRaw(editor.getCurrentContent()));
+  };
   initialize = () => {
     if (this.props.deckContent)
       this.setState({
@@ -61,13 +78,11 @@ class DeckBody extends Component {
   };
   handleRef = ref => this.setState({ ref });
 
-  deckEditorRaw = () => {
-    return convertToRaw(this.state.deckEditor.getCurrentContent());
-  };
-
   alignText = _.throttle(() => {
-    if (this.props.showAnnotations)
-      alignContent(this.deckEditor.editor, this.annotationEditor.editor);
+    const { showAnnotations } = this.props;
+    if (showAnnotations)
+      if (this.deckEditor && this.annotationEditor)
+        alignContent(this.deckEditor.editor, this.annotationEditor.editor);
   }, 250);
 
   handleDeckEditorChange = deckEditor => this.setState({ deckEditor });
@@ -75,14 +90,19 @@ class DeckBody extends Component {
     this.setState({ annotationEditor });
 
   handleSelectionChange = (e, { value }) => {
-    this.setState({ selection: value });
+    this.props.onSelectionChange(value);
+  };
+
+  getAvailableNotes = () => {
+    const userId = JSON.parse(localStorage.getItem("user")).id;
+    return [{ value: userId, text: "Personal Notes" }];
   };
 
   render = () => {
-    const { editNotes } = this.props;
+    const userId = JSON.parse(localStorage.getItem("user")).id;
+    const { editNotes, selection } = this.props;
     const showAnnotations = !!this.props.showAnnotations;
-    const mayEditNotes =
-      this.state.selection === "self" || !this.state.selection;
+    const mayEditNotes = selection === userId;
     const editDeck = this.props.editDeck;
     const anyEditable = editDeck || (showAnnotations && editNotes);
     const Toolbar = editDeck
@@ -91,12 +111,6 @@ class DeckBody extends Component {
           this.state.annotationEditor,
           this.handleAnnotationEditorChange
         );
-
-    const options = [
-      { value: "self", text: "Personal Notes" },
-      { value: "ching", text: "Author's Notes" },
-      { value: "david", text: "David's Notes" }
-    ];
 
     return (
       <Loading active>
@@ -110,10 +124,10 @@ class DeckBody extends Component {
                     <Dropdown
                       placeholder="Viewing notes for: you"
                       search
-                      value={this.state.selection}
+                      value={selection}
                       selection
                       selectOnNavigation={false}
-                      options={options}
+                      options={this.getAvailableNotes()}
                       onChange={this.handleSelectionChange}
                     />
                     {mayEditNotes ? (
@@ -131,7 +145,7 @@ class DeckBody extends Component {
             {anyEditable && (
               <Sticky context={this.state.ref} offset={20} className="sticky">
                 <div className="toolbar">
-                  <a onClick={this.props.onSave}>
+                  <a onClick={this.handleSave}>
                     <Icon size="big" name="save" />
                   </a>
                   <Button.Group
@@ -195,7 +209,9 @@ class DeckBody extends Component {
                   </Grid.Column>
                   {showAnnotations && (
                     <Grid.Column width={6} onClick={this.annotationEditorFocus}>
-                      <Editor
+                      <Notes
+                        userId={selection}
+                        deckId={this.props.deck.id}
                         editorState={this.state.annotationEditor}
                         onChange={this.handleAnnotationEditorChange}
                         plugins={this.annotationEditorPlugins}
@@ -203,7 +219,7 @@ class DeckBody extends Component {
                           editNotes ? "Write personal notes here." : ""
                         }
                         readOnly={!editNotes}
-                        ref={ref => (this.annotationEditor = ref)}
+                        setRef={ref => (this.annotationEditor = ref)}
                       />
                     </Grid.Column>
                   )}
@@ -216,5 +232,77 @@ class DeckBody extends Component {
     );
   };
 }
+
+// userId
+// deckId
+// noteKey
+// contentId
+// content
+function toNotesProps(store, ownProps) {
+  const { userId, deckId } = ownProps;
+  const key = userId + "-" + deckId;
+  const contentId = store.notes.get(key);
+  return {
+    noteKey: key,
+    contentId: contentId,
+    content: store.content.get(contentId)
+  };
+}
+const Notes = connect(toNotesProps)(
+  class extends Component {
+    componentDidMount() {
+      this.loadNotes();
+    }
+    componentDidUpdate(prevProps) {
+      // If selection changes, fetch
+      this.loadNotes();
+      if (
+        prevProps.noteKey !== this.props.noteKey ||
+        !_.isPlainObject(prevProps.content)
+      ) {
+        if (_.isPlainObject(this.props.content)) {
+          console.log("Notes loaded");
+          this.props.onChange(
+            EditorState.createWithContent(convertFromRaw(this.props.content))
+          );
+        }
+      }
+    }
+    loadNotes = () => {
+      const { userId, deckId, contentId, content } = this.props;
+      if (_.isUndefined(contentId)) {
+        backend.relay(fetchNotes(userId, deckId));
+      } else if (
+        _.isString(contentId) &&
+        contentId !== "fetching" &&
+        _.isUndefined(content)
+      ) {
+        backend.relay(fetchContent(contentId));
+      }
+    };
+    render = () => {
+      const {
+        editorState,
+        onChange,
+        plugins,
+        placeholder,
+        readOnly,
+        setRef,
+        content
+      } = this.props;
+      if (!_.isPlainObject(content)) return null;
+      return (
+        <Editor
+          editorState={editorState}
+          onChange={onChange}
+          plugins={plugins}
+          placeholder={placeholder}
+          readOnly={readOnly}
+          ref={setRef}
+        />
+      );
+    };
+  }
+);
 
 export default DeckBody;

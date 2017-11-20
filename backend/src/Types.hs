@@ -152,6 +152,8 @@ data ClientMessage
   | FetchCards DeckId Style
   | ReceiveResponse Response
   | FetchSearchResults SearchQuery DeckOrdering Offset
+  | FetchNotes UserId DeckId
+  | ReceiveNotes UserId DeckId (Maybe ContentId)
   | Login Email Password
   | Logout
     deriving (Show)
@@ -418,6 +420,17 @@ instance FromJSON ClientMessage where
           <$> payload.:"query"
           <*> payload.:"order"
           <*> payload.:"offset"
+      "FETCH_NOTES" -> do
+        payload <- o .: "payload"
+        FetchNotes
+          <$> payload.:"userId"
+          <*> payload.:"deckId"
+      "RECEIVE_NOTES" -> do
+        payload <- o .: "payload"
+        ReceiveNotes
+          <$> payload.:"userId"
+          <*> payload.:"deckId"
+          <*> payload.:"contentId"
       "LOGIN" -> do
         payload <- o .: "payload"
         Login
@@ -453,6 +466,15 @@ instance ToJSON ClientMessage where
       [ "query"  .= query
       , "order"  .= order
       , "offset" .= offset ]
+  toJSON (FetchNotes userId deckId) =
+    toAction "FETCH_NOTES" $ object
+      [ "userId"  .= userId
+      , "deckId"  .= deckId ]
+  toJSON (ReceiveNotes userId deckId contentId) =
+    toAction "RECEIVE_NOTES" $ object
+      [ "userId"    .= userId
+      , "deckId"    .= deckId
+      , "contentId" .= contentId ]
   toJSON (Login email password) =
     toAction "LOGIN" $ object
       [ "email"    .= email

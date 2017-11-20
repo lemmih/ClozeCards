@@ -23,6 +23,17 @@ createContent conn owner contentId content =
   void $ execute conn "INSERT INTO texts(id, body, owner) VALUES (?,?,?)"
           (contentId, content, owner)
 
+createNote :: Connection -> UserId -> DeckId -> ContentId -> IO ()
+createNote conn userId deckId contentId = void $ execute conn
+  "INSERT INTO notes(owner, deck_id, text_id) VALUES (?,?,?)\
+  \ ON CONFLICT(owner, deck_id) DO UPDATE SET\
+  \ text_id = EXCLUDED.text_id"
+  (userId, deckId, contentId)
+
+fetchNote :: Connection -> UserId -> DeckId -> IO (Maybe ContentId)
+fetchNote conn userId deckId = fmap fromOnly <$> queryMaybe conn
+  "SELECT text_id FROM notes WHERE owner = ? AND deck_id = ?" (userId, deckId)
+
 createSlugs :: Connection -> DeckId -> [Text] -> IO [Text]
 createSlugs conn deckId suggestedSlugs = do
   takenSlugs <- query conn "SELECT unnest(slugs) FROM decks WHERE id <> ?" (Only deckId)
