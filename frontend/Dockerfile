@@ -16,7 +16,7 @@ RUN yarn build
 FROM nginx
 
 COPY --from=0 build /app/
-COPY public/static /app/
+COPY app/public/static /app/
 COPY nginx/ClozeCards.nginx.conf /etc/nginx/conf.d/
 RUN rm /etc/nginx/conf.d/default.conf
 
