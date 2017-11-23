@@ -1,7 +1,15 @@
 import _ from "lodash";
-import React, { Component } from "react";
+import React, { Component, PureComponent } from "react";
 import { connect } from "react-redux";
-import { Button, Grid, Loader, Modal } from "semantic-ui-react";
+import {
+  Button,
+  Grid,
+  Loader,
+  Modal,
+  Popup,
+  Header,
+  Icon
+} from "semantic-ui-react";
 
 import { fetchCards, receiveCards, receiveResponse } from "../actions/cards";
 import backend from "../backend";
@@ -41,7 +49,9 @@ export default connect(toStudyProps)(
         style: "study",
         showStatus: false,
         showPinyin: false,
-        showEnglish: false
+        showEnglish: false,
+        mode: "rocket",
+        type: "keyboard"
       };
     }
 
@@ -123,23 +133,17 @@ export default connect(toStudyProps)(
         this.setState({ showStatus: false, active: 0 }); // Show Status FIXME
         backend.relay(fetchCards(this.props.deckId, this.state.style));
       } else {
-        const nextCard = cards[1];
-        let i = 0;
-        while (
-          i < nextCard.chinese.length &&
-          (_.isString(nextCard.chinese[i]) || !nextCard.chinese[i].isGap)
-        )
-          i++;
-        this.setState({ active: i });
+        this.setState({ active: 0 });
         this.props.dispatch(receiveCards(_.slice(cards, 1)));
       }
     };
     getActive = i => {
+      const thoroughMode = this.state.mode === "ship";
       const { cards } = this.props;
       const valid = i =>
         i < cards[0].chinese.length &&
         _.isPlainObject(cards[0].chinese[i]) &&
-        cards[0].chinese[i].isGap;
+        (cards[0].chinese[i].isGap || thoroughMode);
       i = i || this.state.active;
       if (_.isArray(cards) && cards.length > 0 && !valid(i)) {
         const nextCard = cards[0];
@@ -158,6 +162,12 @@ export default connect(toStudyProps)(
       const sid = cards[0].sentenceId;
       a.src = "/static/audio/sentences/" + sid + ".mp3";
       a.play();
+    };
+    switchMode = mode => {
+      this.setState({ mode });
+    };
+    switchType = type => {
+      this.setState({ type });
     };
     render = () => {
       const { style, showStatus, showPinyin, showEnglish } = this.state;
@@ -215,6 +225,8 @@ export default connect(toStudyProps)(
                   icon="play"
                   onClick={this.playAudio}
                 />
+                <ModeButton mode={this.state.mode} onChange={this.switchMode} />
+                <TypeButton type={this.state.type} onChange={this.switchType} />
               </Grid.Column>
               <Grid.Column textAlign="center">
                 <Button.Group toggle>
@@ -255,3 +267,141 @@ export default connect(toStudyProps)(
     };
   }
 );
+
+class ModeButton extends PureComponent {
+  state = { open: false };
+
+  handleOpen = () => {
+    this.setState({ open: true });
+  };
+  handleClose = () => {
+    this.setState({ open: false });
+  };
+
+  switchMode = mode => () => {
+    this.props.onChange(mode);
+    this.handleClose();
+  };
+
+  render = () => {
+    const { mode } = this.props;
+    const { open } = this.state;
+    return (
+      <Popup
+        trigger={<Button circular icon={mode} />}
+        flowing
+        open={open}
+        onOpen={this.handleOpen}
+        onClose={this.handleClose}
+        on="click"
+      >
+        <Grid centered divided columns={2}>
+          <Grid.Column
+            as={"a"}
+            textAlign="center"
+            style={{ maxWidth: "25em" }}
+            onClick={this.switchMode("rocket")}
+          >
+            <Header as="h4">
+              <Icon name="rocket" />
+            </Header>
+            <center>
+              <b>Speed mode</b>
+            </center>
+            <p>
+              <b>
+                Speed through exercises, focusing only on new or difficult
+                words.
+              </b>
+            </p>
+          </Grid.Column>
+          <Grid.Column
+            as="a"
+            onClick={this.switchMode("ship")}
+            textAlign="center"
+            style={{ maxWidth: "25em" }}
+          >
+            <Header as="h4">
+              <Icon name="ship" />
+            </Header>
+            <center>
+              <b>Mastery mode</b>
+            </center>
+            <p>
+              <b>
+                Stimulate deep learning by focusing on the context in which
+                words appear.
+              </b>
+            </p>
+          </Grid.Column>
+        </Grid>
+      </Popup>
+    );
+  };
+}
+
+class TypeButton extends PureComponent {
+  state = { open: false };
+
+  handleOpen = () => {
+    this.setState({ open: true });
+  };
+  handleClose = () => {
+    this.setState({ open: false });
+  };
+
+  switchType = mode => () => {
+    this.props.onChange(mode);
+    this.handleClose();
+  };
+
+  render = () => {
+    const { type } = this.props;
+    const { open } = this.state;
+    return (
+      <Popup
+        trigger={<Button circular icon={type} />}
+        flowing
+        open={open}
+        onOpen={this.handleOpen}
+        onClose={this.handleClose}
+        on="click"
+      >
+        <Grid centered divided columns={2}>
+          <Grid.Column
+            as={"a"}
+            textAlign="center"
+            style={{ maxWidth: "25em" }}
+            onClick={this.switchType("keyboard")}
+          >
+            <Header as="h4">
+              <Icon name="keyboard" />
+            </Header>
+            <center>
+              <b>Reading exercises</b>
+            </center>
+            <p>
+              <b>Learn to recognize written Chinese.</b>
+            </p>
+          </Grid.Column>
+          <Grid.Column
+            as="a"
+            onClick={this.switchType("sound")}
+            textAlign="center"
+            style={{ maxWidth: "25em" }}
+          >
+            <Header as="h4">
+              <Icon name="sound" />
+            </Header>
+            <center>
+              <b>Listening exercises</b>
+            </center>
+            <p>
+              <b>Learn to understand spoken Mandarin.</b>
+            </p>
+          </Grid.Column>
+        </Grid>
+      </Popup>
+    );
+  };
+}
