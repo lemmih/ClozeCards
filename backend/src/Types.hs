@@ -91,7 +91,7 @@ data Card = Card
 data CardBlock
   = ChineseBlock
     { blockSimplified  :: Text
-    -- , blockPinyin     :: Maybe Text
+    , blockPinyin      :: Text
     , blockDefinitions :: [Definition]
     , blockAnswers     :: [Text]
     , blockIsGap       :: Bool
@@ -321,6 +321,7 @@ instance FromJSON CardBlock where
   parseJSON (Object o)   =
     ChineseBlock
       <$> o.:"simplified"
+      <*> o.:"pinyin"
       <*> o.:"definitions"
       <*> o.:"answers"
       <*> o.:"isGap"
@@ -331,6 +332,7 @@ instance ToJSON CardBlock where
   toJSON (EscapedBlock txt) = String txt
   toJSON ChineseBlock{..} = object
     [ "simplified"  .= blockSimplified
+    , "pinyin"      .= blockPinyin
     , "definitions" .= blockDefinitions
     , "answers"     .= blockAnswers
     , "isGap"       .= blockIsGap

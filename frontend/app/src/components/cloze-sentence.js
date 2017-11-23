@@ -38,13 +38,13 @@ class ClozeSentence extends Component {
     };
     return [
       <div key="chinese" className="blocks" style={outerStyle}>
-        <div style={innerStyle}>
+        <div className="block-container" style={innerStyle}>
           {blocks.map((block, idx) => (
             <Block
               onAnswer={this.props.onAnswer}
               onSpace={this.props.onSpace}
               onEscape={this.props.onEscape}
-              showPinyin={done || this.props.showPinyin}
+              showPinyin={done || (this.props.showPinyin && idx === active)}
               active={idx === active}
               completed={idx < active}
               key={idx.toString() + "-" + blockId(block)}
@@ -107,22 +107,20 @@ class Block extends PureComponent {
       block.definitions.map(def => def.pinyin.toLowerCase())
     );
 
-    const renderPinyin = <ul>{pinyin.map(p => <li key={p}>{p}</li>)}</ul>;
+    const renderPinyin = block.pinyin; // <ul>{pinyin.map(p => <li key={p}>{p}</li>)}</ul>;
 
     if (active)
       return (
         <div style={blockStyle}>
+          {showPinyin ? <div>{renderPinyin}</div> : <div>&nbsp;</div>}
           <div>
-            {showPinyin ? <div>{renderPinyin}</div> : <div>&nbsp;</div>}
-            <div>
-              <PinyinInput
-                onEnter={this.props.onAnswer}
-                onSpace={this.props.onSpace}
-                onEscape={this.props.onEscape}
-                style={inputStyle}
-                placeholder={txt}
-              />
-            </div>
+            <PinyinInput
+              onEnter={this.props.onAnswer}
+              onSpace={this.props.onSpace}
+              onEscape={this.props.onEscape}
+              style={inputStyle}
+              placeholder={txt}
+            />
           </div>
         </div>
       );

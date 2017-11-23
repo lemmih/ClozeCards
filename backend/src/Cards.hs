@@ -46,6 +46,7 @@ tokenToBlock now selectedWord models (KnownWord e) = do
     modify $ Set.insert (entrySimplified e)
     pure $ ChineseBlock
       { blockSimplified = entrySimplified e
+      , blockPinyin     = entryDefaultPinyin e
       , blockDefinitions =
           [ Definition (variantPinyin v) (variantDefinitions v)
           | v <- entryVariants e ]

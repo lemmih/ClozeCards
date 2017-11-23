@@ -1,5 +1,7 @@
 import React, { PureComponent } from "react";
 
+// state contains a
+
 const dictStyle = {
   position: "fixed",
   top: 0,
@@ -11,7 +13,14 @@ const dictStyle = {
   background: "white",
   padding: "1ex"
 };
-
+/*
+mandarin::string
+pinyin::string[]
+definitions::string[][]
+sentence_id
+offset
+text_id
+*/
 export default class extends PureComponent {
   render = () => {
     return <div style={dictStyle}>Dictionary</div>;

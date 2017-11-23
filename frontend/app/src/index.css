@@ -1,8 +1,7 @@
 body {
-  font-family: 'Helvetica Neue', 'Helvetica', 'sans-serif', /* basic */
-               "Noto Sans CJK SC Regular", "AR PL UMing CN", /* linux */
-               "Hiragino Sans GB", "STHeiti",  /*mac*/
-               "Microsoft Yahei", 'SimHei';
+  font-family: "Helvetica Neue", "Helvetica", "sans-serif",
+    "Noto Sans CJK SC Regular", "AR PL UMing CN", "Hiragino Sans GB", "STHeiti",
+    "Microsoft Yahei", "SimHei" !important;
   background: #e6edf4;
 }
 
@@ -63,8 +62,6 @@ body {
   opacity: 0.8;
 }
 
-
-
 /* Cloze input */
 .blocks ::-webkit-input-placeholder {
   text-align: center;
@@ -116,4 +113,21 @@ body {
 }
 .deck-item .content .extra {
   padding-left: 1.5em !important;
+}
+
+.block-container {
+  line-height: 1.5em;
+}
+.block-container div div:nth-child(1) {
+  color: grey;
+  padding-left: 2px;
+  padding-right: 2px;
+  font-size: medium;
+}
+.block-container div div:nth-child(2) {
+  font-size: x-large;
+  line-height: 1.5em;
+}
+.block-container div div:nth-child(2) input {
+  line-height: 1.5em;
 }
