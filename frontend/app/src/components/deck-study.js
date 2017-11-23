@@ -198,6 +198,7 @@ export default connect(toStudyProps)(
                     onEscape={this.onEscape}
                     active={active}
                     showPinyin={showPinyin}
+                    mode={this.state.mode}
                     showEnglish={showEnglish || done}
                     blocks={cards[0].chinese}
                     english={cards[0].english}

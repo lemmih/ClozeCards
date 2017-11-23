@@ -21,8 +21,12 @@ function blockId(block) {
 //
 class ClozeSentence extends Component {
   render() {
-    const { blocks, english, active, showEnglish } = this.props;
+    const { blocks, english, active, showEnglish, mode } = this.props;
     const done = active >= blocks.length;
+    const showPinyin = idx =>
+      done ||
+      (this.props.showPinyin && idx === active) ||
+      (mode === "ship" && idx < active);
     const outerStyle = {
       position: "relative",
       float: "left",
@@ -44,7 +48,7 @@ class ClozeSentence extends Component {
               onAnswer={this.props.onAnswer}
               onSpace={this.props.onSpace}
               onEscape={this.props.onEscape}
-              showPinyin={done || (this.props.showPinyin && idx === active)}
+              showPinyin={showPinyin(idx)}
               active={idx === active}
               completed={idx < active}
               key={idx.toString() + "-" + blockId(block)}
