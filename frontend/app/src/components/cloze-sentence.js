@@ -77,6 +77,12 @@ function blockSize(block) {
 }
 
 class Block extends PureComponent {
+  showDict = () => {
+    console.log("Enter");
+  };
+  hideDict = () => {
+    console.log("Leave");
+  };
   render() {
     const { block, active, showPinyin } = this.props;
     const inputStyle = {
@@ -128,7 +134,9 @@ class Block extends PureComponent {
         ) : (
           <div>&nbsp;</div>
         )}
-        <div>{block.simplified}</div>
+        <div onMouseEnter={this.showDict} onMouseLeave={this.hideDict}>
+          {block.simplified}
+        </div>
         <div>&nbsp;</div>
       </div>
     );
