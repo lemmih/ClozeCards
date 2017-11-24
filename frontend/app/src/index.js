@@ -1,3 +1,4 @@
+// @flow
 import _ from "lodash";
 import "semantic-ui-css/semantic.min.css";
 
@@ -17,12 +18,17 @@ const app = (
     <Layout />
   </Provider>
 );
+if(rootElement) {
 if (rootElement.hasChildNodes()) {
   // render the app on a fake root to fetch any required data.
   const fakeRoot = document.createElement("div");
   ReactDOM.render(app, fakeRoot);
   // after a quater second, hydrate the app using the fetched data.
+  // $FlowFixMe
   _.delay(ReactDOM.hydrate, 250, app, rootElement);
 } else {
   ReactDOM.render(app, rootElement);
+}
+} else {
+  console.log('Root element not found!');
 }
