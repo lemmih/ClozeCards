@@ -107,11 +107,7 @@ class Block extends PureComponent {
     }
 
     const txt = block.simplified;
-    const pinyin = _.uniq(
-      block.definitions.map(def => def.pinyin.toLowerCase())
-    );
-
-    const renderPinyin = block.pinyin; // <ul>{pinyin.map(p => <li key={p}>{p}</li>)}</ul>;
+    const renderPinyin = block.pinyin;
 
     if (active)
       return (

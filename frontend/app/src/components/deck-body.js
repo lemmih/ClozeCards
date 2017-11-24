@@ -1,14 +1,26 @@
 import _ from "lodash";
 import React, { Component } from "react";
-import { Sticky, Grid, Icon, Button, Dropdown } from "semantic-ui-react";
-import { EditorState, convertToRaw, convertFromRaw } from "draft-js";
+import {
+  Sticky,
+  Grid,
+  Icon,
+  Button,
+  Dropdown,
+  Loader
+} from "semantic-ui-react";
+import {
+  EditorState,
+  convertToRaw,
+  convertFromRaw,
+  ContentState
+} from "draft-js";
 import Editor from "draft-js-plugins-editor";
 import { connect } from "react-redux";
 import "draft-js-static-toolbar-plugin/lib/plugin.css";
-// import uuid from "uuid/v4";
+import uuid from "uuid/v4";
 
-import { fetchNotes } from "../actions/notes";
-import { fetchContent } from "../actions/content";
+import { fetchNotes, receiveNotes } from "../actions/notes";
+import { fetchContent, receiveContent } from "../actions/content";
 import createChinesePlugin from "../plugins/chinese-plugin";
 import createResizePlugin from "../plugins/resize";
 import alignContent from "../align";
@@ -36,6 +48,7 @@ class DeckBody extends Component {
       };
     this.deckEditorFocus = () => this.deckEditor.focus();
     this.annotationEditorFocus = () => {
+      console.log("notes", this.annotationEditor);
       this.annotationEditor.focus();
     };
     this.deckEditorPlugins = [
@@ -250,24 +263,43 @@ function toNotesProps(store, ownProps) {
 }
 const Notes = connect(toNotesProps)(
   class extends Component {
+    constructor(props) {
+      super(props);
+      this.state = {
+        contentId: undefined
+      };
+    }
+
     componentDidMount() {
       this.loadNotes();
+      this.updState();
     }
-    componentDidUpdate(prevProps) {
+    componentDidUpdate() {
+      this.updState();
+    }
+    updState = () => {
       // If selection changes, fetch
       this.loadNotes();
       if (
-        prevProps.noteKey !== this.props.noteKey ||
-        !_.isPlainObject(prevProps.content)
+        this.state.contentId !== this.props.contentId &&
+        _.isPlainObject(this.props.content)
       ) {
-        if (_.isPlainObject(this.props.content)) {
-          console.log("Notes loaded");
-          this.props.onChange(
-            EditorState.createWithContent(convertFromRaw(this.props.content))
-          );
-        }
+        console.log("Notes loaded");
+        this.setState({ contentId: this.props.contentId });
+        this.props.onChange(
+          EditorState.createWithContent(convertFromRaw(this.props.content))
+        );
+      } else if (_.isNull(this.props.contentId)) {
+        console.log("Initializing notes");
+        const { dispatch, userId, deckId } = this.props;
+        const contentId = uuid();
+        const emptyContent = convertToRaw(
+          ContentState.createFromText("Notes go here")
+        );
+        dispatch(receiveContent(contentId, emptyContent));
+        dispatch(receiveNotes(userId, deckId, contentId));
       }
-    }
+    };
     loadNotes = () => {
       const { userId, deckId, contentId, content } = this.props;
       if (_.isUndefined(contentId)) {
@@ -280,6 +312,7 @@ const Notes = connect(toNotesProps)(
         backend.relay(fetchContent(contentId));
       }
     };
+
     render = () => {
       const {
         editorState,
@@ -290,7 +323,12 @@ const Notes = connect(toNotesProps)(
         setRef,
         content
       } = this.props;
-      if (!_.isPlainObject(content)) return null;
+      if (!_.isPlainObject(content))
+        return (
+          <div style={{ height: "5em", position: "relative" }}>
+            <Loader active />
+          </div>
+        );
       return (
         <Editor
           editorState={editorState}
