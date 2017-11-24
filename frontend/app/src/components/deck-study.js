@@ -50,6 +50,7 @@ export default connect(toStudyProps)(
         showStatus: false,
         showPinyin: false,
         showEnglish: false,
+        showPlaceholder: false,
         mode: "rocket",
         type: "keyboard"
       };
@@ -59,6 +60,7 @@ export default connect(toStudyProps)(
       if (_.isNull(this.props.cards)) {
         backend.relay(fetchCards(this.props.deckId, this.state.style));
       }
+      this.setAudioState();
     };
     componentDidUpdate = (prevProps, prevState) => {
       if (_.isNull(this.props.cards) || this.state.style !== prevState.style) {
@@ -75,6 +77,21 @@ export default connect(toStudyProps)(
       if (_.isArray(this.props.cards) && !_.isArray(prevProps.cards)) {
         this.setState({ showPinyin: false, showEnglish: false, active: 0 });
       }
+      this.setAudioState();
+    };
+
+    setAudioState = () => {
+      const { cards } = this.props;
+      const isSound = this.state.type === "sound";
+      if (_.isArray(cards) && cards.length > 0) {
+        const sid = cards[0].sentenceId;
+        const target = "/static/audio/sentences/" + sid + ".mp3";
+        if (!this.audio || !this.audio.src.endsWith(target)) {
+          this.audio = new Audio();
+          this.audio.src = target;
+          if (isSound) this.audio.play();
+        }
+      }
     };
 
     onSpace = value => {
@@ -88,6 +105,11 @@ export default connect(toStudyProps)(
       return isCorrect;
     };
     onAnswer = value => {
+      const isKeyboard = this.state.type === "keyboard";
+      if (value === "") {
+        if (!isKeyboard) this.playAudio();
+        return;
+      }
       const { cards } = this.props;
       const card = cards[0];
       const block = card.chinese[this.getActive()];
@@ -106,10 +128,16 @@ export default connect(toStudyProps)(
       backend.relay(receiveResponse(response));
       if (isCorrect) {
         let i = this.getActive() + 1;
-        this.setState({ active: i, showPinyin: false });
         i = this.getActive(i);
-        if (i >= card.chinese.length) {
-          this.playAudio();
+        const allDone = i >= card.chinese.length;
+        this.setState({
+          active: i,
+          showPlaceholder: false,
+          showEnglish: !allDone && this.state.showEnglish,
+          showPinyin: false
+        });
+        if (allDone) {
+          if (isKeyboard) this.playAudio();
         }
       }
       return isCorrect;
@@ -117,7 +145,13 @@ export default connect(toStudyProps)(
     onEscape = () => {
       console.log("Set shown answer");
       this.setState(state => {
-        return { showEnglish: true, showPinyin: state.showEnglish };
+        if (state.type === "sound")
+          return {
+            showEnglish: true,
+            showPlaceholder: state.showEnglish,
+            showPinyin: state.showPlaceholder
+          };
+        else return { showEnglish: true, showPinyin: state.showEnglish };
       });
       return false;
     };
@@ -157,11 +191,7 @@ export default connect(toStudyProps)(
       this.continueRef = continueRef;
     };
     playAudio = () => {
-      const a = new Audio();
-      const { cards } = this.props;
-      const sid = cards[0].sentenceId;
-      a.src = "/static/audio/sentences/" + sid + ".mp3";
-      a.play();
+      this.audio.play();
     };
     switchMode = mode => {
       this.setState({ mode });
@@ -173,6 +203,8 @@ export default connect(toStudyProps)(
       const { style, showStatus, showPinyin, showEnglish } = this.state;
       const { cards } = this.props;
       const active = this.getActive();
+      const keyboardStyle = this.state.type === "keyboard";
+      const soundStyle = this.state.type === "sound";
 
       const ready = _.isArray(cards);
       const done = ready && cards[0].chinese.length <= active;
@@ -194,11 +226,16 @@ export default connect(toStudyProps)(
                 {ready ? (
                   <ClozeSentence
                     onAnswer={this.onAnswer}
+                    onShiftEnter={this.playAudio}
                     onSpace={this.onSpace}
                     onEscape={this.onEscape}
                     active={active}
                     showPinyin={showPinyin}
+                    showPlaceholder={
+                      this.state.showPlaceholder || keyboardStyle
+                    }
                     mode={this.state.mode}
+                    type={this.state.type}
                     showEnglish={showEnglish || done}
                     blocks={cards[0].chinese}
                     english={cards[0].english}
@@ -222,7 +259,7 @@ export default connect(toStudyProps)(
                 />
                 <Button
                   circular
-                  disabled={!done}
+                  disabled={!done && !soundStyle}
                   icon="play"
                   onClick={this.playAudio}
                 />
@@ -256,7 +293,11 @@ export default connect(toStudyProps)(
                     Continue
                   </Button>
                 ) : (
-                  <Button disabled={!ready} color="yellow">
+                  <Button
+                    disabled={!ready}
+                    color="yellow"
+                    onClick={this.onEscape}
+                  >
                     Show hint
                   </Button>
                 )}

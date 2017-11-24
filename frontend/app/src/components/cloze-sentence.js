@@ -46,8 +46,12 @@ class ClozeSentence extends Component {
           {blocks.map((block, idx) => (
             <Block
               onAnswer={this.props.onAnswer}
+              onShiftEnter={this.props.onShiftEnter}
               onSpace={this.props.onSpace}
               onEscape={this.props.onEscape}
+              mode={mode}
+              type={this.props.type}
+              showPlaceholder={this.props.showPlaceholder}
               showPinyin={showPinyin(idx)}
               active={idx === active}
               completed={idx < active}
@@ -88,7 +92,17 @@ class Block extends PureComponent {
     console.log("Leave");
   };
   render() {
-    const { block, active, showPinyin } = this.props;
+    const {
+      block,
+      active,
+      showPinyin,
+      showPlaceholder,
+      mode,
+      type,
+      completed
+    } = this.props;
+    const soundType = type === "sound";
+    const rocketMode = mode === "rocket";
     const inputStyle = {
       border: "0px",
       borderBottom: "1px solid black",
@@ -116,10 +130,11 @@ class Block extends PureComponent {
           <div>
             <PinyinInput
               onEnter={this.props.onAnswer}
+              onShiftEnter={this.props.onShiftEnter}
               onSpace={this.props.onSpace}
               onEscape={this.props.onEscape}
               style={inputStyle}
-              placeholder={txt}
+              placeholder={showPlaceholder ? txt : null}
             />
           </div>
         </div>
@@ -127,14 +142,19 @@ class Block extends PureComponent {
 
     return (
       <div style={blockStyle}>
-        {showPinyin || (block.isGap && this.props.completed) ? (
+        {showPinyin || (block.isGap && completed) ? (
           <div>{renderPinyin}</div>
         ) : (
           <div>&nbsp;</div>
         )}
-        <div onMouseEnter={this.showDict} onMouseLeave={this.hideDict}>
-          {block.simplified}
-        </div>
+        {!soundType || completed || (rocketMode && !block.isGap) ? (
+          <div onMouseEnter={this.showDict} onMouseLeave={this.hideDict}>
+            {block.simplified}
+          </div>
+        ) : (
+          <div style={{ width: block.simplified.length + "em" }}>_</div>
+        )}
+
         <div>&nbsp;</div>
       </div>
     );
