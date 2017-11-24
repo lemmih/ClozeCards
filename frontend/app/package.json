@@ -4,9 +4,9 @@
   "private": true,
   "proxy": "http://localhost:8000",
   "dependencies": {
-    "axios": "^0.16.2",
+    "axios": "^0.16.x",
     "css-element-queries": "^0.4.0",
-    "draft-js": "^0.10.3",
+    "draft-js": "^0.10.x",
     "draft-js-plugins-editor": "^2.0.0-rc8",
     "draft-js-static-toolbar-plugin": "^2.0.0-rc4",
     "flow-bin": "^0.59.0",
@@ -23,7 +23,7 @@
     "redux-promise-middleware": "^4.4.1",
     "redux-thunk": "^2.2.0",
     "semantic-ui-css": "^2.2.12",
-    "semantic-ui-react": "^0.74.2",
+    "semantic-ui-react": "^0.74.2 || ^0.76.x",
     "uuid": "^3.1.0"
   },
   "devDependencies": {
