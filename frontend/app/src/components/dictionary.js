@@ -11,7 +11,8 @@ const dictStyle = {
   zIndex: 1001,
   boxShadow: "1px 1px 5px #0074D9",
   background: "white",
-  padding: "1ex"
+  padding: "1ex",
+  display: "none"
 };
 /*
 mandarin::string
