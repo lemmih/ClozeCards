@@ -246,6 +246,10 @@ export default class PinyinInput extends PureComponent {
         style={this.props.style}
         placeholder={this.props.placeholder}
         onFocus={this.props.onFocus}
+        autocomplete="off"
+        autocorrect="off"
+        autocapitalize="off"
+        spellcheck="false"
       />
     );
   }

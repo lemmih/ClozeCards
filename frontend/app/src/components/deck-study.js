@@ -20,7 +20,8 @@ const containerStyle = {
   position: "fixed",
   bottom: 0,
   width: "100%",
-  background: "aliceblue"
+  background: "aliceblue",
+  zIndex: 1001
 };
 const headerRow = {
   background: "#ccc",
@@ -215,7 +216,7 @@ export default connect(toStudyProps)(
           <Modal open={showStatus} onClose={this.onCloseStatus}>
             <Modal.Content>Content</Modal.Content>
           </Modal>
-          <Grid relaxed>
+          <Grid stackable>
             <Grid.Row columns={1} textAlign="center" style={headerRow}>
               <Grid.Column>
                 High score | When word will be reviewed.
@@ -246,7 +247,7 @@ export default connect(toStudyProps)(
               </Grid.Column>
             </Grid.Row>
             <Grid.Row columns={3} style={controlRow}>
-              <Grid.Column>
+              <Grid.Column textAlign="center">
                 <Button negative circular icon="power" />
                 <Button circular icon="settings" />
                 <Button
@@ -283,7 +284,7 @@ export default connect(toStudyProps)(
                   </Button>
                 </Button.Group>
               </Grid.Column>
-              <Grid.Column textAlign="right">
+              <Grid.Column textAlign="center">
                 {done ? (
                   <Button
                     ref={this.handleContinueRef}
@@ -332,6 +333,7 @@ class ModeButton extends PureComponent {
       <Popup
         trigger={<Button circular icon={mode} />}
         flowing
+        hideOnScroll
         open={open}
         onOpen={this.handleOpen}
         onClose={this.handleClose}
@@ -404,6 +406,7 @@ class TypeButton extends PureComponent {
       <Popup
         trigger={<Button circular icon={type} />}
         flowing
+        hideOnScroll
         open={open}
         onOpen={this.handleOpen}
         onClose={this.handleClose}
