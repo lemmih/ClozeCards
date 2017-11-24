@@ -122,6 +122,9 @@ class Block extends PureComponent {
 
     const txt = block.simplified;
     const renderPinyin = block.pinyin;
+    const blanks = Array(block.simplified.length)
+      .fill("_")
+      .join(" ");
 
     if (active)
       return (
@@ -134,7 +137,7 @@ class Block extends PureComponent {
               onSpace={this.props.onSpace}
               onEscape={this.props.onEscape}
               style={inputStyle}
-              placeholder={showPlaceholder ? txt : null}
+              placeholder={showPlaceholder ? txt : blanks}
             />
           </div>
         </div>
@@ -152,7 +155,7 @@ class Block extends PureComponent {
             {block.simplified}
           </div>
         ) : (
-          <div style={{ width: block.simplified.length + "em" }}>_</div>
+          <div style={{ width: block.simplified.length + "em" }}>{blanks}</div>
         )}
 
         <div>&nbsp;</div>
