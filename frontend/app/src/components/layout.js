@@ -51,13 +51,13 @@ class Layout extends Component {
               Recent Decks
             </Menu.Item>
             {/* <Menu.Item as={Link} to={"/trending-decks/"}>Trending Decks</Menu.Item> */}
-            <Menu.Item as={Link} to={"/teach/"}>
+            {/*<Menu.Item as={Link} to={"/teach/"}>
               Teach
-            </Menu.Item>
+            </Menu.Item>*/}
             <Menu.Menu position="right">
-              <Menu.Item as={Link} to={"/news/"}>
+              {/* <Menu.Item as={Link} to={"/news/"}>
                 News
-              </Menu.Item>
+              </Menu.Item>*/}
               {loggedIn ? (
                 <Dropdown item text={user.email}>
                   <Dropdown.Menu>

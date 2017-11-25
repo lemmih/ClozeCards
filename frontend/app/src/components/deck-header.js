@@ -110,7 +110,7 @@ class DeckHeader extends Component {
         }
       />
     );
-    const removeActive = <a>{removeBase}</a>;
+    const removeActive = removeBase; // <a>{removeBase}</a>;
 
     return (
       <Item className="deck-item">
