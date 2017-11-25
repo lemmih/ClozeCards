@@ -10,6 +10,7 @@ import {
   Header,
   Icon
 } from "semantic-ui-react";
+import { Link } from "react-router-dom";
 
 import { fetchCards, receiveCards, receiveResponse } from "../actions/cards";
 import backend from "../backend";
@@ -202,7 +203,7 @@ export default connect(toStudyProps)(
     };
     render = () => {
       const { style, showStatus, showPinyin, showEnglish } = this.state;
-      const { cards } = this.props;
+      const { cards, studyQuitLink } = this.props;
       const active = this.getActive();
       const keyboardStyle = this.state.type === "keyboard";
       const soundStyle = this.state.type === "sound";
@@ -248,8 +249,14 @@ export default connect(toStudyProps)(
             </Grid.Row>
             <Grid.Row columns={3} style={controlRow}>
               <Grid.Column textAlign="center">
-                <Button negative circular icon="power" />
-                <Button circular icon="settings" />
+                <Button
+                  negative
+                  circular
+                  icon="power"
+                  as={Link}
+                  to={studyQuitLink}
+                />
+                <Button circular icon="settings" disabled />
                 <Button
                   circular
                   disabled={!ready}

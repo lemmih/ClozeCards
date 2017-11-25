@@ -120,9 +120,15 @@ export const ViewDeck = connect(toViewDeckProps)(
       this.setState({ selection });
     };
 
+    studyQuitLink = () => {
+      const deck = this.state.deck || this.props.deck;
+      // const { notes } = this.state;
+      return "/decks/" + deck.slugs[0] + "/";
+    };
+
     render() {
-      const { content, study } = this.props;
-      const { editing, notes } = this.state;
+      const { content } = this.props;
+      const { editing, notes, study } = this.state;
       const deck = this.state.deck || this.props.deck;
       const hasDeck = _.isPlainObject(this.props.deck);
       const hasContent = _.isPlainObject(content);
@@ -163,7 +169,9 @@ export const ViewDeck = connect(toViewDeckProps)(
 
             {false && <DeckComments />}
           </Container>
-          {study && <Study deckId={deck.id} />}
+          {study && (
+            <Study studyQuitLink={this.studyQuitLink()} deckId={deck.id} />
+          )}
         </div>
       );
     }
