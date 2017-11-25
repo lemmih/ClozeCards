@@ -19,7 +19,6 @@ const defaultState = {
 
 const persist = store => next => action => {
   if (action.type === SET_ACTIVE_USER) {
-    console.log("Persisting login");
     const user = Object.assign(
       { token: action.payload.token },
       action.payload.user
@@ -45,13 +44,11 @@ const middleware = applyMiddleware(
 );
 
 const preloadedState = window.__PRELOADED_STATE__;
-console.log("Preloaded state", preloadedState);
 const store = createStore(rootReducer, defaultState, middleware);
 
 _.forEach(preloadedState, action => {
   if (action.type !== SET_ACTIVE_USER) store.dispatch(action);
 });
-console.log("Initial state", store.getState());
 
 window.snapSaveState = () => ({
   __PRELOADED_STATE__: actions

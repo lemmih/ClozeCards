@@ -145,7 +145,6 @@ export default connect(toStudyProps)(
       return isCorrect;
     };
     onEscape = () => {
-      console.log("Set shown answer");
       this.setState(state => {
         if (state.type === "sound")
           return {

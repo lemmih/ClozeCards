@@ -64,7 +64,6 @@ function connect() {
     const preloadedState = window.__PRELOADED_STATE__;
     _.forEach(preloadedState, action => {
       if (isQuery(action)) {
-        console.log("Sending action", action);
         send(action);
       }
     });

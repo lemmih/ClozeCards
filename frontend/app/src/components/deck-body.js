@@ -52,7 +52,6 @@ class DeckBody extends Component {
       };
     this.deckEditorFocus = () => this.deckEditor.focus();
     this.annotationEditorFocus = () => {
-      console.log("notes", this.annotationEditor);
       this.annotationEditor.focus();
     };
     this.deckEditorPlugins = [
@@ -288,13 +287,11 @@ const Notes = connect(toNotesProps)(
         this.state.contentId !== this.props.contentId &&
         _.isPlainObject(this.props.content)
       ) {
-        console.log("Notes loaded");
         this.setState({ contentId: this.props.contentId });
         this.props.onChange(
           EditorState.createWithContent(convertFromRaw(this.props.content))
         );
       } else if (_.isNull(this.props.contentId)) {
-        console.log("Initializing notes");
         const { dispatch, userId, deckId } = this.props;
         const contentId = uuid();
         const emptyContent = convertToRaw(
