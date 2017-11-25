@@ -24,6 +24,16 @@ class LandingPage extends Component {
               </p>
             </li>
             <li>
+              <b>Notes.</b>
+              <p>
+                All decks (even those not created by you) can be annotated with
+                notes. These notes are aligned with the context in the deck such
+                they'll always match up line-by-line, regardless of window size
+                or formatting. Furthermore, any chinese written in the notes
+                will trigger the built-in dictionary, just like in the decks.
+              </p>
+            </li>
+            <li>
               <b>Listening exercises.</b>
               <p>
                 Practice your comprehension by listening to each practice
