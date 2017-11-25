@@ -13,22 +13,16 @@ import "./index.css";
 backend.connect();
 
 const rootElement = document.getElementById("root");
+if (!rootElement) throw new Error("Root element not found!");
+
 const app = (
   <Provider store={store}>
     <Layout />
   </Provider>
 );
-if(rootElement) {
 if (rootElement.hasChildNodes()) {
-  // render the app on a fake root to fetch any required data.
-  const fakeRoot = document.createElement("div");
-  ReactDOM.render(app, fakeRoot);
-  // after a quater second, hydrate the app using the fetched data.
   // $FlowFixMe
-  _.delay(ReactDOM.hydrate, 250, app, rootElement);
+  ReactDOM.hydrate(app, rootElement);
 } else {
   ReactDOM.render(app, rootElement);
-}
-} else {
-  console.log('Root element not found!');
 }

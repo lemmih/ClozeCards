@@ -19,8 +19,12 @@ import { connect } from "react-redux";
 import "draft-js-static-toolbar-plugin/lib/plugin.css";
 import uuid from "uuid/v4";
 
-import { fetchNotes, receiveNotes } from "../actions/notes";
-import { fetchContent, receiveContent } from "../actions/content";
+import {
+  fetchNotes,
+  receiveNotes,
+  fetchContent,
+  receiveContent
+} from "../actions";
 import createChinesePlugin from "../plugins/chinese-plugin";
 import createResizePlugin from "../plugins/resize";
 import alignContent from "../align";

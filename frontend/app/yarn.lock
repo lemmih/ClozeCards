@@ -1204,7 +1204,7 @@ classnames@^2.2.5:
   version "2.2.5"
   resolved "https://registry.yarnpkg.com/classnames/-/classnames-2.2.5.tgz#fb3801d453467649ef3603c7d61a02bd129bde6d"
 
-clean-css@4.1.x:
+clean-css@4.1.x, clean-css@^4.1.9:
   version "4.1.9"
   resolved "https://registry.yarnpkg.com/clean-css/-/clean-css-4.1.9.tgz#35cee8ae7687a49b98034f70de00c4edd3826301"
   dependencies:
@@ -4685,10 +4685,11 @@ react-scripts@0.9.5:
   optionalDependencies:
     fsevents "1.0.17"
 
-react-snap@^0.10.0:
-  version "0.10.0"
-  resolved "https://registry.yarnpkg.com/react-snap/-/react-snap-0.10.0.tgz#c5f80f42ad21a1ca822230a863fc1920a7fa83d9"
+react-snap@^1.1.1:
+  version "1.1.1"
+  resolved "https://registry.yarnpkg.com/react-snap/-/react-snap-1.1.1.tgz#8957beb872d3da24422a7942221bd66ddd349bd8"
   dependencies:
+    clean-css "^4.1.9"
     express "^4.16.1"
     express-history-api-fallback "^2.2.1"
     highland "^2.11.1"

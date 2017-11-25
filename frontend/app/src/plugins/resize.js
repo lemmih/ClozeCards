@@ -6,7 +6,8 @@ export default cb => {
   return {
     initialize: plugin => {
       _.defer(() => {
-        sensor = new ResizeSensor(plugin.getEditorRef().refs.editor, cb);
+        const editor = plugin.getEditorRef();
+        if (editor) sensor = new ResizeSensor(editor.refs.editor, cb);
       });
     },
     willUnmount: plugin => {

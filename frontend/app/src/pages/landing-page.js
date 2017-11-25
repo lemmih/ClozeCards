@@ -4,16 +4,14 @@ class LandingPage extends Component {
   render = () => {
     return (
       <div>
-        <p>
-          <center>
-            <h1>Public Beta.</h1>
-            <h2>
-              Many features do not work and any content you add to the site may
-              be lost
-            </h2>
-          </center>
-        </p>
-        <p>
+        <center>
+          <h1>Public Beta.</h1>
+          <h2>
+            Many features do not work and any content you add to the site may be
+            lost
+          </h2>
+        </center>
+        <div>
           Features of this beta version includes:
           <ul>
             <li>
@@ -86,7 +84,7 @@ class LandingPage extends Component {
               </p>
             </li>
           </ul>
-        </p>
+        </div>
       </div>
     );
   };

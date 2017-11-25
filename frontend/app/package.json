@@ -27,7 +27,7 @@
     "uuid": "^3.1.0"
   },
   "devDependencies": {
-    "react-snap": "^0.10.0"
+    "react-snap": "^1.1.1"
   },
   "reactSnap": {
     "waitFor": 5000,
