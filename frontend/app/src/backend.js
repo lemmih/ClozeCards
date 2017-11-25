@@ -9,7 +9,7 @@ var backlog = [];
 
 function onopen() {
   // dispatch: CONNECTION_OPEN
-  const user = JSON.parse(localStorage.getItem("user") || "") || {};
+  const user = JSON.parse(localStorage.getItem("user") || "{}") || {};
   // send user-id and token
   // console.log('onopen');
   if (user.id && user.token) {
