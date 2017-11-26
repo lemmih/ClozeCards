@@ -101,7 +101,7 @@ export default connect(toStudyProps)(
       const block = cards[0].chinese[this.getActive()];
       const isCorrect = _.includes(
         block.answers,
-        value.replace(" ", "").toLowerCase()
+        value.replace(/\s/g, "").toLowerCase()
       );
       if (isCorrect) this.onAnswer(value);
       return isCorrect;
@@ -117,7 +117,7 @@ export default connect(toStudyProps)(
       const block = card.chinese[this.getActive()];
       const isCorrect = _.includes(
         block.answers,
-        value.replace(" ", "").toLowerCase()
+        value.replace(/\s/g, "").toLowerCase()
       );
       const response = {
         word: block.simplified,
@@ -162,7 +162,22 @@ export default connect(toStudyProps)(
     onCloseStatus = () => {
       this.setState({ showStatus: false });
     };
-    onContinue = () => {
+    onKeyUp = e => {
+      // Hitting space (KeyDown) may finish the exercise and switch focus
+      // to the 'continue' button. Then, when the user lifts his finger and
+      // the KeyUp event is fired, that event triggers the 'continue' button
+      // prematurely. We get around this by ignoring all KeyUp events for
+      // the 'continue' button. Instead, we take action only on KeyDown.
+      e.preventDefault();
+    };
+    onKeyDown = e => {
+      var code = e.keyCode ? e.keyCode : e.which;
+      if (code === 32 || code === 13) {
+        this.onContinue(e);
+        e.preventDefault();
+      }
+    };
+    onContinue = e => {
       const { cards } = this.props;
       if (cards.length === 1) {
         this.setState({ showStatus: false, active: 0 }); // Show Status FIXME
@@ -295,6 +310,8 @@ export default connect(toStudyProps)(
                   <Button
                     ref={this.handleContinueRef}
                     onClick={this.onContinue}
+                    onKeyUp={this.onKeyUp}
+                    onKeyDown={this.onKeyDown}
                     positive
                   >
                     Continue

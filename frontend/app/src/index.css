@@ -75,6 +75,9 @@ body {
 .blocks :-ms-input-placeholder {
   text-align: center;
 }
+.blocks ::placeholder {
+  text-align: center;
+}
 .blocks ul {
   display: inline;
   list-style: none;

@@ -221,7 +221,9 @@ export default class PinyinInput extends PureComponent {
       }
       e.preventDefault();
     } else if (code === 32) {
-      if (this.props.onSpace(input.value)) e.preventDefault();
+      if (this.props.onSpace(input.value)) {
+        e.preventDefault();
+      }
     }
   };
 
