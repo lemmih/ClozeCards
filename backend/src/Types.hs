@@ -158,6 +158,8 @@ data ClientMessage
   | ReceiveNotes UserId DeckId (Maybe ContentId)
   | Login Email Password
   | Logout
+  | SetFavorite DeckId
+  | UnsetFavorite DeckId
     deriving (Show)
 
 data ServerMessage
@@ -442,6 +444,8 @@ instance FromJSON ClientMessage where
           <$> payload.:"email"
           <*> payload.:"password"
       "LOGOUT" -> pure Logout
+      "SET_FAVORITE" -> SetFavorite <$> o.:"payload"
+      "UNSET_FAVORITE" -> UnsetFavorite <$> o.:"payload"
       _ -> fail "invalid tag"
 
 toAction :: String -> Value -> Value
@@ -486,6 +490,10 @@ instance ToJSON ClientMessage where
       , "password" .= password ]
   toJSON Logout =
     toAction "LOGOUT" Null
+  toJSON (SetFavorite deckId) =
+    toAction "SET_FAVORITE" $ toJSON deckId
+  toJSON (UnsetFavorite deckId) =
+    toAction "UNSET_FAVORITE" $ toJSON deckId
 
 
 instance ToJSON ServerMessage where

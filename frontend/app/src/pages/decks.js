@@ -26,9 +26,11 @@ import { getUser } from "../common";
 //   missing     => false
 function toViewDeckProps(store, ownProps) {
   const slug = ownProps.slug;
-  const deck = store.decksBySlug.get(slug);
+  const deckId = store.decksBySlug.get(slug);
+  const deck = deckId ? store.decks.get(deckId) : null;
   const content = deck ? store.content.get(deck.contentId) : null;
   return {
+    bySlug: deckId,
     deck: deck,
     content: content
   };
@@ -94,7 +96,7 @@ export const ViewDeck = connect(toViewDeckProps)(
     handleBodyRef = ref => (this.bodyRef = ref);
 
     componentDidMount() {
-      if (_.isUndefined(this.props.deck)) {
+      if (_.isUndefined(this.props.bySlug)) {
         backend.relay(fetchDeck(this.props.slug));
       }
       if (_.isPlainObject(this.props.deck)) {
@@ -105,7 +107,7 @@ export const ViewDeck = connect(toViewDeckProps)(
     }
     componentDidUpdate() {
       // console.log('update', this.props.deck, this.props.content);
-      if (this.props.deck === undefined) {
+      if (this.props.bySlug === undefined) {
         backend.relay(fetchDeck(this.props.slug));
       }
       // console.log('update', this.props.deck, this.props.content);
@@ -132,7 +134,7 @@ export const ViewDeck = connect(toViewDeckProps)(
       const deck = this.state.deck || this.props.deck;
       const hasDeck = _.isPlainObject(this.props.deck);
       const hasContent = _.isPlainObject(content);
-      if (this.props.deck === "failed") return <Redirect to="/" />;
+      if (this.props.bySlug === "failed") return <Redirect to="/" />;
       if (!hasDeck) return <Loader active />;
 
       return (

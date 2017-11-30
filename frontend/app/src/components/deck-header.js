@@ -13,6 +13,8 @@ import {
 } from "semantic-ui-react";
 import { Link } from "react-router-dom";
 
+import Favorites from "./favorites";
+
 const opt = val => {
   return { key: val, text: val, value: val };
 };
@@ -189,16 +191,7 @@ class DeckHeader extends Component {
 
                 <Grid.Column textAlign="right">
                   {!editable && (
-                    <a>
-                      <span
-                        style={{ position: "relative", paddingLeft: "1em" }}
-                      >
-                        <Icon name="empty heart" size="big" />
-                        <Label circular color="grey" floating>
-                          {deck.nLikes}
-                        </Label>
-                      </span>
-                    </a>
+                    <Favorites nFavorites={deck.nLikes} deckId={deck.id} />
                   )}
                   {!editable && (
                     <a>

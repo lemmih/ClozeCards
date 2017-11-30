@@ -81,6 +81,10 @@ handleClient pool conn userId = do
       runDB pool $ \db -> createNote db userId deckId contentId
     Login{} -> return ()
     Logout{} -> return ()
+    SetFavorite deckId ->
+      runDB pool $ \db -> setFavorite db userId deckId
+    UnsetFavorite deckId ->
+      runDB pool $ \db -> unsetFavorite db userId deckId
   case msg of
     Login email password -> do
       mbUser <- runDB pool $ \db -> passwdLogin db email password
