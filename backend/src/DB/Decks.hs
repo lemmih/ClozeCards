@@ -188,3 +188,14 @@ searchDecks conn keyWords tags ordering offset = query conn
         ByLikes    -> " ORDER BY nLikes desc"
         ByDate     -> " ORDER BY published desc"
         ByTrending -> " ORDER BY nLikes desc"
+
+setFavorite :: Connection -> UserId ->  DeckId -> IO ()
+setFavorite conn userId deckId = void $ execute conn
+  "INSERT INTO favorites (user_id, deck_id) VALUES (?, ?)\
+  \ ON CONFLICT DO NOTHING"
+  (userId, deckId)
+
+unsetFavorite :: Connection -> UserId ->  DeckId -> IO ()
+unsetFavorite conn userId deckId = void $ execute conn
+  "DELETE FROM favorites WHERE user_id = ? AND deck_id = ?"
+  (userId, deckId)

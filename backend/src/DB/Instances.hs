@@ -3,8 +3,9 @@
 {-# LANGUAGE RecordWildCards   #-}
 module DB.Instances () where
 
-import qualified Data.Aeson                             as Aeson
-import qualified Data.Vector                            as V
+import qualified Data.Aeson                           as Aeson
+import qualified Data.Set                             as S
+import qualified Data.Vector                          as V
 import           Database.PostgreSQL.Simple
 import           Database.PostgreSQL.Simple.FromField
 import           Database.PostgreSQL.Simple.FromRow
@@ -24,8 +25,8 @@ instance ToField ContentState where
 
 instance FromRow User where
   fromRow = do
-    (userId, email, name, userHash) <- fromRow
-    return $ User userId email name userHash
+    (userId, email, name, userHash, favorites) <- fromRow
+    return $ User userId email name userHash (S.fromList $ V.toList favorites)
 
 instance FromRow Deck where
   fromRow = do

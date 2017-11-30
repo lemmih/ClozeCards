@@ -6,6 +6,7 @@ import           Crypto.BCrypt
 import           Crypto.Hash.SHA256
 import qualified Data.ByteString            as B
 import           Data.ByteString.Base16
+import qualified Data.Set                   as S
 import qualified Data.Text                  as T
 import qualified Data.Text.Encoding         as T
 import           Data.UUID.V4               as UUID
@@ -23,27 +24,35 @@ createUser conn = do
     { getUserId = userId
     , getUserEmail = Nothing
     , getUserName  = T.empty
-    , getUserHash  = B.empty }
+    , getUserHash  = B.empty
+    , getUserFavorites = S.empty }
 
 fetchUser :: Connection -> UserId -> IO (Maybe User)
-fetchUser conn userId =
-  queryMaybe conn "SELECT id, email, name, hash FROM users WHERE id=?" (Only userId)
+fetchUser conn userId = queryMaybe conn
+  "SELECT id, email, name, hash, \
+  \ ARRAY(SELECT deck_id FROM favorites WHERE user_id = id)\
+  \ FROM users WHERE id=?" (Only userId)
 
 fetchUserByEmail :: Connection -> Email -> IO (Maybe User)
-fetchUserByEmail conn email =
-  queryMaybe conn "SELECT id, email, name, hash FROM users WHERE email=?" (Only email)
+fetchUserByEmail conn email = queryMaybe conn
+  "SELECT id, email, name, hash, \
+  \ ARRAY(SELECT deck_id FROM favorites WHERE user_id = id)\
+  \ FROM users WHERE email=?" (Only email)
 
--- FIXME: Use 'ON CONFLICT'
 createToken :: Connection -> UserId -> IO Token
 createToken conn userId = do
-  execute conn "DELETE FROM tokens WHERE user_id = ?" (Only userId)
   token <- UUID.nextRandom
-  execute conn "INSERT INTO tokens values (?, ?)" (userId, token)
+  execute conn "INSERT INTO tokens values (?, ?)\
+               \ ON CONFLICT (user_id) DO UPDATE\
+               \ SET token = EXCLUDED.token" (userId, token)
   return token
 
 tokenLogin :: Connection -> UserId -> Token -> IO (Maybe User)
 tokenLogin conn userId token = do
-  rows <- query conn "SELECT id, email, name, hash FROM tokens, users WHERE id=user_id AND user_id=? AND token=?" (userId, token)
+  rows <- query conn "SELECT id, email, name, hash,\
+                     \ ARRAY(SELECT deck_id FROM favorites WHERE user_id = id)\
+                     \ FROM tokens, users\
+                     \ WHERE id=user_id AND user_id=? AND token=?" (userId, token)
   case rows of
     [user] -> return $ Just user
     _      -> return Nothing

@@ -5,15 +5,17 @@ module Types where
 import           Data.Aeson
 import           Data.ByteString (ByteString)
 import           Data.Map        (Map)
+import           Data.Set        (Set)
 import           Data.Text       (Text)
 import           Data.Time
 import           Data.UUID
 
 data User = User
-  { getUserId    :: UserId
-  , getUserEmail :: Maybe Email
-  , getUserName  :: Name
-  , getUserHash  :: ByteString
+  { getUserId        :: UserId
+  , getUserEmail     :: Maybe Email
+  , getUserName      :: Name
+  , getUserHash      :: ByteString
+  , getUserFavorites :: Set DeckId
   } deriving (Show)
 
 type UserId = Int
@@ -172,10 +174,11 @@ data ServerMessage
 -- Instances
 
 instance ToJSON User where
-  toJSON (User userId email name _hash) = object
+  toJSON (User userId email name _hash favorites) = object
     [ "id" .= userId
     , "email" .= email
-    , "name" .= name ]
+    , "name" .= name
+    , "favorites" .= favorites ]
 
 instance FromJSON Handshake where
   parseJSON = withObject "Handshake" $ \o -> do
