@@ -1,7 +1,7 @@
 import _ from "lodash";
 import React, { Component } from "react";
 import { Redirect, Link } from "react-router-dom";
-import { Container, Form, Header, Grid, Message } from "semantic-ui-react";
+import { Container, Form, Header, Message } from "semantic-ui-react";
 import { connect } from "react-redux";
 import sha256 from "sha256";
 

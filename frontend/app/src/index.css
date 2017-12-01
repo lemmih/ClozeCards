@@ -146,3 +146,11 @@ a.column:hover {
 .sign-in-up p {
   margin-top: 1em;
 }
+
+.hidden {
+  border: 1px dashed blue;
+}
+.hidden:not(:hover) {
+  color: transparent;
+  border: 1px dashed blue;
+}

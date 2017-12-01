@@ -174,6 +174,7 @@ class DeckBody extends Component {
                     <Toolbar.Inline type="BOLD" icon="bold" />
                     <Toolbar.Inline type="UNDERLINE" icon="underline" />
                     <Toolbar.Inline type="CODE" icon="code" />
+                    <Toolbar.Inline type="HIDDEN" icon="unhide" />
                   </Button.Group>
                   {" - "}
                   <Button.Group
