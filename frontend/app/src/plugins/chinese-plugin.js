@@ -23,7 +23,6 @@ function handleChinese(contentBlock, callback, contentState) {
   }, callback);
 }
 const HandleSpan = props => {
-  console.log("HandleSpan", props);
   return (
     <span className="chinese" data-offset-key={props.offsetKey}>
       {props.children}

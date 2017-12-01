@@ -45,8 +45,8 @@ createDeck :: Connection -> Deck -> IO ()
 createDeck conn Deck{..} =
   -- Upsert decks, will quietly do nothing if row exists with different owner.
   void $ execute conn
-      "INSERT INTO decks(id, owner, type, title, tags, slugs, text_id, hidden)\
-      \          VALUES (?,  ?,     ?,     ?,    ?,    ?,     ?,       ?)\
+      "INSERT INTO decks(id, owner, type, title, tags, slugs, text_id, created_at, hidden)\
+      \          VALUES (?,  ?,     ?,     ?,    ?,    ?,     ?,       ?,          ?)\
       \ ON CONFLICT (id) DO UPDATE\
       \ SET type = EXCLUDED.type,\
       \     tags = EXCLUDED.tags,\
@@ -56,7 +56,7 @@ createDeck conn Deck{..} =
       \     hidden = EXCLUDED.hidden\
       \ WHERE decks.owner = EXCLUDED.owner"
       ( deckId, deckOwner, deckType, deckTitle, V.fromList deckTags
-      , V.fromList deckSlugs, deckContentId, deckHidden)
+      , V.fromList deckSlugs, deckContentId, deckCreatedAt, deckHidden)
 
 mkSlug slugSet txt = trySlugs (slug : [ slug <> "-" <> T.pack (show n) | n <- [1..]])
   where
@@ -74,7 +74,7 @@ mkSlug slugSet txt = trySlugs (slug : [ slug <> "-" <> T.pack (show n) | n <- [1
 
 deckBySlug :: Connection -> Text -> IO (Maybe Deck)
 deckBySlug conn slug = queryMaybe conn
-  "SELECT id, owner, type, title, tags, slugs, nLikes, nComments, text_id, dirty, hidden\
+  "SELECT id, owner, type, title, tags, slugs, nLikes, nComments, text_id, created_at, dirty, hidden\
   \  FROM decks\
   \ WHERE ? = ANY(slugs)" (Only slug)
 
@@ -176,7 +176,7 @@ createResponse conn Response{..} = void $ execute conn
 -- FIXME: FavOnly?
 searchDecks :: Connection -> [Text] -> [Tag] -> DeckOrdering -> Offset -> IO [Deck]
 searchDecks conn keyWords tags ordering offset = query conn
-    ("SELECT id, owner, type, title, tags, slugs, nLikes, nComments, text_id, dirty, hidden\
+    ("SELECT id, owner, type, title, tags, slugs, nLikes, nComments, text_id, created_at, dirty, hidden\
     \  FROM decks\
     \ WHERE title ILIKE ALL(?) AND not hidden"
     <> orderBy <>
@@ -187,7 +187,7 @@ searchDecks conn keyWords tags ordering offset = query conn
     orderBy =
       case ordering of
         ByLikes    -> " ORDER BY nLikes desc"
-        ByDate     -> " ORDER BY published desc"
+        ByDate     -> " ORDER BY created_at desc"
         ByTrending -> " ORDER BY nLikes desc"
 
 setFavorite :: Connection -> UserId ->  DeckId -> IO ()

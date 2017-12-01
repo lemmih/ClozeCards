@@ -1,6 +1,6 @@
 import React, { PureComponent } from "react";
 import { Button } from "semantic-ui-react";
-import { RichUtils, EditorState } from "draft-js";
+import { RichUtils } from "draft-js";
 
 const mkInline = (activeStyles, setEditorState) =>
   class extends PureComponent {

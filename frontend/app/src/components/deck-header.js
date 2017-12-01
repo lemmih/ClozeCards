@@ -12,6 +12,7 @@ import {
   Grid
 } from "semantic-ui-react";
 import { Link } from "react-router-dom";
+import moment from "moment";
 
 import { setVisibility } from "../actions/decks";
 import Favorites from "./favorites";
@@ -189,7 +190,7 @@ class DeckHeader extends Component {
                 {deck.tags.map(tag => <span key={tag}>{tag}</span>)}
               </div>
             )}
-            Published 10 minutes ago by ...
+            {moment(deck.createdAt).calendar()}
           </Item.Meta>
           <Item.Extra>
             <Grid columns={3}>

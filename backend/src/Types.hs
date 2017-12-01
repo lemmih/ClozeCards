@@ -46,6 +46,7 @@ data Deck = Deck
   , deckNLikes     :: Int
   , deckNComments  :: Int
   , deckContentId  :: ContentId
+  , deckCreatedAt  :: UTCTime
   , deckDirty      :: Bool
   , deckProcessing :: Bool
   , deckHidden     :: Bool
@@ -204,6 +205,7 @@ instance FromJSON Deck where
     <*> o.:"nLikes"
     <*> o.:"nComments"
     <*> o.:"contentId"
+    <*> o.:"createdAt"
     <*> o.:"dirty"
     <*> o.:"processing"
     <*> o.:"hidden"
@@ -219,6 +221,7 @@ instance ToJSON Deck where
       , "nLikes"    .= deckNLikes
       , "nComments" .= deckNComments
       , "contentId" .= deckContentId
+      , "createdAt" .= deckCreatedAt
       , "dirty"     .= deckDirty
       , "processing" .= deckProcessing
       , "hidden"    .= deckHidden ]

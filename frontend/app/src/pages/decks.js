@@ -207,7 +207,8 @@ const NewDeck = withRouter(
             nComments: 0,
             dirty: true,
             processing: true,
-            hidden: false
+            hidden: false,
+            createdAt: new Date()
           })
         );
 
