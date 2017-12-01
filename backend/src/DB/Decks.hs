@@ -45,17 +45,18 @@ createDeck :: Connection -> Deck -> IO ()
 createDeck conn Deck{..} =
   -- Upsert decks, will quietly do nothing if row exists with different owner.
   void $ execute conn
-      "INSERT INTO decks(id, owner, type, title, tags, slugs, text_id)\
-      \          VALUES (?,  ?,     ?,     ?,    ?,    ?,     ?)\
+      "INSERT INTO decks(id, owner, type, title, tags, slugs, text_id, hidden)\
+      \          VALUES (?,  ?,     ?,     ?,    ?,    ?,     ?,       ?)\
       \ ON CONFLICT (id) DO UPDATE\
       \ SET type = EXCLUDED.type,\
       \     tags = EXCLUDED.tags,\
       \     title = EXCLUDED.title,\
       \     slugs = EXCLUDED.slugs,\
       \     text_id = EXCLUDED.text_id\
+      \     hidden = EXCLUDED.hidden\
       \ WHERE decks.owner = EXCLUDED.owner"
       ( deckId, deckOwner, deckType, deckTitle, V.fromList deckTags
-      , V.fromList deckSlugs, deckContentId)
+      , V.fromList deckSlugs, deckContentId, deckHidden)
 
 mkSlug slugSet txt = trySlugs (slug : [ slug <> "-" <> T.pack (show n) | n <- [1..]])
   where
@@ -73,7 +74,7 @@ mkSlug slugSet txt = trySlugs (slug : [ slug <> "-" <> T.pack (show n) | n <- [1
 
 deckBySlug :: Connection -> Text -> IO (Maybe Deck)
 deckBySlug conn slug = queryMaybe conn
-  "SELECT id, owner, type, title, tags, slugs, nLikes, nComments, text_id, dirty\
+  "SELECT id, owner, type, title, tags, slugs, nLikes, nComments, text_id, dirty, hidden\
   \  FROM decks\
   \ WHERE ? = ANY(slugs)" (Only slug)
 
@@ -175,9 +176,9 @@ createResponse conn Response{..} = void $ execute conn
 -- FIXME: FavOnly?
 searchDecks :: Connection -> [Text] -> [Tag] -> DeckOrdering -> Offset -> IO [Deck]
 searchDecks conn keyWords tags ordering offset = query conn
-    ("SELECT id, owner, type, title, tags, slugs, nLikes, nComments, text_id, dirty\
+    ("SELECT id, owner, type, title, tags, slugs, nLikes, nComments, text_id, dirty, hidden\
     \  FROM decks\
-    \ WHERE title ILIKE ALL(?)"
+    \ WHERE title ILIKE ALL(?) AND not hidden"
     <> orderBy <>
     " OFFSET ?\
     \ LIMIT 10")
@@ -199,3 +200,8 @@ unsetFavorite :: Connection -> UserId ->  DeckId -> IO ()
 unsetFavorite conn userId deckId = void $ execute conn
   "DELETE FROM favorites WHERE user_id = ? AND deck_id = ?"
   (userId, deckId)
+
+setVisibility :: Connection -> UserId -> DeckId -> Bool -> IO ()
+setVisibility conn userId deckId hidden = void $ execute conn
+  "UPDATE decks SET hidden = ? WHERE owner = ? AND id = ?"
+  (hidden, userId, deckId)

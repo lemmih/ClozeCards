@@ -42,9 +42,7 @@ fetchUserByEmail conn email = queryMaybe conn
 createToken :: Connection -> UserId -> IO Token
 createToken conn userId = do
   token <- UUID.nextRandom
-  execute conn "INSERT INTO tokens values (?, ?)\
-               \ ON CONFLICT (user_id) DO UPDATE\
-               \ SET token = EXCLUDED.token" (userId, token)
+  execute conn "INSERT INTO tokens values (?, ?)" (userId, token)
   return token
 
 tokenLogin :: Connection -> UserId -> Token -> IO (Maybe User)

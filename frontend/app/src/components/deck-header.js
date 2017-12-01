@@ -13,7 +13,10 @@ import {
 } from "semantic-ui-react";
 import { Link } from "react-router-dom";
 
+import { setVisibility } from "../actions/decks";
 import Favorites from "./favorites";
+
+import backend from "../backend";
 
 const opt = val => {
   return { key: val, text: val, value: val };
@@ -67,6 +70,11 @@ class DeckHeader extends Component {
     });
   };
 
+  toggleVisibility = () => {
+    const { deck } = this.props;
+    backend.relay(setVisibility(deck.id, !deck.hidden));
+  };
+
   render = () => {
     const { editable, user, deck } = this.props;
     const { title, tags } = this.props.deck;
@@ -103,16 +111,27 @@ class DeckHeader extends Component {
     );
     const editActive = <a onClick={this.props.onEdit}>{editBase}</a>;
 
-    const removeBase = (
+    const hideBase = (
       <Popup
-        content="Remove deck"
+        content="Hide deck"
+        position="top center"
+        trigger={<Icon style={{ marginLeft: "1em" }} name="hide" size="big" />}
+      />
+    );
+    const unhideBase = (
+      <Popup
+        content="Unhide deck"
         position="top center"
         trigger={
-          <Icon style={{ marginLeft: "1em" }} name="remove" size="big" />
+          <Icon style={{ marginLeft: "1em" }} name="unhide" size="big" />
         }
       />
     );
-    const removeActive = removeBase; // <a>{removeBase}</a>;
+    const visibilityActive = (
+      <a onClick={this.toggleVisibility}>
+        {deck.hidden ? unhideBase : hideBase}
+      </a>
+    );
 
     return (
       <Item className="deck-item">
@@ -182,8 +201,8 @@ class DeckHeader extends Component {
 
                 {mayEdit ? (
                   <Grid.Column textAlign="center">
-                    {editable ? editBase : editActive}
-                    {editable ? removeBase : removeActive}
+                    {editActive}
+                    {visibilityActive}
                   </Grid.Column>
                 ) : (
                   <Grid.Column textAlign="center" />

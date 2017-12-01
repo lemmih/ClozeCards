@@ -48,6 +48,7 @@ data Deck = Deck
   , deckContentId  :: ContentId
   , deckDirty      :: Bool
   , deckProcessing :: Bool
+  , deckHidden     :: Bool
   } deriving (Show)
 
 
@@ -160,6 +161,7 @@ data ClientMessage
   | Logout
   | SetFavorite DeckId
   | UnsetFavorite DeckId
+  | SetVisibility DeckId Bool
     deriving (Show)
 
 data ServerMessage
@@ -203,6 +205,7 @@ instance FromJSON Deck where
     <*> o.:"contentId"
     <*> o.:"dirty"
     <*> o.:"processing"
+    <*> o.:"hidden"
 
 instance ToJSON Deck where
   toJSON Deck{..} = object
@@ -216,7 +219,8 @@ instance ToJSON Deck where
       , "nComments" .= deckNComments
       , "contentId" .= deckContentId
       , "dirty"     .= deckDirty
-      , "processing" .= deckProcessing ]
+      , "processing" .= deckProcessing
+      , "hidden"    .= deckHidden ]
 
 instance FromJSON ContentState where
   parseJSON = withObject "ContentState" $ \o ->
@@ -446,6 +450,11 @@ instance FromJSON ClientMessage where
       "LOGOUT" -> pure Logout
       "SET_FAVORITE" -> SetFavorite <$> o.:"payload"
       "UNSET_FAVORITE" -> UnsetFavorite <$> o.:"payload"
+      "SET_VISIBILITY" -> do
+        payload <- o .: "payload"
+        SetVisibility
+          <$> payload.:"deckId"
+          <*> payload.:"hidden"
       _ -> fail "invalid tag"
 
 toAction :: String -> Value -> Value
@@ -494,7 +503,10 @@ instance ToJSON ClientMessage where
     toAction "SET_FAVORITE" $ toJSON deckId
   toJSON (UnsetFavorite deckId) =
     toAction "UNSET_FAVORITE" $ toJSON deckId
-
+  toJSON (SetVisibility deckId hidden) =
+    toAction "SET_VISIBILITY" $ object
+      [ "deckId" .= deckId
+      , "hidden" .= hidden ]
 
 instance ToJSON ServerMessage where
   toJSON (SetActiveUser user token) =

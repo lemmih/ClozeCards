@@ -30,7 +30,9 @@ instance FromRow User where
 
 instance FromRow Deck where
   fromRow = do
-    (deckId, deckOwner, deckType, deckTitle, tags, slugs, deckNLikes, deckNComments, deckContentId, deckDirty) <- fromRow
+    ((deckId, deckOwner, deckType, deckTitle) :.
+     (tags, slugs, deckNLikes, deckNComments) :.
+     (deckContentId, deckDirty, deckHidden)) <- fromRow
     let deckTags = V.toList tags
         deckSlugs = V.toList slugs
         deckProcessing = False -- FIXME

@@ -85,6 +85,8 @@ handleClient pool conn userId = do
       runDB pool $ \db -> setFavorite db userId deckId
     UnsetFavorite deckId ->
       runDB pool $ \db -> unsetFavorite db userId deckId
+    SetVisibility deckId hidden ->
+      runDB pool $ \db -> setVisibility db userId deckId hidden
   case msg of
     Login email password -> do
       mbUser <- runDB pool $ \db -> passwdLogin db email password
