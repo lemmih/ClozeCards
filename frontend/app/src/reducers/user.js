@@ -5,10 +5,12 @@ import {
   LOGOUT,
   LOGIN_FAILED,
   SET_FAVORITE,
-  UNSET_FAVORITE
+  UNSET_FAVORITE,
+  REGISTER
 } from "../actions/user.js";
 
 const emptyUser = {
+  email: null,
   favorites: Set()
 };
 
@@ -24,6 +26,8 @@ export default function(state = emptyUser, action) {
       return Object.assign({}, state, { status: "logging-in" });
     case LOGIN_FAILED:
       return Object.assign({}, state, { status: "failed" });
+    case REGISTER:
+      return Object.assign({}, state, { status: "logging-in" });
     case LOGOUT:
       return emptyUser;
     case SET_FAVORITE:

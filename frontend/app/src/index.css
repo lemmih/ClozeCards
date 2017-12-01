@@ -139,3 +139,10 @@ a.column:hover {
   cursor: pointer;
   background: lightblue;
 }
+
+.sign-in-up {
+  padding-top: 1em;
+}
+.sign-in-up p {
+  margin-top: 1em;
+}

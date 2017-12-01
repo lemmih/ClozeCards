@@ -4,6 +4,7 @@ export const LOGIN_FAILED = "LOGIN_FAILED";
 export const LOGOUT = "LOGOUT";
 export const SET_FAVORITE = "SET_FAVORITE";
 export const UNSET_FAVORITE = "UNSET_FAVORITE";
+export const REGISTER = "REGISTER";
 
 export function login(email, password) {
   return {
@@ -30,5 +31,11 @@ export function unsetFavorite(deckId) {
   return {
     type: UNSET_FAVORITE,
     payload: deckId
+  };
+}
+export function register(email, password) {
+  return {
+    type: REGISTER,
+    payload: { email, password }
   };
 }

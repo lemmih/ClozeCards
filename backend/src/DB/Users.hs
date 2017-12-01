@@ -25,6 +25,15 @@ createUser conn = do
     , getUserHash  = B.empty
     , getUserFavorites = S.empty }
 
+registerUser :: Connection -> UserId -> Email -> Password -> IO (Maybe User)
+registerUser conn userId email password = do
+  hash <- hashPasswordUsingPolicy fastBcryptHashingPolicy (T.encodeUtf8 password)
+  changed <- execute conn "UPDATE users SET email = ?, hash = ? WHERE id = ? AND NOT EXISTS (SELECT id FROM users WHERE email=?)"
+    (email, hash, userId, email)
+  if changed == 0
+    then return Nothing
+    else fetchUser conn userId
+
 fetchUser :: Connection -> UserId -> IO (Maybe User)
 fetchUser conn userId = queryMaybe conn
   "SELECT id, email, name, hash, \

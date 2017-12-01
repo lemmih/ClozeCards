@@ -81,6 +81,13 @@ handleClient pool conn userId = do
       runDB pool $ \db -> createNote db userId deckId contentId
     Login{} -> return ()
     Logout{} -> return ()
+    Register email password -> do
+      mbUser <- runDB pool $ \db -> registerUser db userId email password
+      case mbUser of
+        Nothing -> sendJSON conn LoginFailed
+        Just user -> do
+          token <- runDB pool $ \db -> createToken db (getUserId user)
+          sendJSON conn $ SetActiveUser user token
     SetFavorite deckId ->
       runDB pool $ \db -> setFavorite db userId deckId
     UnsetFavorite deckId ->

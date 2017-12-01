@@ -159,6 +159,7 @@ data ClientMessage
   | ReceiveNotes UserId DeckId (Maybe ContentId)
   | Login Email Password
   | Logout
+  | Register Email Password
   | SetFavorite DeckId
   | UnsetFavorite DeckId
   | SetVisibility DeckId Bool
@@ -447,6 +448,11 @@ instance FromJSON ClientMessage where
         Login
           <$> payload.:"email"
           <*> payload.:"password"
+      "REGISTER" -> do
+        payload <- o .: "payload"
+        Register
+          <$> payload.:"email"
+          <*> payload.:"password"
       "LOGOUT" -> pure Logout
       "SET_FAVORITE" -> SetFavorite <$> o.:"payload"
       "UNSET_FAVORITE" -> UnsetFavorite <$> o.:"payload"
@@ -495,6 +501,10 @@ instance ToJSON ClientMessage where
       , "contentId" .= contentId ]
   toJSON (Login email password) =
     toAction "LOGIN" $ object
+      [ "email"    .= email
+      , "password" .= password ]
+  toJSON (Register email password) =
+    toAction "REGISTER" $ object
       [ "email"    .= email
       , "password" .= password ]
   toJSON Logout =
