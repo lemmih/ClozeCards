@@ -17,7 +17,7 @@ const favoriteStyle = {
 // deckId
 class Favorites extends PureComponent {
   handleClick = () => {
-    const { user, deckId, dispatch } = this.props;
+    const { user, deckId } = this.props;
     const isFavorite = user.favorites.has(deckId);
     const action = isFavorite ? unsetFavorite(deckId) : setFavorite(deckId);
     backend.relay(action);

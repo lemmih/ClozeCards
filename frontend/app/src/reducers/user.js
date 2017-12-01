@@ -8,7 +8,11 @@ import {
   UNSET_FAVORITE
 } from "../actions/user.js";
 
-export default function(state = {}, action) {
+const emptyUser = {
+  favorites: Set()
+};
+
+export default function(state = emptyUser, action) {
   switch (action.type) {
     case SET_ACTIVE_USER:
       return Object.assign(
@@ -21,7 +25,7 @@ export default function(state = {}, action) {
     case LOGIN_FAILED:
       return Object.assign({}, state, { status: "failed" });
     case LOGOUT:
-      return {};
+      return emptyUser;
     case SET_FAVORITE:
       return { ...state, favorites: state.favorites.add(action.payload) };
     case UNSET_FAVORITE:

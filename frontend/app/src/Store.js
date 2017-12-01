@@ -13,8 +13,7 @@ import rootReducer from "./reducers";
 const defaultState = {
   decks: Map(),
   decksBySlug: Map(),
-  content: Map(),
-  user: JSON.parse(localStorage.getItem("user")) || {}
+  content: Map()
 };
 
 const persist = store => next => action => {
