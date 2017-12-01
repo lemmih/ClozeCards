@@ -52,7 +52,7 @@ createDeck conn Deck{..} =
       \     tags = EXCLUDED.tags,\
       \     title = EXCLUDED.title,\
       \     slugs = EXCLUDED.slugs,\
-      \     text_id = EXCLUDED.text_id\
+      \     text_id = EXCLUDED.text_id,\
       \     hidden = EXCLUDED.hidden\
       \ WHERE decks.owner = EXCLUDED.owner"
       ( deckId, deckOwner, deckType, deckTitle, V.fromList deckTags
@@ -69,7 +69,7 @@ mkSlug slugSet txt = trySlugs (slug : [ slug <> "-" <> T.pack (show n) | n <- [1
     slugify = T.map replace . T.filter (not . banned) . T.strip . T.toLower
     replace c | isSpace c = '-'
     replace c = c
-    banned '_' = False
+    banned '-' = False
     banned c   = isPunctuation c
 
 deckBySlug :: Connection -> Text -> IO (Maybe Deck)
@@ -103,7 +103,7 @@ fetchContent conn contentId = fromOnly <$> querySingle conn
 
 fetchDirtyDecks :: Connection -> IO [Deck]
 fetchDirtyDecks conn =
-  query conn "SELECT id, owner, type, title, tags, slugs, nLikes, nComments, text_id, dirty\
+  query conn "SELECT id, owner, type, title, tags, slugs, nLikes, nComments, text_id, dirty, hidden\
              \  FROM decks\
              \ WHERE dirty = true" ()
 

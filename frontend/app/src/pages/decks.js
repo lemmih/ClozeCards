@@ -190,13 +190,13 @@ const NewDeck = withRouter(
   connect(toNewDeckProps)(
     class NewDeck extends Component {
       state = {};
-      onSave = () => {
+      onSave = content => {
         const { deck } = this.state;
         const slug = mkSlug(deck.title);
         const contentId = uuid();
         const deckId = uuid();
 
-        backend.relay(receiveContent(contentId, this.bodyRef.deckEditorRaw()));
+        backend.relay(receiveContent(contentId, content));
         backend.relay(
           receiveDeck({
             ...deck,
@@ -206,7 +206,8 @@ const NewDeck = withRouter(
             nLikes: 0,
             nComments: 0,
             dirty: true,
-            processing: true
+            processing: true,
+            hidden: false
           })
         );
 
