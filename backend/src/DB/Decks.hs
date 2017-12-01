@@ -103,7 +103,7 @@ fetchContent conn contentId = fromOnly <$> querySingle conn
 
 fetchDirtyDecks :: Connection -> IO [Deck]
 fetchDirtyDecks conn =
-  query conn "SELECT id, owner, type, title, tags, slugs, nLikes, nComments, text_id, dirty, hidden\
+  query conn "SELECT id, owner, type, title, tags, slugs, nLikes, nComments, text_id, created_at, dirty, hidden\
              \  FROM decks\
              \ WHERE dirty = true" ()
 

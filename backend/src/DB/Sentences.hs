@@ -23,3 +23,7 @@ setSentenceWords conn sid ws = do
 fetchSentences :: Connection -> IO [(SentenceId, Text)]
 fetchSentences conn =
   query conn "SELECT id, simplified FROM sentences" ()
+
+fetchSentencePairs :: Connection -> IO [(Text, Text)]
+fetchSentencePairs conn =
+  query conn "SELECT simplified, english[1] FROM sentences" ()

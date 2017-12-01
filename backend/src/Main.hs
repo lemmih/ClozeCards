@@ -27,6 +27,7 @@ import           Data.Chinese.Segmentation
 import           CLI.Audio
 import           CLI.Tatoeba
 import           CLI.Users
+import           CLI.TenThousand
 import           Client
 import qualified Daemons
 import           DB
@@ -79,6 +80,7 @@ main = do
       ["tatoeba", sentences, links] -> runDB pool $ \conn -> tatoeba conn sentences links
       ["audio", dest] -> runDB pool $ \conn -> fetchAudio conn dest
       ["users", userFile] -> runDB pool $ \conn -> importUsers conn userFile
+      ["tenthousand"] -> runDB pool $ \conn -> tenThousand conn
       _ -> putStrLn "Usag: prog tatoeba sentences links"
   where
     jsonBody :: Aeson.FromJSON a => ServerPart a
