@@ -39,7 +39,7 @@ instance Interesting ClientMessage where
   isInteresting _ = False
 
 instance Interesting ServerMessage where
-  isInteresting SetActiveUser{} = True
+  -- isInteresting SetActiveUser{} = True
   isInteresting _ = False
 
 instance Interesting Handshake where

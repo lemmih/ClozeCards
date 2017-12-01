@@ -3,9 +3,7 @@
 module DB.Users where
 
 import           Crypto.BCrypt
-import           Crypto.Hash.SHA256
 import qualified Data.ByteString            as B
-import           Data.ByteString.Base16
 import qualified Data.Set                   as S
 import qualified Data.Text                  as T
 import qualified Data.Text.Encoding         as T
@@ -59,7 +57,7 @@ passwdLogin :: Connection -> Email -> Password -> IO (Maybe User)
 passwdLogin conn email passwd = do
   mbUser <- fetchUserByEmail conn email
   case mbUser of
-    Just user | validatePassword (getUserHash user) (encode $ hash $ T.encodeUtf8 passwd) ->
+    Just user | validatePassword (getUserHash user) (T.encodeUtf8 passwd) ->
       pure (Just user)
     _ -> pure Nothing
 -- tokens
