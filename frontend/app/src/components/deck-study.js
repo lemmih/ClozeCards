@@ -124,7 +124,7 @@ export default connect(toStudyProps)(
         sentenceId: card.sentenceId,
         completed: isCorrect,
         value: value,
-        shownAnswer: this.state.showEnglish,
+        shownAnswer: this.state.showPinyin,
         factor: 3
       };
       backend.relay(receiveResponse(response));
