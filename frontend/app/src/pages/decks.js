@@ -14,8 +14,6 @@ import { receiveNotes } from "../actions/notes";
 import { receiveDeck, fetchDeck } from "../actions/decks";
 import { receiveContent, fetchContent } from "../actions/content";
 
-import mkSlug from "../misc/slugs";
-
 import backend from "../backend";
 import { getUser } from "../common";
 
@@ -66,7 +64,7 @@ export const ViewDeck = connect(toViewDeckProps)(
       switch (this.state.editing) {
         case "deck": {
           const deck = this.state.deck || this.props.deck;
-          const slug = mkSlug(deck.title);
+          const slug = deck.title;
           const slugs = _.uniq([slug].concat(deck.slugs));
           const contentId = uuid();
 
@@ -192,7 +190,7 @@ const NewDeck = withRouter(
       state = {};
       onSave = content => {
         const { deck } = this.state;
-        const slug = mkSlug(deck.title);
+        const slug = deck.title;
         const contentId = uuid();
         const deckId = uuid();
 
