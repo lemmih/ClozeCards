@@ -51,7 +51,7 @@ function onmessage(event) {
 }
 
 function connect() {
-  const isHTTPs = window.location.protocol === "https";
+  const isHTTPs = window.location.protocol === "https:";
   const isReactSnap = navigator.userAgent === "ReactSnap";
   const isProduction =
     process && process.env && process.env.NODE_ENV === "production";
