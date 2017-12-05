@@ -1,0 +1,20 @@
+version: '3'
+services:
+  psql:
+    image: postgres:9.6
+    volumes:
+      - "dbdata:/var/lib/postgresql/data"
+  backend:
+    image: lemmih/clozecards_backend
+    links:
+      - psql
+  frontend:
+    image: lemmih/clozecards_frontend
+    ports:
+      - "8080:80"
+    links:
+      - backend:backend
+    volumes:
+      - "./web-root:/app/"
+volumes:
+  dbdata:  
