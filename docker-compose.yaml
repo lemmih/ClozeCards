@@ -11,10 +11,11 @@ services:
   frontend:
     image: lemmih/clozecards_frontend
     ports:
-      - "8080:80"
+      - "80:80"
     links:
       - backend:backend
     volumes:
       - "./web-root:/app/"
+      - "/etc/letsencrypt/live/:/ssl/"
 volumes:
   dbdata:  
