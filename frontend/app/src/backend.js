@@ -51,7 +51,10 @@ function onmessage(event) {
 }
 
 function connect() {
-  if (process && process.env && process.env.NODE_ENV === "production")
+  const isReactSnap = navigator.userAgent === "ReactSnap";
+  const isProduction =
+    process && process.env && process.env.NODE_ENV === "production";
+  if (isProduction && isReactSnap)
     ws = new WebSocket("ws://beta.clozecards.com/api/ws");
   else ws = new WebSocket("ws://" + window.location.host + "/api/ws");
   ws.onopen = onopen;
@@ -59,7 +62,6 @@ function connect() {
   ws.onerror = onerror;
   ws.onmessage = onmessage;
 
-  const isReactSnap = navigator.userAgent === "ReactSnap";
   if (!isReactSnap) {
     const preloadedState = window.__PRELOADED_STATE__;
     _.forEach(preloadedState, action => {

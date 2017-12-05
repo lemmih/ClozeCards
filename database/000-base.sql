@@ -45,7 +45,7 @@ create table decks
   , nComments integer not null check (nComments >= 0) default(0)
   , slugs text[] not null check (array_length(slugs,1) IS NOT NULL)
   , text_id uuid references texts(id) not null
-  , createdAt timestamptz not null default(now())
+  , created_at timestamptz not null default(now())
   , dirty boolean not null default(true)
   , processing boolean not null default(false)
   , hidden boolean not null default(false)
