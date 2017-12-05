@@ -51,12 +51,14 @@ function onmessage(event) {
 }
 
 function connect() {
+  const isHTTPs = window.location.protocol === "https";
   const isReactSnap = navigator.userAgent === "ReactSnap";
   const isProduction =
     process && process.env && process.env.NODE_ENV === "production";
+  const protocol = isHTTPs ? "wss" : "ws";
   if (isProduction && isReactSnap)
-    ws = new WebSocket("ws://beta.clozecards.com/api/ws");
-  else ws = new WebSocket("ws://" + window.location.host + "/api/ws");
+    ws = new WebSocket("wss://beta.clozecards.com/api/ws");
+  else ws = new WebSocket(protocol + "://" + window.location.host + "/api/ws");
   ws.onopen = onopen;
   ws.onclose = onclose;
   ws.onerror = onerror;
