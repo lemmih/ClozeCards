@@ -20,8 +20,11 @@ export default class Footer extends PureComponent {
             <Grid.Column>
               <h4>Thanks</h4>
               <p>
-                ClozeCards chould not be here without the great work done by
-                MDBG, Tatoeba, Project SHTOOKA and JustLearnChinese.
+                ClozeCards chould not be here without the great work done by{" "}
+                <a href="https://www.mdbg.net/chinese/dictionary">MDBG</a>,{" "}
+                <a href="https://tatoeba.org/eng/">Tatoeba</a>,{" "}
+                <a href="http://shtooka.net/">Project SHTOOKA</a> and{" "}
+                <a href="http://justlearnchinese.com/">JustLearnChinese</a>.
               </p>
             </Grid.Column>
             <Grid.Column>
@@ -51,12 +54,12 @@ export default class Footer extends PureComponent {
                     </a>
                   </List.Content>
                 </List.Item>
-                <List.Item>
+                {/*<List.Item>
                   <List.Icon name="info circle" />
                   <List.Content>
                     <a href="https://clozecards.com/news">Site news</a>
                   </List.Content>
-                </List.Item>
+                </List.Item>*/}
               </List>
             </Grid.Column>
           </Grid.Row>
