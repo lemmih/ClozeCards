@@ -84,84 +84,104 @@ function blockSize(block) {
   }
 }
 
-class Block extends PureComponent {
-  showDict = () => {
-    console.log("Enter");
-  };
-  hideDict = () => {
-    console.log("Leave");
-  };
-  render() {
-    const {
-      block,
-      active,
-      showPinyin,
-      showPlaceholder,
-      mode,
-      type,
-      completed
-    } = this.props;
-    const soundType = type === "sound";
-    const rocketMode = mode === "rocket";
-    const inputStyle = {
-      border: "0px",
-      borderBottom: "1px solid black",
-      width: blockSize(block) + "em"
+const Block = connect()(
+  class Block extends PureComponent {
+    dictEntry = () => {
+      const { simplified, pinyin, english, definitions } = this.props.block;
+      return {
+        simplified: simplified,
+        pinyin: pinyin,
+        english: english,
+        definitions: definitions
+      };
     };
-    const blockStyle = {
-      float: "left"
+    showDict = () => {
+      this.props.dispatch(showDictionary(this.dictEntry()));
     };
-    if (_.isString(block)) {
+    pinDict = () => {
+      this.props.dispatch(pinDictionary(this.dictEntry()));
+    };
+    hideDict = () => {
+      this.props.dispatch(hideDictionary());
+    };
+    render() {
+      const {
+        block,
+        active,
+        showPinyin,
+        showPlaceholder,
+        mode,
+        type,
+        completed
+      } = this.props;
+      const soundType = type === "sound";
+      const rocketMode = mode === "rocket";
+      const inputStyle = {
+        border: "0px",
+        borderBottom: "1px solid black",
+        width: blockSize(block) + "em"
+      };
+      const blockStyle = {
+        float: "left"
+      };
+      if (_.isString(block)) {
+        return (
+          <div style={blockStyle}>
+            <div>&nbsp;</div>
+            <div>{block}</div>
+          </div>
+        );
+      }
+
+      const txt = block.simplified;
+      const renderPinyin = block.pinyin;
+      const blanks = Array(block.simplified.length)
+        .fill("_")
+        .join(" ");
+
+      if (active)
+        return (
+          <div style={blockStyle}>
+            {showPinyin ? <div>{renderPinyin}</div> : <div>&nbsp;</div>}
+            <div>
+              <PinyinInput
+                onEnter={this.props.onAnswer}
+                onShiftEnter={this.props.onShiftEnter}
+                onSpace={this.props.onSpace}
+                onEscape={this.props.onEscape}
+                style={inputStyle}
+                placeholder={showPlaceholder ? txt : blanks}
+              />
+            </div>
+          </div>
+        );
+
       return (
         <div style={blockStyle}>
+          {showPinyin || (block.isGap && completed) ? (
+            <div>{renderPinyin}</div>
+          ) : (
+            <div>&nbsp;</div>
+          )}
+          {!soundType || completed || (rocketMode && !block.isGap) ? (
+            <div
+              onClick={this.pinDict}
+              onMouseEnter={this.showDict}
+              onMouseLeave={this.hideDict}
+            >
+              {block.simplified}
+            </div>
+          ) : (
+            <div style={{ width: block.simplified.length + "em" }}>
+              {blanks}
+            </div>
+          )}
+
           <div>&nbsp;</div>
-          <div>{block}</div>
         </div>
       );
     }
-
-    const txt = block.simplified;
-    const renderPinyin = block.pinyin;
-    const blanks = Array(block.simplified.length)
-      .fill("_")
-      .join(" ");
-
-    if (active)
-      return (
-        <div style={blockStyle}>
-          {showPinyin ? <div>{renderPinyin}</div> : <div>&nbsp;</div>}
-          <div>
-            <PinyinInput
-              onEnter={this.props.onAnswer}
-              onShiftEnter={this.props.onShiftEnter}
-              onSpace={this.props.onSpace}
-              onEscape={this.props.onEscape}
-              style={inputStyle}
-              placeholder={showPlaceholder ? txt : blanks}
-            />
-          </div>
-        </div>
-      );
-
-    return (
-      <div style={blockStyle}>
-        {showPinyin || (block.isGap && completed) ? (
-          <div>{renderPinyin}</div>
-        ) : (
-          <div>&nbsp;</div>
-        )}
-        {!soundType || completed || (rocketMode && !block.isGap) ? (
-          <div onMouseEnter={this.showDict} onMouseLeave={this.hideDict}>
-            {block.simplified}
-          </div>
-        ) : (
-          <div style={{ width: block.simplified.length + "em" }}>{blanks}</div>
-        )}
-
-        <div>&nbsp;</div>
-      </div>
-    );
   }
-}
+);
 
 export default ClozeSentence;

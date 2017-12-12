@@ -78,7 +78,6 @@ const BrowseDecks = connect(toProps)(
             </Item.Group>
           </Visibility>
           <Loader inline="centered" active={!done} />
-          Footer
         </Container>
       );
     };
