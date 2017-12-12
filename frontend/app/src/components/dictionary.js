@@ -1,29 +1,66 @@
 import React, { PureComponent } from "react";
+import { Icon } from "semantic-ui-react";
+import { connect } from "react-redux";
+import { unpinDictionary } from "../actions/dictionary";
+import "./dictionary.css";
 
-// state contains a
-
-const dictStyle = {
-  position: "fixed",
-  top: 0,
-  left: "50%",
-  marginLeft: "-15em",
-  width: "30em",
-  zIndex: 1001,
-  boxShadow: "1px 1px 5px #0074D9",
-  background: "white",
-  padding: "1ex",
-  display: "none"
-};
 /*
-mandarin::string
-pinyin::string[]
-definitions::string[][]
-sentence_id
-offset
-text_id
+pinned::boolean
+simplified::string
+pinyin :: string
+english :: string
+definitions::[{pinyin: string, english: string[]}]
+origin: {sentence_id, offset} OR entity ID + text id.
 */
-export default class extends PureComponent {
-  render = () => {
-    return <div style={dictStyle}>Dictionary</div>;
-  };
-}
+export default connect(({ dictionary }) => {
+  return { dictionary };
+})(
+  class extends PureComponent {
+    setEnglish = english => () => {
+      console.log("English", english);
+    };
+    unpin = () => {
+      this.props.dispatch(unpinDictionary());
+    };
+    render = () => {
+      if (!this.props.dictionary) return null;
+      const {
+        simplified,
+        pinyin,
+        english,
+        definitions,
+        pinned
+      } = this.props.dictionary;
+      // console.log("dict", this.props.dictionary);
+      return (
+        <div className="dictionary">
+          {pinned && (
+            <div className="close">
+              <Icon
+                onClick={this.unpin}
+                name="remove circle outline"
+                size="large"
+              />
+            </div>
+          )}
+          <div className="pinyin">{pinyin}</div>
+          <div className="chinese">{simplified}</div>
+          {english && <div className="english">{english}</div>}
+          <div className="definitions">
+            <ul>
+              {definitions.map(lst => (
+                <li>
+                  {lst.english.map(elt => (
+                    <span key={elt}>
+                      <span onClick={this.setEnglish(elt)}>{elt}</span>
+                    </span>
+                  ))}
+                </li>
+              ))}
+            </ul>
+          </div>
+        </div>
+      );
+    };
+  }
+);

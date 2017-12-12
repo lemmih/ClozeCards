@@ -1,0 +1,47 @@
+.dictionary {
+  position: fixed;
+  top: 0;
+  left: 50%;
+  margin-left: -15em;
+  width: 30em;
+  z-index: 1001;
+  box-shadow: 1px 1px 5px #0074d9;
+  background: white;
+  padding: 1ex;
+  line-height: initial;
+}
+.dictionary .close {
+  /*float: right;*/
+  position: absolute;
+  /*top: 0.5em;*/
+  right: 0.5em;
+  cursor: pointer;
+  color: #aaa;
+  font-size: large;
+}
+.dictionary .pinyin {
+  text-align: center;
+}
+.dictionary .english {
+  text-align: center;
+}
+.dictionary .chinese {
+  font-size: 350%;
+  text-align: center;
+}
+.dictionary .english:not(:hover) + .definitions:not(:hover) {
+  display: none;
+}
+.dictionary .definitions ul {
+  margin: 0px;
+}
+.dictionary .definitions span span {
+  cursor: pointer;
+}
+.dictionary .definitions span span:hover {
+  border-radius: 5px;
+  background: lightgreen;
+}
+.dictionary .definitions span + span::before {
+  content: " / ";
+}
