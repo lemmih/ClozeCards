@@ -229,4 +229,63 @@ create view schedule_by_deck AS (
 --   GROUP BY s.index, s.word, s.id, s.simplified, s.english
 --   ORDER BY s.index
 
+create table sentence_meanings
+  ( user_id int references users(id)
+  , sentence_id int references sentences(id) NOT NULL
+  , word_offset int NOT NULL
+  , word text NOT NULL
+  , english text NOT NULL
+  , UNIQUE (user_id, sentence_id, word_offset, word)
+  );
+CREATE UNIQUE INDEX ON sentence_meanings(sentence_id, word_offset, word)
+  WHERE user_id IS NULL;
+-- Sigh, I want a uniqueness constraint where user_id is NULL but that's not
+-- possible. :(
+-- Can't reference ordinary uniqueness indexes in 'ON CONFLICT'.
+
+CREATE FUNCTION upd_default_meaning() RETURNS TRIGGER AS $upd_default_meaning$
+  DECLARE
+    INP RECORD;
+    myrec RECORD;
+    tmp boolean;
+  BEGIN
+    IF (TG_OP = 'DELETE') THEN
+      INP := OLD;
+    ELSIF (TG_OP = 'INSERT') THEN
+      INP := NEW;
+    END IF;
+
+    IF INP.user_id IS NULL THEN
+      RETURN NULL;
+    END IF;
+
+    SELECT english, count(*) as count
+      INTO myrec
+      FROM sentence_meanings
+      WHERE sentence_id = INP.sentence_id AND
+            word_offset = INP.word_offset AND
+            word = INP.word AND
+            user_id IS NOT NULL
+      GROUP BY english
+      ORDER BY count desc
+      LIMIT 1;
+    tmp := FOUND;
+    DELETE FROM sentence_meanings WHERE
+      sentence_id = INP.sentence_id AND
+      word_offset = INP.word_offset AND
+      word = INP.word AND
+      user_id IS NULL;
+    IF tmp THEN
+      INSERT INTO sentence_meanings VALUES
+        (NULL, INP.sentence_id, INP.word_offset, INP.word, myrec.english);
+    END IF;
+
+    RETURN NULL;
+  END;
+$upd_default_meaning$ LANGUAGE plpgsql;
+
+CREATE TRIGGER upd_default_meaning
+  AFTER INSERT OR DELETE on sentence_meanings
+    FOR EACH ROW EXECUTE PROCEDURE upd_default_meaning();
+
 COMMIT;

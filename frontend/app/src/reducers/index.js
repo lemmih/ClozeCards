@@ -6,6 +6,7 @@ import user from "./user";
 import cards from "./cards";
 import search from "./search";
 import notes from "./notes";
+import dictionary from "./dictionary";
 
 export default combineReducers({
   decks,
@@ -14,5 +15,6 @@ export default combineReducers({
   user,
   cards,
   search,
-  notes
+  notes,
+  dictionary
 });

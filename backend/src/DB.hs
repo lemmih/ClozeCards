@@ -1,5 +1,6 @@
 module DB
   ( module DB.Decks
+  , module DB.Dictionary
   , module DB.Misc
   , module DB.Models
   , module DB.Schedule
@@ -9,6 +10,7 @@ module DB
   ) where
 
 import           DB.Decks
+import           DB.Dictionary
 import           DB.Misc
 import           DB.Models
 import           DB.Schedule

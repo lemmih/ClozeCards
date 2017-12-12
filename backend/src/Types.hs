@@ -100,6 +100,8 @@ data CardBlock
     , blockAnswers     :: [Text]
     , blockIsGap       :: Bool
     , blockIsNew       :: Bool
+    , blockOffset      :: Int
+    , blockEnglish     :: Maybe Text
     }
   | EscapedBlock Text
     deriving (Show)
@@ -339,6 +341,8 @@ instance FromJSON CardBlock where
       <*> o.:"answers"
       <*> o.:"isGap"
       <*> o.:"isNew"
+      <*> o.:"offset"
+      <*> o.:"english"
   parseJSON _ = fail "invalid CardBlock"
 
 instance ToJSON CardBlock where
@@ -349,7 +353,9 @@ instance ToJSON CardBlock where
     , "definitions" .= blockDefinitions
     , "answers"     .= blockAnswers
     , "isGap"       .= blockIsGap
-    , "isNew"       .= blockIsNew ]
+    , "isNew"       .= blockIsNew
+    , "offset"      .= blockOffset
+    , "english"     .= blockEnglish ]
 
 instance FromJSON Definition where
   parseJSON = withObject "Definition" $ \o ->

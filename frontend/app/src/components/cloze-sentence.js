@@ -1,8 +1,15 @@
 import _ from "lodash";
 import React, { Component, PureComponent } from "react";
+import { connect } from "react-redux";
 // import {
 //   Popup
 // } from 'semantic-ui-react'
+
+import {
+  showDictionary,
+  hideDictionary,
+  pinDictionary
+} from "../actions/dictionary";
 
 import PinyinInput from "./pinyin-input";
 

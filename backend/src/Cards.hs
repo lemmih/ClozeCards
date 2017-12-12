@@ -54,6 +54,8 @@ tokenToBlock now selectedWord models (KnownWord e) = do
       -- Is gap if the model is missing OR if the reviewAt time is in the past.
       , blockIsGap = isSelected || (not skip && maybe True (<now) mbReviewAt)
       , blockIsNew = not skip && isNothing mbReviewAt
+      , blockOffset = error "offset not set"
+      , blockEnglish = Nothing
       }
   where
     isSelected = selectedWord == entrySimplified e
@@ -89,7 +91,7 @@ fetchCards conn userId deckId Review = do
         nubBy ((==) `on` cardTemplateWord) $
         nubBy ((==) `on` cardTemplateSentenceId) rows
   putStrLn $ "Review: " ++ show (length templates)
-  return $ cardify now templates
+  mapM (annotateCard conn userId) (cardify now templates)
 fetchCards conn userId deckId Study = do
   now <- getCurrentTime
   newStudy <- timeIt "FetchNew" $ fetchStudyCardsNew conn now userId deckId
@@ -100,7 +102,7 @@ fetchCards conn userId deckId Study = do
   putStrLn $ "Study: " ++ show (length newStudy)
   let templates = nubBy ((==) `on` cardTemplateSentenceId) (rows++newStudy)
   -- putStrLn $ "Templates: " ++ show (head templates)
-  return $ cardify now templates
+  mapM (annotateCard conn userId) (cardify now templates)
 
 templatesToBound :: [CardTemplate] -> Maybe Int
 templatesToBound []     = Nothing
