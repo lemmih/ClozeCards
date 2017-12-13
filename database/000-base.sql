@@ -1,5 +1,5 @@
 BEGIN;
--- select _v.register_patch('000-base', NULL, NULL);
+select _v.register_patch('000-base', NULL, NULL);
 
 drop schema public cascade;
 create schema public;
