@@ -14,7 +14,7 @@ class LandingPage extends Component {
           </h2>
         </center>
         <div>
-          Features of this beta version includes:
+          <h4>Features of this beta version includes:</h4>
           <ul>
             <li>
               <b>User created study decks.</b>

@@ -13,8 +13,9 @@ export class Footer extends PureComponent {
             <Grid.Column>
               <h4>About</h4>
               <p>
-                ClozeCards aims at providing the most effective language
-                learning tools to the largest number of people possible.
+                ClozeCards wants to bring top-of-the-line study techniques out
+                to the masses. If you know how we can do better, send us an
+                email.
               </p>
             </Grid.Column>
             <Grid.Column>
