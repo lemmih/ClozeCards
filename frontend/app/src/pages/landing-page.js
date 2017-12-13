@@ -7,11 +7,17 @@ class LandingPage extends Component {
     return (
       <div>
         <center>
-          <h1>Public Beta.</h1>
-          <h2>
-            Many features do not work and any content you add to the site may be
-            lost
-          </h2>
+          <h1>ClozeCards Public Beta</h1>
+          <h3>
+            ClozeCards has been undergoing radical changes since late December,
+            2017. If these changes are interfering with your study habits,
+            please{" "}
+            <a href="mailto:david.himmelstrup@clozecards.com">
+              write us an email
+            </a>{" "}
+            and we'll make it a priority to solve the issues.
+          </h3>
+          <h2>&nbsp;</h2>
         </center>
         <div>
           <h4>Features of this beta version includes:</h4>
