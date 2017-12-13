@@ -3,6 +3,7 @@ import React, { Component } from "react";
 import { connect } from "react-redux";
 import { Container, Item, Visibility, Loader } from "semantic-ui-react";
 
+import { Footer } from "../components/footer";
 import DeckHeader from "../components/deck-header";
 import { fetchSearchResults } from "../actions/search";
 import backend from "../backend";
@@ -64,8 +65,8 @@ const BrowseDecks = connect(toProps)(
       const done =
         rendered >= search.fetched.length && search.status === "completed";
 
-      return (
-        <Container style={{ paddingTop: "2em" }}>
+      return [
+        <Container key="container" style={{ paddingTop: "2em" }}>
           <Visibility
             once={false}
             fireOnMount={true}
@@ -78,8 +79,9 @@ const BrowseDecks = connect(toProps)(
             </Item.Group>
           </Visibility>
           <Loader inline="centered" active={!done} />
-        </Container>
-      );
+        </Container>,
+        done && <Footer key="footer" />
+      ];
     };
   }
 );

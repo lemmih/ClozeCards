@@ -9,7 +9,6 @@ import { ViewDeck, NewDeck } from "../pages/decks";
 import BrowseDecks from "../pages/browse-decks";
 import { SignIn, SignUp } from "../pages/sign-in-up";
 import Dictionary from "./dictionary";
-import Footer from "../components/footer";
 
 import { logout } from "../actions/user";
 
@@ -112,7 +111,6 @@ class Layout extends Component {
             <Route path="/sign-in" exact={true} render={() => <SignIn />} />
             <Route path="/sign-up" exact={true} render={() => <SignUp />} />
           </Switch>
-          <Footer />
           <Dictionary />
         </div>
       </Router>

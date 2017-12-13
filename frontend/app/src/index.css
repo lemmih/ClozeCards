@@ -154,3 +154,9 @@ a.column:hover {
   color: transparent;
   border: 1px dashed blue;
 }
+
+.decks-end {
+  padding-top: 2em;
+  padding-bottom: 2em;
+  text-align: center;
+}

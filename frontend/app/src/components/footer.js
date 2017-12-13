@@ -4,7 +4,7 @@ import { Grid, List } from "semantic-ui-react";
 
 import "./footer.css";
 
-export default class Footer extends PureComponent {
+export class Footer extends PureComponent {
   render = () => {
     return (
       <div className="footer">
@@ -66,5 +66,11 @@ export default class Footer extends PureComponent {
         </Grid>
       </div>
     );
+  };
+}
+
+export class EmptyFooter extends PureComponent {
+  render = () => {
+    return <div className="empty-footer" />;
   };
 }
