@@ -9,6 +9,7 @@ import qualified Data.Text                  as T
 import qualified Data.Text.Encoding         as T
 import           Data.UUID.V4               as UUID
 import           Database.PostgreSQL.Simple
+import Control.Monad
 
 import           DB.Instances               ()
 import           DB.Misc
@@ -70,3 +71,11 @@ passwdLogin conn email passwd = do
       pure (Just user)
     _ -> pure Nothing
 -- tokens
+
+fetchDirtyUser :: Connection -> IO (Maybe UserId)
+fetchDirtyUser conn = do
+  mbRet <- queryMaybe conn "SELECT id FROM users WHERE dirty LIMIT 1" ()
+  return $ fmap fromOnly mbRet
+
+markUserClean :: Connection -> UserId -> IO ()
+markUserClean conn userId = void $ execute conn "UPDATE users SET dirty=false WHERE id = ?" (Only userId)

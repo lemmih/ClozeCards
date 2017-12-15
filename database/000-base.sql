@@ -19,6 +19,7 @@ create table users
   , newsletter boolean not null default(true)
   , verified boolean not null default(false)
   , lastWeeklyReport timestamptz
+  , dirty boolean not null default(false)
   , unique (email)
   );
 
@@ -182,7 +183,7 @@ CREATE INDEX ON models (user_id, review_at);
 create table responses
   ( user_id int references users(id) not null
   , word text not null
-  , sentence_id int references sentences(id) not null
+  , sentence_id int references sentences(id)
   , created_at timestamptz not null default(now())
   , completed boolean not null
   , value text not null

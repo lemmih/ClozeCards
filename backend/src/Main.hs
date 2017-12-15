@@ -65,6 +65,9 @@ main = do
         Worker.forkIO group $ forever $ do
           runDBUnsafe pool $ Daemons.updSchedule
           threadDelay (oneSecond * 1)
+        Worker.forkIO group $ forever $ do
+          runDBUnsafe pool $ Daemons.updDirtyUsers
+          threadDelay (oneSecond * 10)
         simpleHTTP nullConf (dir "api" $ msum
           [dir "status" $ do
             method GET
@@ -80,6 +83,7 @@ main = do
       ["tatoeba", sentences, links] -> runDB pool $ \conn -> tatoeba conn sentences links
       ["audio", dest] -> runDB pool $ \conn -> fetchAudio conn dest
       ["users", userFile] -> runDB pool $ \conn -> importUsers conn userFile
+      ["responses", userFile, responsesFile] -> runDB pool $ \conn -> importResponses conn userFile responsesFile
       ["tenthousand"] -> runDB pool $ \conn -> tenThousand conn
       _ -> putStrLn "Usag: prog tatoeba sentences links"
   where

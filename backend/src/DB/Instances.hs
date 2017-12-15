@@ -56,3 +56,15 @@ instance FromRow (Maybe Model) where
     return $ do
       (modelUserId, modelWord, modelStability, modelReviewAt, modelCreatedAt) <- mbRow
       pure Model{..}
+
+instance FromRow Response where
+  fromRow = do
+    ( responseUserId,
+      responseWord,
+      responseSentenceId,
+      responseCreatedAt,
+      responseCompleted,
+      responseValue,
+      responseShownAnswer,
+      responseFactor) <- fromRow
+    return Response{..}

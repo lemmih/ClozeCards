@@ -17,6 +17,7 @@ import           Data.Version
 import           Database.PostgreSQL.Simple (withTransaction)
 
 import           DB
+import           Logic
 import           Helpers
 import           Types
 
@@ -39,6 +40,50 @@ updSchedule conn = do
     (ms, (new, del)) <- timed $ updScheduleAndClearDirty conn now
     when (new > 0 || del > 0) $
       infoLog $ "Schedule: Finished in " ++ show ms ++ " ms, " ++ show new ++ " new, " ++ show del ++ " deleted."
+
+updDirtyUsers conn = do
+  mbDirtyUser <- withTransaction conn $ fetchDirtyUser conn
+  case mbDirtyUser of
+    Nothing -> return ()
+    Just dirtyUser -> withTransaction conn $
+      timeIt "Recalculating models & schedule" $ do
+        markUserClean conn dirtyUser
+        mbLastModel <- foldResponses conn dirtyUser Nothing (worker dirtyUser)
+        case mbLastModel of
+          Nothing -> return ()
+          Just lastModel ->
+            createModel conn lastModel
+        markUserSchedule conn dirtyUser
+  where
+    worker userId Nothing response = do
+      let newStability | responseShownAnswer response = minStability
+                       | otherwise                    = knownWordStability
+          newReviewAt  = updateReviewAt response newStability
+          newModel = Model
+            { modelUserId    = userId
+            , modelWord      = responseWord response
+            , modelStability = round newStability
+            , modelCreatedAt = responseCreatedAt response
+            , modelReviewAt  = newReviewAt
+            }
+      return $ Just newModel
+    worker userId (Just model) response
+      | modelWord model /= responseWord response = do
+        createModel conn model
+        let newStability | responseShownAnswer response = minStability
+                         | otherwise                    = knownWordStability
+            newReviewAt  = updateReviewAt response newStability
+            newModel = Model
+              { modelUserId    = userId
+              , modelWord      = responseWord response
+              , modelStability = round newStability
+              , modelCreatedAt = responseCreatedAt response
+              , modelReviewAt  = newReviewAt
+              }
+        return $ Just newModel
+      | otherwise =
+        return $ Just $ updateModel response model
+
 
 -- Deck sentences
 -- When decks are dirty, get the chinese text, find stencils, set HSK level and difficulty level.

@@ -60,3 +60,12 @@ markSeenSentencesDirty conn userId word = void $ execute conn
   \ ON CONFLICT (sentence_id, user_id) DO UPDATE\
   \    SET created_at = EXCLUDED.created_at"
   (userId, word)
+
+-- very expensive, only used when recalculating everything.
+markUserSchedule :: Connection -> UserId -> IO ()
+markUserSchedule conn userId = void $ execute conn
+  "INSERT INTO dirty_sentences (\
+  \  SELECT id, ? FROM sentences)\
+  \ ON CONFLICT (sentence_id, user_id) DO UPDATE\
+  \    SET created_at = EXCLUDED.created_at"
+  (Only userId)

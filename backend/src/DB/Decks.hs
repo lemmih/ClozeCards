@@ -166,13 +166,6 @@ fetchStudyCardsNew conn now userId deckId = query conn
   -- \  LIMIT 10"
   -- ( userId, deckId )
 
--- FIXME: This doesn't belong here
-createResponse :: Connection -> Response -> IO ()
-createResponse conn Response{..} = void $ execute conn
-  "INSERT INTO responses VALUES (?, ?, ?, ?, ?, ?, ?, ?)"
-    ( responseUserId, responseWord, responseSentenceId, responseCreatedAt
-    , responseCompleted, responseValue, responseShownAnswer, responseFactor )
-
 -- FIXME: FavOnly?
 searchDecks :: Connection -> [Text] -> [Tag] -> DeckOrdering -> Offset -> IO [Deck]
 searchDecks conn keyWords tags ordering offset = query conn

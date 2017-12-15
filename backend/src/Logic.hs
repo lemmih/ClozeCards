@@ -1,17 +1,17 @@
 {-# LANGUAGE RecordWildCards #-}
-module Logic (addResponse) where
+module Logic (addResponse, updateModel, updateReviewAt, knownWordStability, minStability) where
 
 import           Control.Concurrent
 import           Control.Monad
 import           Data.Maybe
 import           Data.Pool
+import qualified Data.Text                  as T
 import           Data.Time
-import qualified Data.Text as T
 import           Database.PostgreSQL.Simple (Connection)
 
 import           DB
-import           Types
 import           Helpers
+import           Types
 
 ------------------------------------------------------------------------------
 -- Parameters
@@ -63,7 +63,7 @@ addResponse pool userId response_ = do
   now <- getCurrentTime
   let response = response_{responseUserId = userId, responseCreatedAt = now}
       word = responseWord response
-      sentenceId = responseSentenceId response
+      mbSentenceId = responseSentenceId response
   newModel <- runDB pool $ \db -> do
     createResponse db response
     mbModel <- fetchModel db userId word
@@ -89,14 +89,17 @@ addResponse pool userId response_ = do
               reviewIn = diffUTCTime (modelReviewAt newModel) now
           noticeLog $ T.unpack word ++ " UPD " ++ " " ++ show (modelStability model) ++ " -> " ++ show (modelStability newModel) ++ " in " ++ show reviewIn
           createModel db newModel
-    when (responseCompleted response) $ do
-      models <- fetchSentenceModels db userId sentenceId
-      let mbReviewAts = sequence [ fmap modelReviewAt mbModel | (_,mbModel) <- models]
-      case mbReviewAts of
-        Nothing -> return ()
-        Just [] -> return ()
-        Just reviewAt -> do
-          setSchedule db userId sentenceId now (minimum reviewAt)
+    case mbSentenceId of
+      Nothing -> return ()
+      Just sentenceId ->
+        when (responseCompleted response) $ do
+          models <- fetchSentenceModels db userId sentenceId
+          let mbReviewAts = sequence [ fmap modelReviewAt mbModel | (_,mbModel) <- models]
+          case mbReviewAts of
+            Nothing -> return ()
+            Just [] -> return ()
+            Just reviewAt -> do
+              setSchedule db userId sentenceId now (minimum reviewAt)
     return $ isNothing mbModel
   when (responseCompleted response) $
     -- Marking sentences dirty happens in the background such that

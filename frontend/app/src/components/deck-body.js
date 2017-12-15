@@ -296,7 +296,9 @@ const Notes = connect(toNotesProps)(
         const { dispatch, userId, deckId } = this.props;
         const contentId = uuid();
         const emptyContent = convertToRaw(
-          ContentState.createFromText("Notes go here")
+          ContentState.createFromText(
+            "Click on the pencil to edit these notes."
+          )
         );
         dispatch(receiveContent(contentId, emptyContent));
         dispatch(receiveNotes(userId, deckId, contentId));

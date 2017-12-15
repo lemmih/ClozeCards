@@ -123,7 +123,7 @@ data CardTemplate = CardTemplate
 data Response = Response
   { responseUserId      :: UserId
   , responseWord        :: Text
-  , responseSentenceId  :: SentenceId
+  , responseSentenceId  :: Maybe SentenceId
   , responseCreatedAt   :: UTCTime
   , responseCompleted   :: Bool
   , responseValue       :: Text
