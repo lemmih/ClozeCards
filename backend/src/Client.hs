@@ -71,7 +71,7 @@ handleClient pool conn userId = do
       runDB pool $ \db -> do
         results <- searchDecks db [] [] ordering offset
         forM_ results $ \result -> sendJSON conn $ ReceiveDeck result
-        sendJSON conn $ ReceiveSearchResults (map deckId results)
+        sendJSON conn $ ReceiveSearchResults offset (map deckId results)
     FetchNotes userId deckId ->
       runDB pool $ \db -> do
         mbContent <- fetchNote db userId deckId

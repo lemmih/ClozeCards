@@ -171,7 +171,7 @@ data ClientMessage
 data ServerMessage
   = SetActiveUser User Token
   | UnusedSlug Slug
-  | ReceiveSearchResults [DeckId]
+  | ReceiveSearchResults Int [DeckId]
   | ReceiveCards DeckId [Card]
   | LoginFailed
     deriving (Show)
@@ -538,7 +538,9 @@ instance ToJSON ServerMessage where
       , "cards" .= cards ]
   toJSON (UnusedSlug slug) =
     toAction "UNUSED_SLUG" $ toJSON slug
-  toJSON (ReceiveSearchResults results) =
-    toAction "RECEIVE_SEARCH_RESULTS" $ toJSON results
+  toJSON (ReceiveSearchResults offset results) =
+    toAction "RECEIVE_SEARCH_RESULTS" $ object
+      [ "offset" .= offset
+      , "results" .= results ]
   toJSON LoginFailed =
     toAction "LOGIN_FAILED" Null
