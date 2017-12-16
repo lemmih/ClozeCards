@@ -20,7 +20,7 @@ const BrowseDecks = connect(toProps)(
     constructor(props) {
       super(props);
       const isReactSnap = navigator.userAgent === "ReactSnap";
-      this.state = { rendered: isReactSnap ? 100 : 5 };
+      this.state = { rendered: isReactSnap ? 100 : 10 };
     }
     componentDidMount = () => {
       this.lazySearchFetch();
