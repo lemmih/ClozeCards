@@ -33,6 +33,9 @@
   },
   "reactSnap": {
     "waitFor": 5000,
+    "minifyHtml": {
+      "sortClassName": false
+    },
     "puppeteerArgs": [
       "--no-sandbox",
       "--disable-setuid-sandbox"
