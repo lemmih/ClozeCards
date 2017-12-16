@@ -58,8 +58,8 @@ class LandingPage extends Component {
               <b>Study mode.</b>
               <p>
                 Push your limits by practicing new words or words you're just
-                about to forget. New words will are introduced until you reach a
-                20% recall failure rate.
+                about to forget. New words are introduced until you reach a 20%
+                recall failure rate.
               </p>
             </li>
             <li>
