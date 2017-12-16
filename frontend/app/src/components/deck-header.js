@@ -213,7 +213,7 @@ class DeckHeader extends Component {
                   {!editable && (
                     <Favorites nFavorites={deck.nLikes} deckId={deck.id} />
                   )}
-                  {!editable && (
+                  {/*!editable && (
                     <a>
                       <span
                         style={{ position: "relative", paddingLeft: "1em" }}
@@ -224,18 +224,18 @@ class DeckHeader extends Component {
                         </Label>
                       </span>
                     </a>
-                  )}
+                  )*/}
 
                   {editable && (
                     <span style={{ position: "relative", paddingLeft: "1em" }}>
                       <Icon name="empty heart" size="big" />
                     </span>
                   )}
-                  {editable && (
+                  {/*editable && (
                     <span style={{ position: "relative", paddingLeft: "1em" }}>
                       <Icon name="comments" size="big" />
                     </span>
-                  )}
+                  )*/}
                 </Grid.Column>
               </Grid.Row>
             </Grid>
