@@ -8,6 +8,7 @@ import LandingPage from "../pages/landing-page";
 import { ViewDeck, NewDeck } from "../pages/decks";
 import BrowseDecks from "../pages/browse-decks";
 import { SignIn, SignUp } from "../pages/sign-in-up";
+import MarkWords from "../pages/mark";
 import Dictionary from "./dictionary";
 
 import { logout } from "../actions/user";
@@ -64,6 +65,9 @@ class Layout extends Component {
                     <Dropdown.Item as={Link} to={"/new-deck/"}>
                       New Deck
                     </Dropdown.Item>
+                    <Dropdown.Item as={Link} to={"/profile/mark-words"}>
+                      Mark Words
+                    </Dropdown.Item>
                     <Dropdown.Item onClick={this.logout} as={Link} to={"/"}>
                       Logout
                     </Dropdown.Item>
@@ -110,6 +114,11 @@ class Layout extends Component {
             />
             <Route path="/sign-in" exact={true} render={() => <SignIn />} />
             <Route path="/sign-up" exact={true} render={() => <SignUp />} />
+            <Route
+              path="/profile/mark-words"
+              exact={true}
+              render={() => <MarkWords />}
+            />
           </Switch>
           <Dictionary />
         </div>

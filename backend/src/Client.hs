@@ -4,6 +4,9 @@ module Client (handleNewWS) where
 import           Control.Monad
 import qualified Data.Aeson                 as Aeson
 import qualified Data.ByteString.Lazy.Char8 as BL8
+import           Data.Chinese.Segmentation
+import           Data.List
+import qualified Data.Text                  as T
 import           System.Console.ANSI
 import           System.IO
 
@@ -94,6 +97,24 @@ handleClient pool conn userId = do
       runDB pool $ \db -> unsetFavorite db userId deckId
     SetVisibility deckId hidden ->
       runDB pool $ \db -> setVisibility db userId deckId hidden
+    MarkWords ws asKnown -> do
+      known <- runDB pool $ \db -> fetchKnownWords db userId
+      forM_ (nub [ entrySimplified e | KnownWord e <- tokenizer ws]) $ \word ->
+        when (word `notElem` known || not asKnown) $ do
+          let resp = Response
+                { responseUserId      = userId
+                , responseWord        = word
+                , responseSentenceId  = Nothing
+                , responseCreatedAt   = error "CreatedAt not set" -- will be set by 'addResponse'
+                , responseCompleted   = True
+                , responseValue       = word
+                , responseShownAnswer = not asKnown
+                , responseFactor      = 100000000
+                }
+          addResponse pool userId resp
+    FetchKnownWords -> do
+      ws <- runDB pool $ \db -> fetchKnownWords db userId
+      sendJSON conn $ ReceiveKnownWords (T.unwords ws)
   case msg of
     Login email password -> do
       mbUser <- runDB pool $ \db -> passwdLogin db email password

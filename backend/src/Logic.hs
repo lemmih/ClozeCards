@@ -18,6 +18,9 @@ import           Types
 minStability :: NominalDiffTime
 minStability = 30 -- minimumDelay between reviews in seconds
 
+maxStability :: NominalDiffTime
+maxStability = 60*60*24*365*10
+
 -- Failing to recall a word decreases time to next view while also inserting
 -- a recap review after 5 minutes. Passing this recap review does not increase
 -- time to next review. Failing the recap DOES decrease the time to next review.
@@ -42,10 +45,13 @@ updateModel response model = model
     newReviewAt  = updateReviewAt response newStability
 
 updateStability Response{..} Model{..}
+  | responseShownAnswer && extremeFactor     = minStability
+  | not responseShownAnswer && extremeFactor = maxStability
   | not responseShownAnswer && earlyReview = stability + fasttrack
   | responseShownAnswer                    = max minStability (stability / factor)
   | otherwise                              = max stability fasttrack * factor
   where
+    extremeFactor = responseFactor > 10000
     stability = fromIntegral modelStability
     factor = realToFrac responseFactor
     fasttrack = diffUTCTime responseCreatedAt modelCreatedAt

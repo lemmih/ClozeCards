@@ -166,6 +166,8 @@ data ClientMessage
   | SetFavorite DeckId
   | UnsetFavorite DeckId
   | SetVisibility DeckId Bool
+  | MarkWords Text Bool -- True => Mark as known, False => Mark as unknown
+  | FetchKnownWords
     deriving (Show)
 
 data ServerMessage
@@ -173,6 +175,7 @@ data ServerMessage
   | UnusedSlug Slug
   | ReceiveSearchResults Int [DeckId]
   | ReceiveCards DeckId [Card]
+  | ReceiveKnownWords Text
   | LoginFailed
     deriving (Show)
 
@@ -470,6 +473,12 @@ instance FromJSON ClientMessage where
         SetVisibility
           <$> payload.:"deckId"
           <*> payload.:"hidden"
+      "MARK_WORDS" -> do
+        payload <- o .: "payload"
+        MarkWords
+          <$> payload.:"words"
+          <*> payload.:"known"
+      "FETCH_KNOWN_WORDS" -> pure FetchKnownWords
       _ -> fail "invalid tag"
 
 toAction :: String -> Value -> Value
@@ -526,6 +535,12 @@ instance ToJSON ClientMessage where
     toAction "SET_VISIBILITY" $ object
       [ "deckId" .= deckId
       , "hidden" .= hidden ]
+  toJSON (MarkWords words known) =
+    toAction "MARK_WORDS" $ object
+      [ "words"  .= words
+      , "known" .= known ]
+  toJSON FetchKnownWords =
+    toAction "FETCH_KNOWN_WORDS" Null
 
 instance ToJSON ServerMessage where
   toJSON (SetActiveUser user token) =
@@ -542,5 +557,7 @@ instance ToJSON ServerMessage where
     toAction "RECEIVE_SEARCH_RESULTS" $ object
       [ "offset" .= offset
       , "results" .= results ]
+  toJSON (ReceiveKnownWords words) =
+    toAction "RECEIVE_KNOWN_WORDS" (toJSON words)
   toJSON LoginFailed =
     toAction "LOGIN_FAILED" Null

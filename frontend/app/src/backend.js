@@ -6,6 +6,7 @@ import type { Action } from "./actions";
 
 var ws;
 var backlog = [];
+var callbacks = {};
 
 function onopen() {
   // dispatch: CONNECTION_OPEN
@@ -48,6 +49,10 @@ function onmessage(event) {
   const msg = JSON.parse(event.data);
   // console.log('onmessage', msg);
   store.dispatch(msg);
+  if (_.has(callbacks, msg.type) && _.isFunction(callbacks[msg.type])) {
+    callbacks[msg.type](msg.payload);
+    delete callbacks[msg.type];
+  }
 }
 
 function connect() {
@@ -85,9 +90,14 @@ function send(msg: Action) {
   else ws.send(JSON.stringify(msg));
 }
 
+function callback(type, cb) {
+  callbacks[type] = cb;
+}
+
 export default {
   connect,
-  relay
+  relay,
+  callback
 };
 
 // Time series

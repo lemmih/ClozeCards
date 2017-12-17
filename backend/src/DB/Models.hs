@@ -35,3 +35,13 @@ createModel conn Model{..} = void $ execute conn
   \     review_at = EXCLUDED.review_at,\
   \     created_at = EXCLUDED.created_at"
   (modelUserId, modelWord, modelStability, modelReviewAt, modelCreatedAt)
+
+fetchKnownWords :: Connection -> UserId -> IO [Text]
+fetchKnownWords conn userId = map fromOnly <$> query conn
+  "SELECT word FROM models\
+  \ WHERE user_id = ? AND stability > ?\
+  \ ORDER BY created_at asc"
+    (userId, knownStability)
+  where
+    knownStability :: Int
+    knownStability = 60*60*24*365*2 -- 2 years
