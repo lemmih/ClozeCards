@@ -13,6 +13,7 @@ import {
 import { Link } from "react-router-dom";
 
 import { fetchCards, receiveCards, receiveResponse } from "../actions/cards";
+import { setFavorite } from "../actions/user";
 import backend from "../backend";
 
 import ClozeSentence from "./cloze-sentence";
@@ -37,8 +38,11 @@ const exerciseRow = {
   paddingTop: "0"
 };
 
-function toStudyProps(store) {
+function toStudyProps(store, props) {
+  const { deckId } = props;
+  const isFavorite = store.user.favorites.has(deckId);
   return {
+    isFavorite: isFavorite,
     cards: store.cards
   };
 }
@@ -59,10 +63,12 @@ export default connect(toStudyProps)(
     }
 
     componentDidMount = () => {
-      if (_.isNull(this.props.cards)) {
-        backend.relay(fetchCards(this.props.deckId, this.state.style));
+      const { cards, isFavorite, deckId } = this.props;
+      if (_.isNull(cards)) {
+        backend.relay(fetchCards(deckId, this.state.style));
       }
       this.setAudioState();
+      if (!isFavorite) backend.relay(setFavorite(deckId));
     };
     componentDidUpdate = (prevProps, prevState) => {
       if (_.isNull(this.props.cards) || this.state.style !== prevState.style) {

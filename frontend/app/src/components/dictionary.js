@@ -49,7 +49,7 @@ export default connect(({ dictionary }) => {
           <div className="definitions">
             <ul>
               {definitions.map(lst => (
-                <li>
+                <li key={JSON.stringify(lst)}>
                   {lst.english.map(elt => (
                     <span key={elt}>
                       <span onClick={this.setEnglish(elt)}>{elt}</span>
