@@ -43,6 +43,7 @@ function toStudyProps(store, props) {
   const isFavorite = store.user.favorites.has(deckId);
   return {
     isFavorite: isFavorite,
+    isRegistered: !_.isNull(store.user.email),
     cards: store.cards
   };
 }
@@ -63,12 +64,12 @@ export default connect(toStudyProps)(
     }
 
     componentDidMount = () => {
-      const { cards, isFavorite, deckId } = this.props;
+      const { cards, isFavorite, isRegistered, deckId } = this.props;
       if (_.isNull(cards)) {
         backend.relay(fetchCards(deckId, this.state.style));
       }
       this.setAudioState();
-      if (!isFavorite) backend.relay(setFavorite(deckId));
+      if (!isFavorite && isRegistered) backend.relay(setFavorite(deckId));
     };
     componentDidUpdate = (prevProps, prevState) => {
       if (_.isNull(this.props.cards) || this.state.style !== prevState.style) {
