@@ -1,7 +1,6 @@
 import _ from "lodash";
 import React, { PureComponent } from "react";
 import { Container, Button, Form } from "semantic-ui-react";
-import { connect } from "react-redux";
 import backend from "../backend";
 
 import {

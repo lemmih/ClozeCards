@@ -1,7 +1,6 @@
 import React, { Component } from "react";
 
 import { Footer } from "../components/footer";
-
 class LandingPage extends Component {
   render = () => {
     return (
@@ -69,7 +68,7 @@ class LandingPage extends Component {
                   Overlearn
                 </a>{" "}
                 by studying words that you haven't seen in a long time,
-                regarless of whether the learning algorithm believes you've
+                regardless of whether the learning algorithm believes you've
                 about to forget them. This mode is relaxing, builds mastery, and
                 improves your comprehension by showing you known words in
                 completely new sentences.
