@@ -12,7 +12,12 @@ import {
 } from "semantic-ui-react";
 import { Link } from "react-router-dom";
 
-import { fetchCards, receiveCards, receiveResponse } from "../actions/cards";
+import {
+  fetchCards,
+  receiveCards,
+  receiveResponse,
+  clearCards
+} from "../actions/cards";
 import { setFavorite } from "../actions/user";
 import backend from "../backend";
 
@@ -88,6 +93,9 @@ export default connect(toStudyProps)(
         this.setState({ showPinyin: false, showEnglish: false, active: 0 });
       }
       this.setAudioState();
+    };
+    componentWillUnmount = () => {
+      this.props.dispatch(clearCards());
     };
 
     setAudioState = () => {

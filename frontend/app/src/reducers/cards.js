@@ -1,4 +1,4 @@
-import { FETCH_CARDS, RECEIVE_CARDS } from "../actions/cards";
+import { FETCH_CARDS, RECEIVE_CARDS, CLEAR_CARDS } from "../actions/cards";
 
 export default (cards = null, action) => {
   switch (action.type) {
@@ -6,6 +6,8 @@ export default (cards = null, action) => {
       return action.payload.cards;
     case FETCH_CARDS:
       return "fetching";
+    case CLEAR_CARDS:
+      return null;
     default:
       return cards;
   }
