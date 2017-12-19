@@ -79,7 +79,8 @@ export default connect(toStudyProps)(
       const active = this.getActive();
 
       const ready = _.isArray(this.props.cards);
-      const done = ready && this.props.cards[0].chinese.length <= active;
+      const haveCards = ready && this.props.cards.length !== 0;
+      const done = haveCards && this.props.cards[0].chinese.length <= active;
       if (done && this.continueRef) {
         this.continueRef.focus();
       }
@@ -230,8 +231,9 @@ export default connect(toStudyProps)(
       const soundStyle = this.state.type === "sound";
 
       const ready = _.isArray(cards);
-      const done = ready && cards[0].chinese.length <= active;
-      const sid = ready && cards[0].sentenceId;
+      const haveCards = ready && cards.length !== 0;
+      const done = haveCards && cards[0].chinese.length <= active;
+      const sid = haveCards && cards[0].sentenceId;
 
       return (
         <div style={containerStyle}>
@@ -247,22 +249,26 @@ export default connect(toStudyProps)(
             <Grid.Row columns={1} textAlign="center" style={exerciseRow}>
               <Grid.Column>
                 {ready ? (
-                  <ClozeSentence
-                    onAnswer={this.onAnswer}
-                    onShiftEnter={this.playAudio}
-                    onSpace={this.onSpace}
-                    onEscape={this.onEscape}
-                    active={active}
-                    showPinyin={showPinyin}
-                    showPlaceholder={
-                      this.state.showPlaceholder || keyboardStyle
-                    }
-                    mode={this.state.mode}
-                    type={this.state.type}
-                    showEnglish={showEnglish || done}
-                    blocks={cards[0].chinese}
-                    english={cards[0].english}
-                  />
+                  haveCards ? (
+                    <ClozeSentence
+                      onAnswer={this.onAnswer}
+                      onShiftEnter={this.playAudio}
+                      onSpace={this.onSpace}
+                      onEscape={this.onEscape}
+                      active={active}
+                      showPinyin={showPinyin}
+                      showPlaceholder={
+                        this.state.showPlaceholder || keyboardStyle
+                      }
+                      mode={this.state.mode}
+                      type={this.state.type}
+                      showEnglish={showEnglish || done}
+                      blocks={cards[0].chinese}
+                      english={cards[0].english}
+                    />
+                  ) : (
+                    "No exercises available"
+                  )
                 ) : (
                   <Loader active />
                 )}
