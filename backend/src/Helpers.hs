@@ -1,6 +1,7 @@
 module Helpers where
 
 import           Control.Concurrent
+import           Control.Exception
 import qualified Data.Text.Lazy      as TL
 import           Data.Time
 import           System.Console.ANSI
@@ -48,3 +49,12 @@ pp a = init $ unlines $ take limit $ lines $ TL.unpack (pShowOpt opt a)
   where
     limit = 15
     opt = defaultOutputOptionsDarkBg{outputOptionsIndentAmount=1}
+
+
+logExceptions :: String -> IO () -> IO ()
+logExceptions name action =
+  catch action $ \e -> do
+    errorLog $ name ++ ": " ++ show e
+    case fromException e of
+      Nothing -> return ()
+      Just e  -> throwIO (e::AsyncException)

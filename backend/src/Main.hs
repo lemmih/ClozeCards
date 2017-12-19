@@ -29,6 +29,7 @@ import           CLI.Tatoeba
 import           CLI.Users
 import           CLI.TenThousand
 import           Client
+import           Helpers (logExceptions)
 import qualified Daemons
 import           DB
 import qualified Worker
@@ -57,16 +58,20 @@ main = do
       [] -> do
         group <- Worker.new
         Worker.forkIO group $ forever $ do
-          runDBUnsafe pool $ Daemons.updSentenceWords
+          logExceptions "updSentenceWords" $
+            runDBUnsafe pool $ Daemons.updSentenceWords
           threadDelay oneSecond
         Worker.forkIO group $ forever $ do
-          runDBUnsafe pool $ Daemons.updDirtyDecks
+          logExceptions "updDirtyDecks" $
+            runDBUnsafe pool $ Daemons.updDirtyDecks
           threadDelay oneSecond
         Worker.forkIO group $ forever $ do
-          runDBUnsafe pool $ Daemons.updSchedule
+          logExceptions "updSchedule" $
+            runDBUnsafe pool $ Daemons.updSchedule
           threadDelay (oneSecond * 1)
         Worker.forkIO group $ forever $ do
-          runDBUnsafe pool $ Daemons.updDirtyUsers
+          logExceptions "updDirtyUsers" $
+            runDBUnsafe pool $ Daemons.updDirtyUsers
           threadDelay (oneSecond * 10)
         simpleHTTP nullConf (dir "api" $ msum
           [dir "status" $ do
