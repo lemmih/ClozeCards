@@ -16,7 +16,7 @@ body {
   background: white;
 }
 .chinese.active {
-  text-shadow: 0 0 5px green !important;
+  text-shadow: 0 0 10px green !important;
 }
 .chinese.recent {
   text-shadow: 0 0 5px cyan;
@@ -54,7 +54,7 @@ body {
 }
 
 .public-DraftEditor-content {
-  font-size: 150%;
+  font-size: 200%;
   line-height: 1.4285em;
   overflow: hidden;
 }
