@@ -24,7 +24,7 @@ body {
 .chinese.expired {
   text-shadow: 0 0 5px coral;
 }
-.studying .chinese:not(.active):not(.recent):not(.expired) {
+.studying .chinese:not(.active):not(.recent):not(.expired):not(.known) {
   border-bottom: 2px solid red;
 }
 .chinese:hover {

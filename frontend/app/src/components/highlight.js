@@ -13,6 +13,23 @@ import { is, Set } from "immutable";
 //   highlight: { active, expired, recent, unknown }
 class Highlight extends Component {
   wordMap = {};
+  updLabels = (prevWords, newWords, label) => {
+    if (!is(prevWords, newWords)) {
+      const removed = prevWords.subtract(newWords);
+      const added = newWords.subtract(prevWords);
+      removed.forEach(recent => {
+        _.forEach(this.wordMap[recent], node => {
+          node.classList.remove(label);
+        });
+      });
+
+      added.forEach(recent => {
+        _.forEach(this.wordMap[recent], node => {
+          node.classList.add(label);
+        });
+      });
+    }
+  };
   componentDidUpdate = prevProps => {
     const { target, highlight } = this.props;
     const node = target.editor.refs.editor;
@@ -46,26 +63,21 @@ class Highlight extends Component {
       }
     }
 
-    if (!is(prevProps.highlight.recent, highlight.recent) || changed) {
-      const removed = prevProps.highlight.recent.subtract(
-        changed ? Set() : highlight.recent
-      );
-      const added = highlight.recent.subtract(
-        changed ? Set() : prevProps.highlight.recent
-      );
-      console.log("removed, added", removed.size, added.size);
-      removed.forEach(recent => {
-        _.forEach(this.wordMap[recent], node => {
-          node.classList.remove("recent");
-        });
-      });
-
-      added.forEach(recent => {
-        _.forEach(this.wordMap[recent], node => {
-          node.classList.add("recent");
-        });
-      });
-    }
+    this.updLabels(
+      changed ? Set() : prevProps.highlight.recent,
+      highlight.recent,
+      "recent"
+    );
+    this.updLabels(
+      changed ? Set() : prevProps.highlight.expired,
+      highlight.expired,
+      "expired"
+    );
+    this.updLabels(
+      changed ? Set() : prevProps.highlight.known,
+      highlight.known,
+      "known"
+    );
 
     // _.forEach(this.wordMap["我"], node => {
     //   node.className += " active";
