@@ -7,6 +7,7 @@ import cards from "./cards";
 import search from "./search";
 import notes from "./notes";
 import dictionary from "./dictionary";
+import highlight from "./highlight";
 
 export default combineReducers({
   decks,
@@ -16,5 +17,6 @@ export default combineReducers({
   cards,
   search,
   notes,
-  dictionary
+  dictionary,
+  highlight
 });

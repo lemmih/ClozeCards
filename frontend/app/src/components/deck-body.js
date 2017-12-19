@@ -30,6 +30,7 @@ import createResizePlugin from "../plugins/resize";
 import alignContent from "../align";
 import mkToolbar from "./toolbar";
 import Loading from "./loading";
+import Highlight from "./highlight";
 
 import backend from "../backend";
 // import { getUser } from "../common";
@@ -245,6 +246,7 @@ class DeckBody extends Component {
             </div>
           </div>
         </div>
+        <Highlight target={this.deckEditor} />
       </Loading>
     );
   };

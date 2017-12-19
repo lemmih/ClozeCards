@@ -31,3 +31,4 @@ export * from "./cards";
 export * from "./content";
 export * from "./decks";
 export * from "./notes";
+export * from "./highlight";

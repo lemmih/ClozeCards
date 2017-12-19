@@ -198,3 +198,27 @@ setVisibility :: Connection -> UserId -> DeckId -> Bool -> IO ()
 setVisibility conn userId deckId hidden = void $ execute conn
   "UPDATE decks SET hidden = ? WHERE owner = ? AND id = ?"
   (hidden, userId, deckId)
+
+-- { highlightRecent :: [Text]
+-- , highlightExpired :: [Text]
+-- , highlightKnown   :: [Text] }
+-- Recent = created at within 1 hour and review at in future
+-- Expired = review at in the past
+-- Known = review at in the future
+deckHighlights :: Connection -> UserId -> DeckId -> IO ([Text], [Text], [Text])
+deckHighlights conn userId deckId = do
+  recent <- query conn "SELECT ds.word FROM deck_sentences ds, models\
+                       \ WHERE deck_id = ? AND ds.word = models.word AND\
+                       \       models.user_id = ? AND created_at BETWEEN now()-interval '1 hour' AND NOW() AND\
+                       \       review_at > now()"
+                       ( deckId, userId )
+  expired <- query conn "SELECT ds.word FROM deck_sentences ds, models\
+                       \ WHERE deck_id = ? AND ds.word = models.word AND\
+                       \       models.user_id = ? AND review_at < now()"
+                       ( deckId, userId )
+  known <- query conn "SELECT ds.word FROM deck_sentences ds, models\
+                     \ WHERE deck_id = ? AND ds.word = models.word AND\
+                     \       models.user_id = ? AND review_at > now() AND\
+                     \       created_at < now() - interval '1 hour'"
+                     ( deckId, userId )
+  return (map fromOnly recent, map fromOnly expired, map fromOnly known)

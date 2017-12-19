@@ -168,6 +168,7 @@ data ClientMessage
   | SetVisibility DeckId Bool
   | MarkWords Text Bool -- True => Mark as known, False => Mark as unknown
   | FetchKnownWords
+  | FetchHighlight DeckId
     deriving (Show)
 
 data ServerMessage
@@ -176,6 +177,10 @@ data ServerMessage
   | ReceiveSearchResults Int [DeckId]
   | ReceiveCards DeckId [Card]
   | ReceiveKnownWords Text
+  | ReceiveHighlight
+    { highlightRecent :: [Text]
+    , highlightExpired :: [Text]
+    , highlightKnown   :: [Text] }
   | LoginFailed
     deriving (Show)
 
@@ -479,6 +484,9 @@ instance FromJSON ClientMessage where
           <$> payload.:"words"
           <*> payload.:"known"
       "FETCH_KNOWN_WORDS" -> pure FetchKnownWords
+      "FETCH_HIGHLIGHT" ->
+        FetchHighlight
+          <$> o.:"payload"
       _ -> fail "invalid tag"
 
 toAction :: String -> Value -> Value
@@ -541,6 +549,8 @@ instance ToJSON ClientMessage where
       , "known" .= known ]
   toJSON FetchKnownWords =
     toAction "FETCH_KNOWN_WORDS" Null
+  toJSON (FetchHighlight deckId) =
+    toAction "FETCH_HIGHLIGHT" $ toJSON deckId
 
 instance ToJSON ServerMessage where
   toJSON (SetActiveUser user token) =
@@ -559,5 +569,10 @@ instance ToJSON ServerMessage where
       , "results" .= results ]
   toJSON (ReceiveKnownWords words) =
     toAction "RECEIVE_KNOWN_WORDS" (toJSON words)
+  toJSON ReceiveHighlight{..} =
+    toAction "RECEIVE_HIGHLIGHT" $ object
+      [ "recent"  .= highlightRecent
+      , "expired" .= highlightExpired
+      , "known"   .= highlightKnown ]
   toJSON LoginFailed =
     toAction "LOGIN_FAILED" Null

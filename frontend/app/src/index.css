@@ -15,6 +15,18 @@ body {
 .editor {
   background: white;
 }
+.chinese.active {
+  text-shadow: 0 0 5px green !important;
+}
+.chinese.recent {
+  text-shadow: 0 0 5px cyan;
+}
+.chinese.expired {
+  text-shadow: 0 0 5px coral;
+}
+.studying .chinese:not(.active):not(.recent):not(.expired) {
+  border-bottom: 2px solid red;
+}
 .chinese:hover {
   /*background-color: lightblue;*/
   /*border-bottom: 2px solid green;*/

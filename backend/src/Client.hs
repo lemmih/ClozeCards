@@ -115,6 +115,12 @@ handleClient pool conn userId = do
     FetchKnownWords -> do
       ws <- runDB pool $ \db -> fetchKnownWords db userId
       sendJSON conn $ ReceiveKnownWords (T.unwords ws)
+    FetchHighlight deckId -> do
+      (recent, expired, known) <- runDB pool $ \db -> deckHighlights db userId deckId
+      sendJSON conn $ ReceiveHighlight
+        { highlightRecent  = recent
+        , highlightExpired = expired
+        , highlightKnown   = known }
   case msg of
     Login email password -> do
       mbUser <- runDB pool $ \db -> passwdLogin db email password

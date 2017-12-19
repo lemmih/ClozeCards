@@ -19,6 +19,12 @@ import {
   clearCards
 } from "../actions/cards";
 import { setFavorite } from "../actions/user";
+import {
+  setActiveHighlight,
+  fetchHighlight,
+  addRecentWord,
+  clearHighlight
+} from "../actions/highlight";
 import backend from "../backend";
 
 import ClozeSentence from "./cloze-sentence";
@@ -75,27 +81,34 @@ export default connect(toStudyProps)(
       }
       this.setAudioState();
       if (!isFavorite && isRegistered) backend.relay(setFavorite(deckId));
+      backend.relay(fetchHighlight(deckId));
     };
     componentDidUpdate = (prevProps, prevState) => {
-      if (_.isNull(this.props.cards) || this.state.style !== prevState.style) {
-        backend.relay(fetchCards(this.props.deckId, this.state.style));
+      const { cards, deckId } = this.props;
+      const { style } = this.state;
+      if (_.isNull(cards) || style !== prevState.style) {
+        backend.relay(fetchCards(deckId, style));
       }
 
       const active = this.getActive();
 
-      const ready = _.isArray(this.props.cards);
-      const haveCards = ready && this.props.cards.length !== 0;
-      const done = haveCards && this.props.cards[0].chinese.length <= active;
+      const ready = _.isArray(cards);
+      const haveCards = ready && cards.length !== 0;
+      const done = haveCards && cards[0].chinese.length <= active;
       if (done && this.continueRef) {
         this.continueRef.focus();
       }
-      if (_.isArray(this.props.cards) && !_.isArray(prevProps.cards)) {
+      if (ready && !_.isArray(prevProps.cards)) {
         this.setState({ showPinyin: false, showEnglish: false, active: 0 });
       }
       this.setAudioState();
+      if (haveCards) {
+        this.props.dispatch(setActiveHighlight(cards[0].word));
+      }
     };
     componentWillUnmount = () => {
       this.props.dispatch(clearCards());
+      this.props.dispatch(clearHighlight());
     };
 
     setAudioState = () => {
@@ -145,6 +158,7 @@ export default connect(toStudyProps)(
       };
       backend.relay(receiveResponse(response));
       if (isCorrect) {
+        this.props.dispatch(addRecentWord(block.simplified));
         let i = this.getActive() + 1;
         i = this.getActive(i);
         const allDone = i >= card.chinese.length;

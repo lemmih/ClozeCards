@@ -136,7 +136,7 @@ export const ViewDeck = connect(toViewDeckProps)(
       if (!hasDeck) return <Loader active />;
 
       return (
-        <div>
+        <div className={study ? "studying" : null}>
           <Container style={{ paddingTop: "2em" }}>
             <Item.Group>
               <DeckHeader
