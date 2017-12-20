@@ -27,6 +27,9 @@ body {
 .studying .chinese:not(.active):not(.recent):not(.expired):not(.known) {
   border-bottom: 2px solid red;
 }
+div.studying {
+  margin-bottom: 20em;
+}
 .chinese:hover {
   /*background-color: lightblue;*/
   /*border-bottom: 2px solid green;*/
