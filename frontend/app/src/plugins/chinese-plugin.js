@@ -2,7 +2,12 @@ import _ from "lodash";
 import axios from "axios";
 import { Set, is } from "immutable";
 import React from "react";
+import { connect } from "react-redux";
 import { EditorState, Modifier, SelectionState } from "draft-js";
+
+import { pinDictionary } from "../actions/dictionary";
+
+import { showDictionary, hideDictionary } from "../store-interface";
 
 function applyEntity(contentState, selectionState, entityKey) {
   const state1 = Modifier.applyEntity(contentState, selectionState, entityKey);
@@ -22,13 +27,40 @@ function handleChinese(contentBlock, callback, contentState) {
     );
   }, callback);
 }
-const HandleSpan = props => {
-  return (
-    <span className="chinese" data-offset-key={props.offsetKey}>
-      {props.children}
-    </span>
-  );
-};
+
+class HandleChinese extends React.PureComponent {
+  dictEntry = () => {
+    const { decoratedText } = this.props;
+    return {
+      simplified: decoratedText,
+      pinyin: null,
+      english: null,
+      definitions: null
+    };
+  };
+  showDict = () => {
+    showDictionary(this.dictEntry());
+  };
+  pinDict = () => {
+    this.props.dispatch(pinDictionary(this.dictEntry()));
+  };
+  hideDict = () => {
+    hideDictionary();
+  };
+  render = () => {
+    return (
+      <span
+        className="chinese"
+        data-offset-key={this.props.offsetKey}
+        onClick={this.pinDict}
+        onMouseEnter={this.showDict}
+        onMouseLeave={this.hideDict}
+      >
+        {this.props.children}
+      </span>
+    );
+  };
+}
 
 function handleHidden(contentBlock, callback, contentState) {
   // There's a bug in how draftjs check for style equality. It uses (===) but
@@ -123,7 +155,7 @@ export default () => {
     decorators: [
       {
         strategy: handleChinese,
-        component: HandleSpan
+        component: connect()(HandleChinese)
       },
       {
         strategy: handleHidden,

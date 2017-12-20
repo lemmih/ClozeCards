@@ -5,7 +5,9 @@ import           Control.Monad
 import qualified Data.Aeson                 as Aeson
 import qualified Data.ByteString.Lazy.Char8 as BL8
 import           Data.Chinese.Segmentation
+import           Data.Chinese.CCDict
 import           Data.List
+import           Data.Maybe
 import qualified Data.Text                  as T
 import           System.Console.ANSI
 import           System.IO
@@ -121,6 +123,13 @@ handleClient pool conn userId = do
         { highlightRecent  = recent
         , highlightExpired = expired
         , highlightKnown   = known }
+    DictionaryLookup ws -> do
+      let results = [ do e <- lookupMatch word
+                         let defs = [ Definition (variantPinyin v) (variantDefinitions v)
+                                    | v <- entryVariants e ]
+                         return (word, defs)
+                    | word <- ws ]
+      sendJSON conn $ ReceiveDictionaryResults (catMaybes results)
   case msg of
     Login email password -> do
       mbUser <- runDB pool $ \db -> passwdLogin db email password

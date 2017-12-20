@@ -3,6 +3,8 @@ export const HIDE_DICTIONARY = "HIDE_DICTIONARY";
 export const PIN_DICTIONARY = "PIN_DICTIONARY";
 export const UNPIN_DICTIONARY = "UNPIN_DICTIONARY";
 export const SET_DICTIONARY = "SET_DICTIONARY";
+export const DICTIONARY_LOOKUP = "DICTIONARY_LOOKUP";
+export const RECEIVE_DICTIONARY_RESULTS = "RECEIVE_DICTIONARY_RESULTS";
 
 export function showDictionary(entry) {
   return {
@@ -29,5 +31,11 @@ export function unpinDictionary() {
 export function setDictionary(entry) {
   return {
     type: UNPIN_DICTIONARY
+  };
+}
+export function dictionaryLookup(words) {
+  return {
+    type: DICTIONARY_LOOKUP,
+    payload: words
   };
 }

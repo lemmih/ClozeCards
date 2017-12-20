@@ -5,11 +5,9 @@ import { connect } from "react-redux";
 //   Popup
 // } from 'semantic-ui-react'
 
-import {
-  showDictionary,
-  hideDictionary,
-  pinDictionary
-} from "../actions/dictionary";
+import { pinDictionary } from "../actions/dictionary";
+
+import { showDictionary, hideDictionary } from "../store-interface";
 
 import PinyinInput from "./pinyin-input";
 
@@ -103,13 +101,13 @@ const Block = connect()(
       };
     };
     showDict = () => {
-      this.props.dispatch(showDictionary(this.dictEntry()));
+      showDictionary(this.dictEntry());
     };
     pinDict = () => {
       this.props.dispatch(pinDictionary(this.dictEntry()));
     };
     hideDict = () => {
-      this.props.dispatch(hideDictionary());
+      hideDictionary();
     };
     render() {
       const {

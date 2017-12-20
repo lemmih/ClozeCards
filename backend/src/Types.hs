@@ -169,6 +169,7 @@ data ClientMessage
   | MarkWords Text Bool -- True => Mark as known, False => Mark as unknown
   | FetchKnownWords
   | FetchHighlight DeckId
+  | DictionaryLookup [Text]
     deriving (Show)
 
 data ServerMessage
@@ -182,6 +183,7 @@ data ServerMessage
     , highlightExpired :: [Text]
     , highlightKnown   :: [Text] }
   | LoginFailed
+  | ReceiveDictionaryResults [(Text, [Definition])]
     deriving (Show)
 
 
@@ -487,6 +489,9 @@ instance FromJSON ClientMessage where
       "FETCH_HIGHLIGHT" ->
         FetchHighlight
           <$> o.:"payload"
+      "DICTIONARY_LOOKUP" ->
+        DictionaryLookup
+          <$> o.:"payload"
       _ -> fail "invalid tag"
 
 toAction :: String -> Value -> Value
@@ -551,6 +556,8 @@ instance ToJSON ClientMessage where
     toAction "FETCH_KNOWN_WORDS" Null
   toJSON (FetchHighlight deckId) =
     toAction "FETCH_HIGHLIGHT" $ toJSON deckId
+  toJSON (DictionaryLookup ws) =
+    toAction "DICTIONARY_LOOKUP" $ toJSON ws
 
 instance ToJSON ServerMessage where
   toJSON (SetActiveUser user token) =
@@ -576,3 +583,6 @@ instance ToJSON ServerMessage where
       , "known"   .= highlightKnown ]
   toJSON LoginFailed =
     toAction "LOGIN_FAILED" Null
+  toJSON (ReceiveDictionaryResults results) =
+    toAction "RECEIVE_DICTIONARY_RESULTS" $ object
+      [ key .= defs | (key, defs) <- results ]

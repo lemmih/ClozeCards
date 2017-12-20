@@ -6,7 +6,7 @@ import user from "./user";
 import cards from "./cards";
 import search from "./search";
 import notes from "./notes";
-import dictionary from "./dictionary";
+import { activeWord, cache } from "./dictionary";
 import highlight from "./highlight";
 
 export default combineReducers({
@@ -17,6 +17,6 @@ export default combineReducers({
   cards,
   search,
   notes,
-  dictionary,
+  dictionary: combineReducers({ activeWord, cache }),
   highlight
 });
