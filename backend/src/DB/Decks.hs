@@ -210,15 +210,18 @@ deckHighlights conn userId deckId = do
   recent <- query conn "SELECT ds.word FROM deck_sentences ds, models\
                        \ WHERE deck_id = ? AND ds.word = models.word AND\
                        \       models.user_id = ? AND created_at BETWEEN now()-interval '1 hour' AND NOW() AND\
-                       \       review_at > now()"
+                       \       review_at > now() AND\
+                       \       stability > 30"
                        ( deckId, userId )
   expired <- query conn "SELECT ds.word FROM deck_sentences ds, models\
                        \ WHERE deck_id = ? AND ds.word = models.word AND\
-                       \       models.user_id = ? AND review_at < now()"
+                       \       models.user_id = ? AND review_at < now() AND\
+                       \       stability > 30"
                        ( deckId, userId )
   known <- query conn "SELECT ds.word FROM deck_sentences ds, models\
                      \ WHERE deck_id = ? AND ds.word = models.word AND\
                      \       models.user_id = ? AND review_at > now() AND\
-                     \       created_at < now() - interval '1 hour'"
+                     \       created_at < now() - interval '1 hour' AND\
+                     \       stability > 30"
                      ( deckId, userId )
   return (map fromOnly recent, map fromOnly expired, map fromOnly known)
