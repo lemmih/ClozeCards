@@ -110,7 +110,7 @@ addResponse pool userId response_ = do
   when (responseCompleted response) $
     -- Marking sentences dirty happens in the background such that
     -- we can continue serving requests as quickly as possible.
-    void $ forkIO $ runDB pool $ \db -> do
+    void $ forkIO $ logExceptions "addReponse-updDirtySentences" $ runDBUnsafe pool $ \db -> do
       case newModel of
         -- Mark sentences as dirty even if they've never been seen before.
         True ->

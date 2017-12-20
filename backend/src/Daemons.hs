@@ -15,6 +15,7 @@ import           Data.Text                  (Text)
 import           Data.Time
 import           Data.Version
 import           Database.PostgreSQL.Simple (withTransaction)
+import           Database.PostgreSQL.Simple.Transaction
 
 import           DB
 import           Logic
@@ -36,7 +37,7 @@ updSentenceWords conn = do
 
 updSchedule conn = do
   now <- getCurrentTime
-  withTransaction conn $ do
+  withTransactionSerializable conn $ do
     (ms, (new, del)) <- timed $ updScheduleAndClearDirty conn now
     when (new > 0 || del > 0) $
       infoLog $ "Schedule: Finished in " ++ show ms ++ " ms, " ++ show new ++ " new, " ++ show del ++ " deleted."
