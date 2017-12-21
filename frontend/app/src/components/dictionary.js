@@ -66,8 +66,8 @@ export default connect(({ dictionary }) => {
               <Loader active />
             ) : (
               <ul>
-                {definitions.map(lst => (
-                  <li key={JSON.stringify(lst)}>
+                {definitions.map((lst, idx) => (
+                  <li key={idx + JSON.stringify(lst)}>
                     {lst.english.map(elt => (
                       <span key={elt}>
                         <span onClick={this.setEnglish(elt)}>{elt}</span>
