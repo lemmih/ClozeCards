@@ -78,6 +78,12 @@ deckBySlug conn slug = queryMaybe conn
   \  FROM decks\
   \ WHERE ? = ANY(slugs)" (Only slug)
 
+deckById :: Connection -> DeckId -> IO Deck
+deckById conn deckId = querySingle conn
+  "SELECT id, owner, type, title, tags, slugs, nLikes, nComments, text_id, created_at, dirty, hidden\
+  \  FROM decks\
+  \ WHERE id = ?" (Only deckId)
+
 setDeckTags :: Connection -> DeckId -> [Tag] -> IO ()
 setDeckTags conn deckId tags =
   void $ execute conn "UPDATE decks SET tags = ?\
@@ -183,7 +189,7 @@ searchDecks conn keyWords tags ordering offset = query conn
         ByDate     -> " ORDER BY created_at desc"
         ByTrending -> " ORDER BY nLikes desc"
 
-setFavorite :: Connection -> UserId ->  DeckId -> IO ()
+setFavorite :: Connection -> UserId -> DeckId -> IO ()
 setFavorite conn userId deckId = void $ execute conn
   "INSERT INTO favorites (user_id, deck_id) VALUES (?, ?)\
   \ ON CONFLICT DO NOTHING"

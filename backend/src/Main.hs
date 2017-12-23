@@ -32,6 +32,7 @@ import           Client
 import           Helpers (logExceptions)
 import qualified Daemons
 import           DB
+import           Broadcast
 import qualified Worker
 
 instance ToMessage Aeson.Value where
@@ -56,6 +57,7 @@ main = do
     args <- getArgs
     case args of
       [] -> do
+        bc <- newBroadcastState
         group <- Worker.new
         Worker.forkIO group $ forever $ do
           logExceptions "updSentenceWords" $
@@ -83,7 +85,7 @@ main = do
             ok $ toResponse $ Aeson.Object (HM.map segmentate blocks)
           ,dir "ws" $ runWebSocketsHappstack $ \pc -> do
             conn <- WS.acceptRequest pc
-            handleNewWS pool conn
+            handleNewWS bc pool conn
           ]) `finally` Worker.killAll group
       ["tatoeba", sentences, links] -> runDB pool $ \conn -> tatoeba conn sentences links
       ["audio", dest] -> runDB pool $ \conn -> fetchAudio conn dest

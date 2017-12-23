@@ -2,26 +2,32 @@
 module Client (handleNewWS) where
 
 import           Control.Monad
+import           Control.Concurrent
+import           Control.Exception
 import qualified Data.Aeson                 as Aeson
 import qualified Data.ByteString.Lazy.Char8 as BL8
-import           Data.Chinese.Segmentation
 import           Data.Chinese.CCDict
+import           Data.Chinese.Segmentation
 import           Data.List
 import           Data.Maybe
 import qualified Data.Text                  as T
 import           System.Console.ANSI
 import           System.IO
 
+import           Data.Pool                  (Pool)
+import qualified Database.PostgreSQL.Simple as PSQL
 import qualified Network.WebSockets         as WS
 
+import           Buckets
 import           Cards
 import           DB
-import           Buckets
 import           Debug
 import           Logic
 import           Types
+import           Broadcast
 
-handleNewWS pool conn = do
+handleNewWS :: Broadcast -> Pool PSQL.Connection -> WS.Connection -> IO ()
+handleNewWS bc pool conn = do
   handshake <- receiveJSON conn
   case handshake of
     WithoutToken -> do
@@ -30,7 +36,7 @@ handleNewWS pool conn = do
         token <- createToken db (getUserId user)
         sendJSON conn $ SetActiveUser user token
         return (getUserId user)
-      initClient pool conn userId
+      initClient bc pool conn userId
     WithToken userId token -> do
       userId' <- runDB pool $ \db -> do
         mbUser <- tokenLogin db userId token
@@ -43,15 +49,16 @@ handleNewWS pool conn = do
             token <- createToken db (getUserId user)
             sendJSON conn $ SetActiveUser user token
             return (getUserId user)
-      initClient pool conn userId'
+      initClient bc pool conn userId'
 
-initClient pool conn userId = do
+initClient bc pool conn userId = do
+  insertConnection bc userId conn
   runDB pool $ \db -> do
     highscore <- readBucketByTag db highscoreHourly
     sendJSON conn $ Highscore highscore
-  handleClient pool conn userId
+  handleClient bc pool conn userId `finally` deleteConnection bc userId
 
-handleClient pool conn userId = do
+handleClient bc pool conn userId = do
   msg <- receiveJSON conn
   case msg of
     ReceiveContent contentId content ->
@@ -63,7 +70,8 @@ handleClient pool conn userId = do
         let deck' = deck{ deckSlugs = slugs, deckOwner = userId
                         , deckDirty = True, deckProcessing = True}
         createDeck db deck'
-        sendJSON conn $ ReceiveDeck deck'
+        forkIO $ broadcast bc $ ReceiveDeck deck'
+        return ()
     FetchDeck slug ->
       runDB pool $ \db -> do
         mbDeck <- deckBySlug db slug
@@ -93,7 +101,8 @@ handleClient pool conn userId = do
         pushToBucket db responsesDaily () 1
 
         highscore <- readBucketSnapshot db highscoreHourly userId
-        sendJSON conn $ HighscoreDelta [(userId, highscore)]
+        forkIO $ broadcast bc $ HighscoreDelta [(userId, highscore)]
+        return ()
       addResponse pool userId response
     FetchSearchResults _query ordering offset ->
       runDB pool $ \db -> do
@@ -117,9 +126,17 @@ handleClient pool conn userId = do
           token <- runDB pool $ \db -> createToken db (getUserId user)
           sendJSON conn $ SetActiveUser user token
     SetFavorite deckId ->
-      runDB pool $ \db -> setFavorite db userId deckId
+      runDB pool $ \db -> do
+        setFavorite db userId deckId
+        deck <- deckById db deckId
+        forkIO $ broadcast bc $ ReceiveDeck deck
+        return ()
     UnsetFavorite deckId ->
-      runDB pool $ \db -> unsetFavorite db userId deckId
+      runDB pool $ \db -> do
+        unsetFavorite db userId deckId
+        deck <- deckById db deckId
+        forkIO $ broadcast bc $ ReceiveDeck deck
+        return ()
     SetVisibility deckId hidden ->
       runDB pool $ \db -> setVisibility db userId deckId hidden
     MarkWords ws asKnown -> do
@@ -163,17 +180,21 @@ handleClient pool conn userId = do
         Just user -> do
           token <- runDB pool $ \db -> createToken db (getUserId user)
           sendJSON conn $ SetActiveUser user token
-          handleClient pool conn (getUserId user)
+          deleteConnection bc userId
+          insertConnection bc (getUserId user) conn
+          handleClient bc pool conn (getUserId user)
     Logout -> do
+      deleteConnection bc userId
       userId <- runDB pool $ \db -> do
         user <- createUser db
         token <- createToken db (getUserId user)
         sendJSON conn $ SetActiveUser user token
         return (getUserId user)
-      handleClient pool conn userId
+      insertConnection bc userId conn
+      handleClient bc pool conn userId
     _ -> loop
   where
-    loop = handleClient pool conn userId
+    loop = handleClient bc pool conn userId
 
 sendJSON conn msg = do
   debugLog' Blue "SENDING " msg
