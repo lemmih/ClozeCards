@@ -1,5 +1,11 @@
 {-# LANGUAGE RecordWildCards #-}
-module Logic (addResponse, updateModel, updateReviewAt, knownWordStability, minStability) where
+module Logic
+  ( answerScore
+  , addResponse
+  , updateModel
+  , updateReviewAt
+  , knownWordStability
+  , minStability) where
 
 import           Control.Concurrent
 import           Control.Monad
@@ -8,10 +14,34 @@ import           Data.Pool
 import qualified Data.Text                  as T
 import           Data.Time
 import           Database.PostgreSQL.Simple (Connection)
+import Data.Chinese.CCDict
+import Data.Char
 
 import           DB
 import           Helpers
 import           Types
+
+{-
+EarlyReview: 1 points
+SeenAnswer: 1 points
+PlainAnswer: 2 points
+PinyinAnswer: 3 points
+ChineseAnswer: 4 points
+
+-}
+-- How many points to award an answer.
+answerScore Response{..} earlyReview
+  | earlyReview || responseShownAnswer = 1
+  | answer `elem` chineseAnswers       = 4
+  | answer `elem` pinyinAnswers        = 3
+  | otherwise                          = 2
+  where
+    answer = trim responseValue
+    Just e = lookupMatch responseWord
+    trim = T.toLower . T.filter (not.isSpace)
+    pinyinAnswers = map (trim.variantPinyin) (entryVariants e)
+    chineseAnswers = map trim $ concat [ [variantSimplified v, variantTraditional v] | v <- entryVariants e ]
+
 
 ------------------------------------------------------------------------------
 -- Parameters

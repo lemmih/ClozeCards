@@ -53,6 +53,7 @@ function toStudyProps(store, props) {
   const { deckId } = props;
   const isFavorite = store.user.favorites.has(deckId);
   return {
+    highscore: store.highscore.get(store.user.id.toString()) || 0,
     isFavorite: isFavorite,
     isRegistered: !_.isNull(store.user.email),
     cards: store.cards
@@ -247,7 +248,7 @@ export default connect(toStudyProps)(
     };
     render = () => {
       const { style, showStatus, showPinyin, showEnglish } = this.state;
-      const { cards, studyQuitLink } = this.props;
+      const { cards, studyQuitLink, highscore } = this.props;
       const active = this.getActive();
       const keyboardStyle = this.state.type === "keyboard";
       const soundStyle = this.state.type === "sound";
@@ -265,7 +266,9 @@ export default connect(toStudyProps)(
           <Grid stackable>
             <Grid.Row columns={1} textAlign="center" style={headerRow}>
               <Grid.Column>
-                High score | When word will be reviewed.
+                {highscore}
+                {highscore === 1 ? " point" : " points"} | When word will be
+                reviewed.
               </Grid.Column>
             </Grid.Row>
             <Grid.Row columns={1} textAlign="center" style={exerciseRow}>

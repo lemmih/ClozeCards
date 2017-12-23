@@ -16,6 +16,7 @@ import qualified Network.WebSockets         as WS
 
 import           Cards
 import           DB
+import           Buckets
 import           Debug
 import           Logic
 import           Types
@@ -29,7 +30,7 @@ handleNewWS pool conn = do
         token <- createToken db (getUserId user)
         sendJSON conn $ SetActiveUser user token
         return (getUserId user)
-      handleClient pool conn userId
+      initClient pool conn userId
     WithToken userId token -> do
       userId' <- runDB pool $ \db -> do
         mbUser <- tokenLogin db userId token
@@ -42,7 +43,13 @@ handleNewWS pool conn = do
             token <- createToken db (getUserId user)
             sendJSON conn $ SetActiveUser user token
             return (getUserId user)
-      handleClient pool conn userId'
+      initClient pool conn userId'
+
+initClient pool conn userId = do
+  runDB pool $ \db -> do
+    highscore <- readBucketByTag db highscoreHourly
+    sendJSON conn $ Highscore highscore
+  handleClient pool conn userId
 
 handleClient pool conn userId = do
   msg <- receiveJSON conn
@@ -71,7 +78,23 @@ handleClient pool conn userId = do
       runDB pool $ \db -> do
         cards <- fetchCards db userId deckId style
         sendJSON conn $ ReceiveCards deckId cards
-    ReceiveResponse response -> addResponse pool userId response
+    ReceiveResponse response -> do
+      when (responseCompleted response) $ runDB pool $ \db -> do
+        mbModel <- fetchModel db userId (responseWord response)
+        let earlyReview =
+              case mbModel of
+                Nothing -> False
+                Just model -> responseCreatedAt response < modelReviewAt model
+            score = answerScore response earlyReview
+        pushToBucket db highscoreHourly userId score
+        pushToBucket db highscoreDaily userId score
+
+        pushToBucket db responsesHourly () 1
+        pushToBucket db responsesDaily () 1
+
+        highscore <- readBucketSnapshot db highscoreHourly userId
+        sendJSON conn $ HighscoreDelta [(userId, highscore)]
+      addResponse pool userId response
     FetchSearchResults _query ordering offset ->
       runDB pool $ \db -> do
         results <- searchDecks db [] [] ordering offset

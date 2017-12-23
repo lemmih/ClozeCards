@@ -1,0 +1,2 @@
+export const HIGHSCORE = "HIGHSCORE";
+export const HIGHSCORE_DELTA = "HIGHSCORE_DELTA";

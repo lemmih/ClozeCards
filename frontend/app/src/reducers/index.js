@@ -8,6 +8,7 @@ import search from "./search";
 import notes from "./notes";
 import { activeWord, cache } from "./dictionary";
 import highlight from "./highlight";
+import highscore from "./highscore";
 
 export default combineReducers({
   decks,
@@ -18,5 +19,6 @@ export default combineReducers({
   search,
   notes,
   dictionary: combineReducers({ activeWord, cache }),
-  highlight
+  highlight,
+  highscore
 });

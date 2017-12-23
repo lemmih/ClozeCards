@@ -3,6 +3,7 @@ module Cards (fetchCards) where
 
 import           Control.Monad
 import           Control.Monad.State
+import           Data.Char
 import           Data.Chinese.CCDict
 import           Data.Chinese.Pinyin
 import           Data.Chinese.Segmentation  as CC
@@ -12,14 +13,13 @@ import           Data.Maybe
 import           Data.Set                   (Set)
 import qualified Data.Set                   as Set
 import           Data.Text                  (Text)
-import qualified Data.Text as T
-import Data.Char
+import qualified Data.Text                  as T
 import           Data.Time
 import           Database.PostgreSQL.Simple (Connection)
 
 import           DB
+import           Helpers
 import           Types
-import Helpers
 
 wantedWords :: Int
 wantedWords = 10

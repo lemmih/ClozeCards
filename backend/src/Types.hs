@@ -6,7 +6,7 @@ import           Data.Aeson
 import           Data.ByteString (ByteString)
 import           Data.Map        (Map)
 import           Data.Set        (Set)
-import           Data.Text       (Text)
+import           Data.Text       (Text, pack)
 import           Data.Time
 import           Data.UUID
 
@@ -184,6 +184,8 @@ data ServerMessage
     , highlightKnown   :: [Text] }
   | LoginFailed
   | ReceiveDictionaryResults [(Text, [Definition])]
+  | Highscore [(UserId, Int)]
+  | HighscoreDelta [(UserId, Int)]
     deriving (Show)
 
 
@@ -586,3 +588,9 @@ instance ToJSON ServerMessage where
   toJSON (ReceiveDictionaryResults results) =
     toAction "RECEIVE_DICTIONARY_RESULTS" $ object
       [ key .= defs | (key, defs) <- results ]
+  toJSON (Highscore lst) =
+    toAction "HIGHSCORE" $ object
+      [ (pack $ show uid) .= score | (uid, score) <- lst ]
+  toJSON (HighscoreDelta lst) =
+    toAction "HIGHSCORE_DELTA" $ object
+      [ (pack $ show uid) .= score | (uid, score) <- lst ]
