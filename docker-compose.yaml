@@ -8,6 +8,8 @@ services:
     image: lemmih/clozecards_backend
     links:
       - psql
+    volumes:
+      - /root/credentials:/root/.aws/credentials
   frontend:
     image: lemmih/clozecards_frontend
     ports:
