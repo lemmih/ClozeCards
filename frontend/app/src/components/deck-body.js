@@ -31,6 +31,7 @@ import alignContent from "../align";
 import mkToolbar from "./toolbar";
 import Loading from "./loading";
 import Highlight from "./highlight";
+import Upload from "./upload";
 
 import backend from "../backend";
 // import { getUser } from "../common";
@@ -44,12 +45,14 @@ class DeckBody extends Component {
           convertFromRaw(props.deckContent)
         ),
         // deckEditor: EditorState.createEmpty(),
-        annotationEditor: EditorState.createEmpty()
+        annotationEditor: EditorState.createEmpty(),
+        audio: props.deck.audioUrl
       };
     else
       this.state = {
         deckEditor: EditorState.createEmpty(),
-        annotationEditor: EditorState.createEmpty()
+        annotationEditor: EditorState.createEmpty(),
+        audio: props.deck.audioUrl
       };
     this.deckEditorFocus = () => this.deckEditor.focus();
     this.annotationEditorFocus = () => {
@@ -72,7 +75,7 @@ class DeckBody extends Component {
     const editor = editDeck
       ? this.state.deckEditor
       : this.state.annotationEditor;
-    onSave(convertToRaw(editor.getCurrentContent()));
+    onSave(convertToRaw(editor.getCurrentContent()), this.state.audio);
   };
   initialize = () => {
     if (this.props.deckContent)
@@ -80,12 +83,14 @@ class DeckBody extends Component {
         deckEditor: EditorState.createWithContent(
           convertFromRaw(this.props.deckContent)
         ),
-        annotationEditor: EditorState.createEmpty()
+        annotationEditor: EditorState.createEmpty(),
+        audio: this.props.deck.audioUrl
       });
     else
       this.setState({
         deckEditor: EditorState.createEmpty(),
-        annotationEditor: EditorState.createEmpty()
+        annotationEditor: EditorState.createEmpty(),
+        audio: this.props.deck.audioUrl
       });
   };
 
@@ -115,6 +120,13 @@ class DeckBody extends Component {
     return [{ value: userId, text: "Personal Notes" }];
   };
 
+  handleSetAudio = audioKey => {
+    this.setState({ audio: audioKey });
+  };
+  handleUnsetAudio = () => {
+    this.setState({ audio: null });
+  };
+
   render = () => {
     const userId = JSON.parse(localStorage.getItem("user")).id;
     const { editNotes, selection } = this.props;
@@ -128,9 +140,47 @@ class DeckBody extends Component {
           this.state.annotationEditor,
           this.handleAnnotationEditorChange
         );
+    const { audio } = this.state;
 
     return (
       <Loading active>
+        <div>
+          {editDeck && (
+            <center>
+              <Upload
+                trigger={onClick => (
+                  <Button primary onClick={onClick}>
+                    Upload Audio
+                  </Button>
+                )}
+                onSuccess={this.handleSetAudio}
+              />
+              <Button
+                negative
+                disabled={_.isUndefined(audio)}
+                onClick={this.handleUnsetAudio}
+              >
+                Delete Audio
+              </Button>
+            </center>
+          )}
+          {_.isString(audio) && (
+            <center>
+              <audio src={audio} controls="controls" preload="auto">
+                <p>
+                  Sorry, this deck includes audio but your browser is too old to
+                  play it.
+                </p>
+              </audio>
+              <br />
+              <Button.Group>
+                <Button disabled={!_.isString(audio)}>Slow</Button>
+                <Button disabled={_.isUndefined(audio)}>Normal</Button>
+                <Button disabled={_.isUndefined(audio)}>Fast</Button>
+              </Button.Group>
+            </center>
+          )}
+        </div>
         <div>
           {showAnnotations &&
             !editNotes && (

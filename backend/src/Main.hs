@@ -3,19 +3,26 @@ module Main (main) where
 
 import           Control.Concurrent
 import           Control.Exception
+import           Control.Lens               ((&), (.~))
 import           Control.Monad
 import           Control.Monad.Trans
 import           Data.Aeson                 (Value (..), object, (.=))
 import qualified Data.Aeson                 as Aeson
 import qualified Data.ByteString.Char8      as B8
 import qualified Data.HashMap.Strict        as HM
+import           Data.Monoid
 import           Data.Pool
 import qualified Data.Text                  as T
+import qualified Data.UUID                  as UUID
+import qualified Data.UUID.V4               as UUID
 import qualified Data.Vector                as V
 import           System.Environment
+import           System.IO
 import           System.IO.Error
 
 import           Happstack.Server
+import qualified Network.AWS                as AWS
+import qualified Network.AWS.S3             as AWS
 import qualified Network.WebSockets         as WS
 import           WebSockets
 
@@ -24,15 +31,15 @@ import qualified Database.PostgreSQL.Simple as PSQL
 import           Data.Chinese.CCDict
 import           Data.Chinese.Segmentation
 
+import           Broadcast
 import           CLI.Audio
 import           CLI.Tatoeba
-import           CLI.Users
 import           CLI.TenThousand
+import           CLI.Users
 import           Client
-import           Helpers (logExceptions)
 import qualified Daemons
 import           DB
-import           Broadcast
+import           Helpers                    (logExceptions)
 import qualified Worker
 
 instance ToMessage Aeson.Value where
@@ -79,6 +86,24 @@ main = do
           [dir "status" $ do
             method GET
             ok $ toResponse ("OK"::String)
+          ,dir "blob" $ msum
+            [dir "upload" $ do
+              let maxDiskSize = 1024*1024*50
+                  maxRAMSize = 1024*4
+              decodeBody $ defaultBodyPolicy "/tmp/" maxDiskSize maxRAMSize maxRAMSize
+              (tmpPath, remoteName, contentType) <- lookFile "file"
+              blobId <- liftIO $ UUID.nextRandom
+              liftIO $ do
+                lgr <- AWS.newLogger AWS.Error stdout
+                env <- AWS.newEnv AWS.Discover
+                body <- AWS.chunkedFile AWS.defaultChunkSize tmpPath
+                let key = AWS.ObjectKey $ UUID.toText blobId
+                AWS.runResourceT $ AWS.runAWS (env & AWS.envLogger .~ lgr) $
+                  AWS.within AWS.Ohio $
+                    AWS.send $ AWS.putObject "clozecards-blobs" key body
+              let url = "https://clozecards-blobs.s3.amazonaws.com/" <> UUID.toText blobId
+              ok $ toResponse $ url
+            ]
           ,dir "segmentation" $ do
             method POST
             blocks <- jsonBody :: ServerPart Aeson.Object

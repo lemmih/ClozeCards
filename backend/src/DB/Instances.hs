@@ -31,7 +31,7 @@ instance FromRow User where
 instance FromRow Deck where
   fromRow = do
     ((deckId, deckOwner, deckType, deckTitle) :.
-     (tags, slugs, deckNLikes, deckNComments) :.
+     (tags, deckAudioUrl, slugs, deckNLikes, deckNComments) :.
      (deckContentId, deckCreatedAt, deckDirty, deckHidden)) <- fromRow
     let deckTags = V.toList tags
         deckSlugs = V.toList slugs

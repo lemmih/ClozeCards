@@ -60,7 +60,7 @@ export const ViewDeck = connect(toViewDeckProps)(
     handleChange = deck => {
       this.setState({ deck });
     };
-    handleSave = content => {
+    handleSave = (content, audio) => {
       switch (this.state.editing) {
         case "deck": {
           const deck = this.state.deck || this.props.deck;
@@ -69,7 +69,9 @@ export const ViewDeck = connect(toViewDeckProps)(
           const contentId = uuid();
 
           backend.relay(receiveContent(contentId, content));
-          backend.relay(receiveDeck({ ...deck, slugs, contentId }));
+          backend.relay(
+            receiveDeck({ ...deck, audioUrl: audio, slugs, contentId })
+          );
 
           this.setState({ editing: "" });
           return;
@@ -188,7 +190,7 @@ const NewDeck = withRouter(
   connect(toNewDeckProps)(
     class NewDeck extends Component {
       state = {};
-      onSave = content => {
+      onSave = (content, audio) => {
         const { deck } = this.state;
         const slug = deck.title;
         const contentId = uuid();
@@ -199,6 +201,7 @@ const NewDeck = withRouter(
           receiveDeck({
             ...deck,
             id: deckId,
+            audioUrl: audio,
             slugs: [slug],
             contentId,
             nLikes: 0,
@@ -231,6 +234,7 @@ const NewDeck = withRouter(
                 />
               </Item.Group>
               <DeckBody
+                deck={deck}
                 ref={this.handleBodyRef}
                 editDeck={true}
                 showAnnotations={false}

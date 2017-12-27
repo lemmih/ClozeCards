@@ -42,6 +42,7 @@ data Deck = Deck
   , deckType       :: Text
   , deckTitle      :: Text
   , deckTags       :: [Tag]
+  , deckAudioUrl   :: Maybe Text -- Maybe URL
   , deckSlugs      :: [Slug]
   , deckNLikes     :: Int
   , deckNComments  :: Int
@@ -215,6 +216,7 @@ instance FromJSON Deck where
     <*> o.:"type"
     <*> o.:"title"
     <*> o.:"tags"
+    <*> o.:"audioUrl"
     <*> o.:"slugs"
     <*> o.:"nLikes"
     <*> o.:"nComments"
@@ -231,6 +233,7 @@ instance ToJSON Deck where
       , "type"      .= deckType
       , "title"     .= deckTitle
       , "tags"      .= deckTags
+      , "audioUrl"  .= deckAudioUrl
       , "slugs"     .= deckSlugs
       , "nLikes"    .= deckNLikes
       , "nComments" .= deckNComments

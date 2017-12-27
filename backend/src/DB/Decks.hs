@@ -45,18 +45,20 @@ createDeck :: Connection -> Deck -> IO ()
 createDeck conn Deck{..} =
   -- Upsert decks, will quietly do nothing if row exists with different owner.
   void $ execute conn
-      "INSERT INTO decks(id, owner, type, title, tags, slugs, text_id, created_at, hidden)\
-      \          VALUES (?,  ?,     ?,     ?,    ?,    ?,     ?,       ?,          ?)\
+      "INSERT INTO decks(id, owner, type, title, tags, audio_url, slugs, text_id, created_at, hidden)\
+      \          VALUES (?,  ?,     ?,     ?,    ?,    ?,         ?,     ?,       ?,          ?)\
       \ ON CONFLICT (id) DO UPDATE\
       \ SET type = EXCLUDED.type,\
       \     tags = EXCLUDED.tags,\
+      \     audio_url = EXCLUDED.audio_url,\
       \     title = EXCLUDED.title,\
       \     slugs = EXCLUDED.slugs,\
       \     text_id = EXCLUDED.text_id,\
       \     hidden = EXCLUDED.hidden\
       \ WHERE decks.owner = EXCLUDED.owner"
       ( deckId, deckOwner, deckType, deckTitle, V.fromList deckTags
-      , V.fromList deckSlugs, deckContentId, deckCreatedAt, deckHidden)
+      , deckAudioUrl, V.fromList deckSlugs, deckContentId, deckCreatedAt
+      , deckHidden)
 
 mkSlug slugSet txt = trySlugs (slug : [ slug <> "-" <> T.pack (show n) | n <- [1..]])
   where
@@ -74,13 +76,13 @@ mkSlug slugSet txt = trySlugs (slug : [ slug <> "-" <> T.pack (show n) | n <- [1
 
 deckBySlug :: Connection -> Text -> IO (Maybe Deck)
 deckBySlug conn slug = queryMaybe conn
-  "SELECT id, owner, type, title, tags, slugs, nLikes, nComments, text_id, created_at, dirty, hidden\
+  "SELECT id, owner, type, title, tags, audio_url, slugs, nLikes, nComments, text_id, created_at, dirty, hidden\
   \  FROM decks\
   \ WHERE ? = ANY(slugs)" (Only slug)
 
 deckById :: Connection -> DeckId -> IO Deck
 deckById conn deckId = querySingle conn
-  "SELECT id, owner, type, title, tags, slugs, nLikes, nComments, text_id, created_at, dirty, hidden\
+  "SELECT id, owner, type, title, tags, audio_url, slugs, nLikes, nComments, text_id, created_at, dirty, hidden\
   \  FROM decks\
   \ WHERE id = ?" (Only deckId)
 
@@ -109,7 +111,7 @@ fetchContent conn contentId = fromOnly <$> querySingle conn
 
 fetchDirtyDecks :: Connection -> IO [Deck]
 fetchDirtyDecks conn =
-  query conn "SELECT id, owner, type, title, tags, slugs, nLikes, nComments, text_id, created_at, dirty, hidden\
+  query conn "SELECT id, owner, type, title, tags, audio_url, slugs, nLikes, nComments, text_id, created_at, dirty, hidden\
              \  FROM decks\
              \ WHERE dirty = true" ()
 
@@ -175,7 +177,7 @@ fetchStudyCardsNew conn now userId deckId = query conn
 -- FIXME: FavOnly?
 searchDecks :: Connection -> [Text] -> [Tag] -> DeckOrdering -> Offset -> IO [Deck]
 searchDecks conn keyWords tags ordering offset = query conn
-    ("SELECT id, owner, type, title, tags, slugs, nLikes, nComments, text_id, created_at, dirty, hidden\
+    ("SELECT id, owner, type, title, tags, audio_url, slugs, nLikes, nComments, text_id, created_at, dirty, hidden\
     \  FROM decks\
     \ WHERE title ILIKE ALL(?) AND not hidden"
     <> orderBy <>
