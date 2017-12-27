@@ -25,7 +25,10 @@ export class Footer extends PureComponent {
                 <a href="https://www.mdbg.net/chinese/dictionary">MDBG</a>,{" "}
                 <a href="https://tatoeba.org/eng/">Tatoeba</a>,{" "}
                 <a href="http://shtooka.net/">Project SHTOOKA</a> and{" "}
-                <a href="http://justlearnchinese.com/">JustLearnChinese</a>.
+                <a href="http://justlearnchinese.com/">JustLearnChinese</a>. A
+                special thank you to{" "}
+                <a href="https://twitter.com/cosymira">Joshua Amy</a> and
+                Chelsea Chen for providing audio recordings.
               </p>
             </Grid.Column>
             <Grid.Column>
