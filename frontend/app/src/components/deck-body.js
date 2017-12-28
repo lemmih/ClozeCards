@@ -46,13 +46,13 @@ class DeckBody extends Component {
         ),
         // deckEditor: EditorState.createEmpty(),
         annotationEditor: EditorState.createEmpty(),
-        audio: props.deck.audioUrl
+        audio: props.deck.audioUrl || null
       };
     else
       this.state = {
         deckEditor: EditorState.createEmpty(),
         annotationEditor: EditorState.createEmpty(),
-        audio: props.deck.audioUrl
+        audio: props.deck.audioUrl || null
       };
     this.deckEditorFocus = () => this.deckEditor.focus();
     this.annotationEditorFocus = () => {
