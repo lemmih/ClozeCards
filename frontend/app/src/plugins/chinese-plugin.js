@@ -1,9 +1,14 @@
 import _ from "lodash";
 import axios from "axios";
-import { Set, is } from "immutable";
+import { Set, is, Map } from "immutable";
 import React from "react";
 import { connect } from "react-redux";
-import { EditorState, Modifier, SelectionState } from "draft-js";
+import {
+  EditorState,
+  Modifier,
+  SelectionState,
+  DraftEditorBlock
+} from "draft-js";
 
 import { pinDictionary } from "../actions/dictionary";
 
@@ -98,6 +103,23 @@ const RenderHidden = props => {
   );
 };
 
+class AudioIndexBlock extends React.Component {
+  constructor(props) {
+    super(props);
+  }
+  render = () => {
+    // console.log(this.props);
+    // return null;
+    // return DraftEditorBlock(this.props);
+    return (
+      <div>
+        <DraftEditorBlock {...this.props} />
+      </div>
+    );
+    // return <div>{this.props.children}</div>;
+  };
+}
+
 export default () => {
   var dirtyBlocks = Set();
   const markChineseEntity = (contentState, blockKey, range) => {
@@ -152,6 +174,20 @@ export default () => {
       });
   }, 250);
   return {
+    blockRendererFn: block => {
+      if (block.getType() === "audio-index") {
+        return {
+          component: AudioIndexBlock, //DraftEditorBlock,
+          editable: false
+        };
+      }
+    },
+    // blockRenderMap: Map({
+    //   "audio-index": {
+    //     element: "div",
+    //     wrapper: <AudioIndexBlock />
+    //   }
+    // }),
     decorators: [
       {
         strategy: handleChinese,
