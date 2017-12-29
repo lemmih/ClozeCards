@@ -12,8 +12,9 @@ type Props = {
 
 function toProps(store) {
   const { daily, weekly } = store.highscore;
+  const id = store.user.id;
   return {
-    highlight: store.user.id,
+    highlight: id ? id.toString() : id,
     daily,
     weekly
   };
