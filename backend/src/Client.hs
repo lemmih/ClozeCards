@@ -103,7 +103,7 @@ handleClient bc pool conn userId = do
         pushToBucket db Buckets.responsesDaily () 1
 
         daily <- readBucketSnapshot db Buckets.highscoreHourly userId
-        weekly <- readBucketSnapshot db Buckets.highscoreHourly userId
+        weekly <- readBucketSnapshot db Buckets.highscoreDaily userId
         forkIO $ broadcast bc $ UpdateHighscore (Highscore [(userId, daily)]) (Highscore [(userId, weekly)])
         return ()
       addResponse pool userId response
