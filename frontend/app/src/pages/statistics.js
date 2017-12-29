@@ -31,14 +31,14 @@ export default connect(toProps)(
               <Grid.Column>
                 <Highscore
                   title="Weekly"
-                  highscore={daily}
+                  highscore={weekly}
                   highlight={highlight}
                 />
               </Grid.Column>
               <Grid.Column>
                 <Highscore
                   title="Daily"
-                  highscore={weekly}
+                  highscore={daily}
                   highlight={highlight}
                 />
               </Grid.Column>
