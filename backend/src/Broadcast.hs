@@ -27,7 +27,10 @@ newBroadcastState = State <$> newIORef Map.empty
 insertConnection :: Broadcast -> UserId -> WS.Connection -> IO ()
 insertConnection (State ref) uid conn = do
   modifyIORef ref $ Map.insert uid conn
-  void $ forkIO $ broadcast (State ref) $ SetOnline [uid] []
+  connected <- Map.keys <$> readIORef ref
+  void $ forkIO $ do
+    WS.sendTextData conn $ Aeson.encode $ SetOnline connected []
+    broadcast (State ref) $ SetOnline [uid] []
 
 deleteConnection :: Broadcast -> UserId -> IO ()
 deleteConnection (State ref) uid = do
