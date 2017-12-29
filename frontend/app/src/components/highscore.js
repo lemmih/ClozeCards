@@ -2,7 +2,7 @@
 import _ from "lodash";
 import React, { PureComponent } from "react";
 import { Table } from "semantic-ui-react";
-import { Map } from "immutable";
+import { Map, Set } from "immutable";
 // import Identicon from "identicon.js";
 // import sha256 from "sha256";
 
@@ -11,12 +11,13 @@ import Identicon from "./identicon";
 type HighscoreProps = {
   title: string,
   highscore: Map<string, number>,
-  highlight?: number
+  highlight?: number,
+  mark?: Set<number>
 };
 
 export default class Highscore extends PureComponent<HighscoreProps> {
   render = () => {
-    const { title, highscore, highlight } = this.props;
+    const { title, highscore, highlight, mark } = this.props;
     const lst = highscore.sort((a, b) => b - a);
     var n = 1;
     return (
@@ -36,7 +37,11 @@ export default class Highscore extends PureComponent<HighscoreProps> {
                 const idx = n;
                 n++;
                 return (
-                  <Table.Row key={userId} active={highlight === userId}>
+                  <Table.Row
+                    key={userId}
+                    active={highlight.toString() === userId}
+                    positive={mark && mark.has(parseInt(userId, 10))}
+                  >
                     <Table.Cell>#{idx}</Table.Cell>
                     <Table.Cell>
                       <Identicon id={userId} size={32} />

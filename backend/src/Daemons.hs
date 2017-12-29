@@ -6,22 +6,32 @@ import           Control.Monad
 import           Data.Chinese.CCDict
 import           Data.Chinese.Segmentation
 import           Data.List
-import           Data.Map                   (Map)
-import qualified Data.Map                   as Map
+import           Data.Map                               (Map)
+import qualified Data.Map                               as Map
 import           Data.Maybe
 import           Data.Ord
-import qualified Data.Set                   as Set
-import           Data.Text                  (Text)
+import qualified Data.Set                               as Set
+import           Data.Text                              (Text)
 import           Data.Time
 import           Data.Version
-import           Database.PostgreSQL.Simple (withTransaction)
+import           Database.PostgreSQL.Simple             (withTransaction)
 import           Database.PostgreSQL.Simple.Transaction
 
+import           Broadcast
+import           Buckets                                (readBucketByTag)
+import qualified Buckets
 import           DB
-import           Logic
 import           Helpers
+import           Logic
 import           Types
 
+-- High scores are incrementally updated for active users but needs to be
+-- periodically updated for inactive users. Ie. when time passes, high scores
+-- may need to be decreased.
+updHighscores bc db = do
+  daily <- readBucketByTag db Buckets.highscoreHourly
+  weekly <- readBucketByTag db Buckets.highscoreDaily
+  broadcast bc $ SetHighscore (Highscore daily) (Highscore weekly)
 
 -- Sentence to Words daemon.
 -- When cndict version changes, recalculate words for each stencil.

@@ -14,16 +14,17 @@ function toProps(store) {
   const { daily, weekly } = store.highscore;
   const id = store.user.id;
   return {
-    highlight: id ? id.toString() : id,
+    highlight: id,
     daily,
-    weekly
+    weekly,
+    online: store.online
   };
 }
 
 export default connect(toProps)(
   class Statistics extends PureComponent<Props> {
     render = () => {
-      const { daily, weekly, highlight } = this.props;
+      const { daily, weekly, highlight, online } = this.props;
       return (
         <Container text>
           <Grid stackable textAlign="center">
@@ -33,6 +34,7 @@ export default connect(toProps)(
                   title="Weekly"
                   highscore={weekly}
                   highlight={highlight}
+                  mark={online}
                 />
               </Grid.Column>
               <Grid.Column>
@@ -40,6 +42,7 @@ export default connect(toProps)(
                   title="Daily"
                   highscore={daily}
                   highlight={highlight}
+                  mark={online}
                 />
               </Grid.Column>
             </Grid.Row>

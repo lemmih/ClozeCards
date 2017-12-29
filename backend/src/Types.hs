@@ -194,6 +194,9 @@ data ServerMessage
   | UpdateHighscore
     { highscoreDailyDelta  :: Highscore
     , highscoreWeeklyDelta :: Highscore }
+  | SetOnline
+    { usersOnline :: [UserId]
+    , usersOffline :: [UserId] }
     deriving (Show)
 
 
@@ -610,3 +613,7 @@ instance ToJSON ServerMessage where
     toAction "UPDATE_HIGHSCORE" $ object
       [ "daily"  .= daily
       , "weekly" .= weekly ]
+  toJSON (SetOnline online offline) =
+    toAction "SET_ONLINE" $ object
+      [ "online" .= online
+      , "offline" .= offline ]

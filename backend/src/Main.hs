@@ -49,6 +49,12 @@ instance ToMessage Aeson.Value where
 oneSecond :: Int
 oneSecond = 10^6
 
+oneMinute :: Int
+oneMinute = oneSecond * 60
+
+oneHour :: Int
+oneHour = oneMinute * 60
+
 mkDatabasePool :: IO (Pool PSQL.Connection)
 mkDatabasePool = do
   dbAddr <- getEnv "SQL_DB" `catchIOError` \_ -> return "dbname=ClozeCards"
@@ -82,6 +88,10 @@ main = do
           logExceptions "updDirtyUsers" $
             runDBUnsafe pool $ Daemons.updDirtyUsers
           threadDelay (oneSecond * 10)
+        Worker.forkIO group $ forever $ do
+          logExceptions "updHighscores" $
+            runDBUnsafe pool $ Daemons.updHighscores bc
+          threadDelay oneHour
         simpleHTTP nullConf (dir "api" $ msum
           [dir "status" $ do
             method GET
