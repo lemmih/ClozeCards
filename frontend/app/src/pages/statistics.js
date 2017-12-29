@@ -7,7 +7,9 @@ import Highscore from "../components/highscore";
 
 type Props = {
   daily: { [string]: number },
-  weekly: { [string]: number }
+  weekly: { [string]: number },
+  highlight: ?number,
+  online: Array<number>
 };
 
 function toProps(store) {

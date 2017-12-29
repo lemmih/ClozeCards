@@ -21,6 +21,11 @@ type Props = {
 };
 
 export default class Identicon extends PureComponent<Props> {
+  static defaultProps = {
+    background: [0xff, 0xff, 0xff, 0x00],
+    format: "svg"
+  };
+
   format = () => {
     switch (this.props.format) {
       case "svg":
@@ -42,7 +47,3 @@ export default class Identicon extends PureComponent<Props> {
     );
   };
 }
-Identicon.defaultProps = {
-  background: [0xff, 0xff, 0xff, 0x00],
-  format: "svg"
-};

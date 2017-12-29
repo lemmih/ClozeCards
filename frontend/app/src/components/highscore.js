@@ -11,11 +11,16 @@ import Identicon from "./identicon";
 type HighscoreProps = {
   title: string,
   highscore: Map<string, number>,
-  highlight?: number,
-  mark?: Set<number>
+  highlight: ?number,
+  mark: Set<number>
 };
 
 export default class Highscore extends PureComponent<HighscoreProps> {
+  static defaultProps = {
+    highlight: null,
+    mark: Set()
+  };
+
   render = () => {
     const { title, highscore, highlight, mark } = this.props;
     const lst = highscore.sort((a, b) => b - a);
@@ -39,8 +44,8 @@ export default class Highscore extends PureComponent<HighscoreProps> {
                 return (
                   <Table.Row
                     key={userId}
-                    active={highlight.toString() === userId}
-                    positive={mark && mark.has(parseInt(userId, 10))}
+                    active={highlight && highlight.toString() === userId}
+                    positive={mark.has(parseInt(userId, 10))}
                   >
                     <Table.Cell>#{idx}</Table.Cell>
                     <Table.Cell>
