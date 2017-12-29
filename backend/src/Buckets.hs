@@ -18,7 +18,7 @@ import qualified Data.Text as T
 import Data.Text (Text)
 
 import DB
-import Types
+import Types (UserId, DeckId)
 import           Database.PostgreSQL.Simple
 
 {-

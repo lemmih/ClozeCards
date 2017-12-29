@@ -9,6 +9,7 @@ import { ViewDeck, NewDeck } from "../pages/decks";
 import BrowseDecks from "../pages/browse-decks";
 import { SignIn, SignUp } from "../pages/sign-in-up";
 import MarkWords from "../pages/mark";
+import Statistics from "../pages/statistics";
 import Dictionary from "./dictionary";
 
 import { logout } from "../actions/user";
@@ -118,6 +119,11 @@ class Layout extends Component {
               path="/profile/mark-words"
               exact={true}
               render={() => <MarkWords />}
+            />
+            <Route
+              path="/statistics/"
+              exact={true}
+              render={() => <Statistics />}
             />
           </Switch>
           <Dictionary />

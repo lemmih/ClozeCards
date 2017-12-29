@@ -53,7 +53,7 @@ function toStudyProps(store, props) {
   const { deckId } = props;
   const isFavorite = store.user.favorites.has(deckId);
   return {
-    highscore: store.highscore.get(store.user.id.toString()) || 0,
+    highscore: store.highscore.daily.get(store.user.id.toString()) || 0,
     isFavorite: isFavorite,
     isRegistered: !_.isNull(store.user.email),
     cards: store.cards

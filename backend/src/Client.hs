@@ -18,7 +18,8 @@ import           Data.Pool                  (Pool)
 import qualified Database.PostgreSQL.Simple as PSQL
 import qualified Network.WebSockets         as WS
 
-import           Buckets
+import qualified Buckets
+import Buckets ( readBucketByTag, readBucketSnapshot, pushToBucket )
 import           Cards
 import           DB
 import           Debug
@@ -54,8 +55,9 @@ handleNewWS bc pool conn = do
 initClient bc pool conn userId = do
   insertConnection bc userId conn
   runDB pool $ \db -> do
-    highscore <- readBucketByTag db highscoreHourly
-    sendJSON conn $ Highscore highscore
+    daily <- readBucketByTag db Buckets.highscoreHourly
+    weekly <- readBucketByTag db Buckets.highscoreDaily
+    sendJSON conn $ SetHighscore (Highscore daily) (Highscore weekly)
   handleClient bc pool conn userId `finally` deleteConnection bc userId
 
 handleClient bc pool conn userId = do
@@ -94,14 +96,15 @@ handleClient bc pool conn userId = do
                 Nothing -> False
                 Just model -> responseCreatedAt response < modelReviewAt model
             score = answerScore response earlyReview
-        pushToBucket db highscoreHourly userId score
-        pushToBucket db highscoreDaily userId score
+        pushToBucket db Buckets.highscoreHourly userId score
+        pushToBucket db Buckets.highscoreDaily userId score
 
-        pushToBucket db responsesHourly () 1
-        pushToBucket db responsesDaily () 1
+        pushToBucket db Buckets.responsesHourly () 1
+        pushToBucket db Buckets.responsesDaily () 1
 
-        highscore <- readBucketSnapshot db highscoreHourly userId
-        forkIO $ broadcast bc $ HighscoreDelta [(userId, highscore)]
+        daily <- readBucketSnapshot db Buckets.highscoreHourly userId
+        weekly <- readBucketSnapshot db Buckets.highscoreHourly userId
+        forkIO $ broadcast bc $ UpdateHighscore (Highscore [(userId, daily)]) (Highscore [(userId, weekly)])
         return ()
       addResponse pool userId response
     FetchSearchResults _query ordering offset ->

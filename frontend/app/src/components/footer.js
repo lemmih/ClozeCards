@@ -1,5 +1,6 @@
 import _ from "lodash";
 import React, { PureComponent } from "react";
+import { Link } from "react-router-dom";
 import { Grid, List } from "semantic-ui-react";
 
 import "./footer.css";
@@ -64,6 +65,12 @@ export class Footer extends PureComponent {
                     <a href="https://clozecards.com/news">Site news</a>
                   </List.Content>
                 </List.Item>*/}
+                <List.Item>
+                  <List.Icon name="heartbeat" />
+                  <List.Content>
+                    <Link to="/statistics/">Statistics & high scores</Link>
+                  </List.Content>
+                </List.Item>
               </List>
             </Grid.Column>
           </Grid.Row>

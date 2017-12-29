@@ -1,12 +1,24 @@
-import { HIGHSCORE, HIGHSCORE_DELTA } from "../actions/highscore";
+import { SET_HIGHSCORE, UPDATE_HIGHSCORE } from "../actions/highscore";
 import { Map } from "immutable";
 
-export default function(highscore = Map(), action) {
+const emptyHighscore = {
+  daily: Map(),
+  weekly: Map()
+};
+
+export default function(highscore = emptyHighscore, action) {
   switch (action.type) {
-    case HIGHSCORE:
-      return Map(action.payload);
-    case HIGHSCORE_DELTA:
-      return highscore.merge(Map(action.payload));
+    case SET_HIGHSCORE: {
+      const { daily, weekly } = action.payload;
+      return { daily: Map(daily), weekly: Map(weekly) };
+    }
+    case UPDATE_HIGHSCORE: {
+      const { daily, weekly } = action.payload;
+      return {
+        daily: highscore.daily.merge(Map(daily)),
+        weekly: highscore.weekly.merge(Map(weekly))
+      };
+    }
     default:
       return highscore;
   }

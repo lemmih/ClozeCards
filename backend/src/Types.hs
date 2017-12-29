@@ -173,6 +173,9 @@ data ClientMessage
   | DictionaryLookup [Text]
     deriving (Show)
 
+newtype Highscore = Highscore [(UserId, Int)]
+  deriving (Show)
+
 data ServerMessage
   = SetActiveUser User Token
   | UnusedSlug Slug
@@ -185,8 +188,12 @@ data ServerMessage
     , highlightKnown   :: [Text] }
   | LoginFailed
   | ReceiveDictionaryResults [(Text, [Definition])]
-  | Highscore [(UserId, Int)]
-  | HighscoreDelta [(UserId, Int)]
+  | SetHighscore
+    { highscoreDaily  :: Highscore
+    , highscoreWeekly :: Highscore }
+  | UpdateHighscore
+    { highscoreDailyDelta  :: Highscore
+    , highscoreWeeklyDelta :: Highscore }
     deriving (Show)
 
 
@@ -564,6 +571,10 @@ instance ToJSON ClientMessage where
   toJSON (DictionaryLookup ws) =
     toAction "DICTIONARY_LOOKUP" $ toJSON ws
 
+instance ToJSON Highscore where
+  toJSON (Highscore lst) = object
+    [ (pack $ show uid) .= score | (uid, score) <- lst ]
+
 instance ToJSON ServerMessage where
   toJSON (SetActiveUser user token) =
     toAction "SET_ACTIVE_USER" $ object
@@ -591,9 +602,11 @@ instance ToJSON ServerMessage where
   toJSON (ReceiveDictionaryResults results) =
     toAction "RECEIVE_DICTIONARY_RESULTS" $ object
       [ key .= defs | (key, defs) <- results ]
-  toJSON (Highscore lst) =
-    toAction "HIGHSCORE" $ object
-      [ (pack $ show uid) .= score | (uid, score) <- lst ]
-  toJSON (HighscoreDelta lst) =
-    toAction "HIGHSCORE_DELTA" $ object
-      [ (pack $ show uid) .= score | (uid, score) <- lst ]
+  toJSON (SetHighscore daily weekly) =
+    toAction "SET_HIGHSCORE" $ object
+      [ "daily"  .= daily
+      , "weekly" .= weekly ]
+  toJSON (UpdateHighscore daily weekly) =
+    toAction "UPDATE_HIGHSCORE" $ object
+      [ "daily"  .= daily
+      , "weekly" .= weekly ]

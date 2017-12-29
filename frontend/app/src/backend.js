@@ -90,7 +90,7 @@ function send(msg: Action) {
   else ws.send(JSON.stringify(msg));
 }
 
-function callback(type, cb) {
+function callback(type: string, cb: mixed => void) {
   callbacks[type] = cb;
 }
 

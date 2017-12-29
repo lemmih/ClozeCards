@@ -1,6 +1,6 @@
 import _ from "lodash";
 import axios from "axios";
-import { Set, is, Map } from "immutable";
+import { Set, is } from "immutable";
 import React from "react";
 import { connect } from "react-redux";
 import {
@@ -104,9 +104,6 @@ const RenderHidden = props => {
 };
 
 class AudioIndexBlock extends React.Component {
-  constructor(props) {
-    super(props);
-  }
   render = () => {
     // console.log(this.props);
     // return null;
