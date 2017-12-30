@@ -1,3 +1,4 @@
+// @flow
 import _ from "lodash";
 import React, { PureComponent } from "react";
 import { connect } from "react-redux";
@@ -12,10 +13,13 @@ const favoriteStyle = {
   paddingLeft: "1em"
 };
 
-// user
-// nFavorites
-// deckId
-class Favorites extends PureComponent {
+type Props = {
+  user: any, // FIXME
+  deckId: string,
+  nFavorites: number
+};
+
+class Favorites extends PureComponent<Props> {
   handleClick = () => {
     const { user, deckId } = this.props;
     const isFavorite = user.favorites.has(deckId);

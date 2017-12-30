@@ -1,3 +1,4 @@
+// @flow
 import _ from "lodash";
 import React, { PureComponent } from "react";
 
@@ -5,11 +6,18 @@ var vowelRegex = /([āēīōūǖĀĒĪŌáéíóúǘÁÉÍÓǎěǐǒǔǚǍĚǏǑ
 // jin1tian1
 // jin1 tian1
 // jin1 tian21
+
+// Accented characters for each of the four tones
 var toneMap = {
+  // $FlowFixMe
   1: ["ā", "ē", "ī", "ō", "ū", "ǖ", "Ā", "Ē", "Ī", "Ō"],
+  // $FlowFixMe
   2: ["á", "é", "í", "ó", "ú", "ǘ", "Á", "É", "Í", "Ó"],
+  // $FlowFixMe
   3: ["ǎ", "ě", "ǐ", "ǒ", "ǔ", "ǚ", "Ǎ", "Ě", "Ǐ", "Ǒ"],
+  // $FlowFixMe
   4: ["à", "è", "ì", "ò", "ù", "ǜ", "À", "È", "Ì", "Ò"],
+  // $FlowFixMe
   5: ["a", "e", "i", "o", "u", "ü", "A", "E", "I", "O"]
 };
 
@@ -117,15 +125,6 @@ var accentsMap = {
 // Vowels to replace with their accented froms
 var vowels = ["a*", "e*", "i*", "o*", "u*", "ü*", "A*", "E*", "O*"];
 
-// Accented characters for each of the four tones
-var pinyin = {
-  1: ["ā", "ē", "ī", "ō", "ū", "ǖ", "Ā", "Ē", "Ī", "Ō"],
-  2: ["á", "é", "í", "ó", "ú", "ǘ", "Á", "É", "Í", "Ó"],
-  3: ["ǎ", "ě", "ǐ", "ǒ", "ǔ", "ǚ", "Ǎ", "Ě", "Ǐ", "Ǒ"],
-  4: ["à", "è", "ì", "ò", "ù", "ǜ", "À", "È", "Ì", "Ò"],
-  5: ["a", "e", "i", "o", "u", "ü", "A", "E", "I", "O"]
-};
-
 // The replacer function
 var pinyinReplace = function(match) {
   // Extract the tone number from the match
@@ -144,21 +143,33 @@ var pinyinReplace = function(match) {
 
   // Replace the asterisk’d vowel with an accented character
   for (let i = 0; i < 10; i++)
-    word = word.replace(vowels[i], pinyin[toneNumber][i]);
+    word = word.replace(vowels[i], toneMap[toneNumber][i]);
 
   // Return the result
   return word;
 };
 
-export default class PinyinInput extends PureComponent {
-  handleKeyDown = e => {
+type Props = {
+  onEnter: string => boolean,
+  onShiftEnter: string => boolean,
+  onSpace: string => boolean,
+  onEscape: void => boolean,
+  style: {},
+  placeholder: string
+};
+
+export default class PinyinInput extends PureComponent<Props> {
+  input: ?HTMLInputElement;
+
+  handleKeyDown = (e: SyntheticKeyboardEvent<HTMLInputElement>) => {
     if (e.keyCode === 27) {
       if (this.props.onEscape()) {
         e.preventDefault();
       }
     }
   };
-  handleKeyPress = e => {
+  handleKeyPress = (e: SyntheticKeyboardEvent<HTMLInputElement>) => {
+    if (!this.input) return;
     const input = this.input;
     // Get the pressed key code
     var code = e.keyCode ? e.keyCode : e.which;
@@ -216,7 +227,7 @@ export default class PinyinInput extends PureComponent {
         this.props.onShiftEnter(input.value);
       } else {
         if (!this.props.onEnter(input.value)) {
-          e.target.select();
+          e.currentTarget.select();
         }
       }
       e.preventDefault();
@@ -228,15 +239,14 @@ export default class PinyinInput extends PureComponent {
   };
 
   componentDidMount = () => {
-    this.input.focus();
+    if (this.input) this.input.focus();
   };
-  componentDidUpdate = (prevProps, prevState) => {
-    this.input.focus();
+  componentDidUpdate = () => {
+    if (this.input) this.input.focus();
   };
 
-  handleRef = ref => {
+  handleRef = (ref: ?HTMLInputElement) => {
     this.input = ref;
-    if (this.props.ref) this.props.ref(ref);
   };
 
   render() {
@@ -247,7 +257,6 @@ export default class PinyinInput extends PureComponent {
         onKeyDown={this.handleKeyDown}
         style={this.props.style}
         placeholder={this.props.placeholder}
-        onFocus={this.props.onFocus}
         autoComplete="off"
         autoCorrect="off"
         autoCapitalize="off"

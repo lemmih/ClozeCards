@@ -1,7 +1,9 @@
+// @flow
 import React, { Component } from "react";
 
-import { Footer } from "../components/footer";
-class LandingPage extends Component {
+import Footer from "../components/footer";
+
+class LandingPage extends Component<void> {
   render = () => {
     return (
       <div>

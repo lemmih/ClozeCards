@@ -1,3 +1,5 @@
+// @flow
+import type { Dispatch } from "redux";
 import _ from "lodash";
 import React, { PureComponent } from "react";
 import { Icon, Loader } from "semantic-ui-react";
@@ -7,14 +9,24 @@ import "./dictionary.css";
 
 import backend from "../backend";
 
-/*
-pinned::boolean
-simplified::string
-pinyin :: string
-english :: string
-definitions::[{pinyin: string, english: string[]}]
-origin: {sentence_id, offset} OR entity ID + text id.
-*/
+type Props = {
+  activeWord: ?{
+    pinyin: string,
+    english: string,
+    pinned: boolean,
+    simplified: string,
+    definitions: Array<{
+      pinyin: string,
+      english: Array<string>
+    }>
+  },
+  definitions: ?Array<{
+    pinyin: string,
+    english: Array<string>
+  }>,
+  dispatch: Dispatch
+};
+
 export default connect(({ dictionary }) => {
   const { activeWord, cache } = dictionary;
   return {
@@ -22,7 +34,7 @@ export default connect(({ dictionary }) => {
     definitions: activeWord && cache.get(activeWord.simplified)
   };
 })(
-  class extends PureComponent {
+  class extends PureComponent<Props> {
     componentDidMount = () => {
       const { activeWord, definitions } = this.props;
       if (!definitions && activeWord)

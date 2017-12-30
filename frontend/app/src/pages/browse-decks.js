@@ -3,7 +3,7 @@ import React, { Component } from "react";
 import { connect } from "react-redux";
 import { Container, Item, Visibility, Loader } from "semantic-ui-react";
 
-import { Footer } from "../components/footer";
+import Footer from "../components/footer";
 import DeckHeader from "../components/deck-header";
 import { fetchSearchResults } from "../actions/search";
 import backend from "../backend";

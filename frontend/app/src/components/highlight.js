@@ -1,5 +1,5 @@
 import _ from "lodash";
-import { Component } from "react";
+import { PureComponent } from "react";
 import {} from "semantic-ui-react";
 import { connect } from "react-redux";
 
@@ -11,7 +11,7 @@ import { is, Set } from "immutable";
 //   target
 //   deck_id
 //   highlight: { active, expired, recent, unknown }
-class Highlight extends Component {
+class Highlight extends PureComponent {
   wordMap = {};
   updLabels = (prevWords, newWords, label) => {
     if (!is(prevWords, newWords)) {
