@@ -28,7 +28,7 @@ export default class Highscore extends PureComponent<HighscoreProps> {
     return (
       <div>
         <center>{title} high score</center>
-        <Table compact textAlign="center" striped>
+        <Table compact textAlign="center">
           <Table.Header>
             <Table.Row>
               <Table.HeaderCell />
