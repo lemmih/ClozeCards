@@ -1,19 +1,19 @@
 {-# LANGUAGE OverloadedStrings #-}
-module CLI.TenThousand where
+module CLI.TenThousand (tenThousand) where
 
-import qualified Data.Text as T
-import qualified Data.Map as Map
+import           Control.Monad
+import           Data.Chinese.CCDict
+import           Data.Chinese.Segmentation
+import           Data.List
+import qualified Data.Map                   as Map
+import           Data.Monoid
+import           Data.Ord
+import qualified Data.Text                  as T
 import qualified Database.PostgreSQL.Simple as PSQL
-import Data.Ord
-import Data.List
-import Data.Chinese.CCDict
-import Data.Chinese.Segmentation
-import Control.Monad
-import Data.Monoid
 
-import DB.Sentences
+import           DB.Sentences
 
-import Daemons
+import qualified Tiling
 
 -- Find the cheapest sentence x 10,000.
 --
@@ -22,7 +22,7 @@ tenThousand conn = do
   sentences <- fetchSentencePairs conn
   let db =  [ (simplified, english, entries)
             | (simplified, english) <- sentences
-            , let entries = textEntries simplified ]
+            , let entries = Tiling.textEntries simplified ]
       cheapest = findCheapest 1000 Map.empty db
   forM_ (zip [1..] cheapest) $ \(n,(simplified, english, newWords)) -> do
     let tokens = tokenizer simplified
@@ -44,4 +44,5 @@ findCheapest count seenWords sentences =
     (_cost, sentence@(simplified, english, entries)) = minimumBy (comparing fst) graded
     graded = [ (cost, sentence)
              | sentence@(simplified, english, entries) <- sentences
-             , let cost = sentenceCost seenWords 0 entries ]
+             , let wordCost = Tiling.sentenceCost seenWords 0 0 entries
+                   cost = sum [ a*b | (_, a, b) <- wordCost ]]

@@ -35,6 +35,7 @@ import           Broadcast
 import           CLI.Audio
 import           CLI.Tatoeba
 import           CLI.TenThousand
+import           CLI.Tile
 import           CLI.Users
 import           Client
 import qualified Daemons
@@ -127,6 +128,7 @@ main = do
       ["users", userFile] -> runDB pool $ \conn -> importUsers conn userFile
       ["responses", userFile, responsesFile] -> runDB pool $ \conn -> importResponses conn userFile responsesFile
       ["tenthousand"] -> runDB pool $ \conn -> tenThousand conn
+      ["tile", wordFile] -> runDB pool $ \conn -> debugTiling conn wordFile
       _ -> putStrLn "Usag: prog tatoeba sentences links"
   where
     jsonBody :: Aeson.FromJSON a => ServerPart a

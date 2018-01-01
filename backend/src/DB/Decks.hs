@@ -5,6 +5,7 @@ module DB.Decks where
 import           Control.Monad
 import           Data.Char
 import           Data.List
+import           Data.Maybe
 import           Data.Monoid
 import qualified Data.Set                   as Set
 import           Data.Text                  (Text)
@@ -15,6 +16,7 @@ import           Database.PostgreSQL.Simple
 
 import           DB.Instances               ()
 import           DB.Misc
+import           Tiling                     (Tile (..), tileCost)
 import           Types
 
 
@@ -96,14 +98,15 @@ setDeckFlags conn deckId dirty processing = void $
   execute conn "UPDATE decks SET dirty = ?, processing = ?\
                \ WHERE id = ?" (dirty, processing, deckId)
 
-setDeckSentences :: Connection -> DeckId -> [(Text, Maybe (SentenceId, Int))] -> IO ()
+setDeckSentences :: Connection -> DeckId -> [(Text, [Tile])] -> IO ()
 setDeckSentences conn deckId sentences = do
   void $ execute conn "DELETE FROM deck_sentences WHERE deck_id = ?" (Only deckId)
   void $ executeMany conn
             "INSERT INTO deck_sentences (deck_id, word, sentence_id, index, cost)\
             \ VALUES (?, ?, ?, ?, ?)"
-            [ (deckId, w, fmap fst sid, n::Int, fmap snd sid)
-            | (n,(w,sid)) <- zip [0..] sentences ]
+            [ (deckId, w, fmap tileSentenceId tile, n::Int, fmap ((*)100 . tileCost) tile)
+            | (n,(w,tiles)) <- zip [0..] sentences
+            , let tile = listToMaybe [ tile | tile <- tiles, tileCost tile < 1] ]
 
 fetchContent :: Connection -> ContentId -> IO Content
 fetchContent conn contentId = fromOnly <$> querySingle conn
