@@ -29,8 +29,14 @@ export default (highlight = emptyHighlights, action) => {
       };
     }
     case ADD_RECENT_WORD: {
-      const { recent } = highlight;
-      return { ...highlight, recent: recent.add(action.payload) };
+      const { recent, expired, known } = highlight;
+      const word = action.payload;
+      return {
+        ...highlight,
+        expired: expired.delete(word),
+        known: known.delete(word),
+        recent: recent.add(word)
+      };
     }
     default:
       return highlight;
