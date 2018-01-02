@@ -1,5 +1,5 @@
-{-# LANGUAGE RecordWildCards #-}
 {-# LANGUAGE OverloadedStrings #-}
+{-# LANGUAGE RecordWildCards   #-}
 module Buckets
   ( pushToBucket -- :: Connection -> Bucket a -> a -> Int -> IO ()
   , readBuckets -- :: Connection -> Bucket a -> a -> IO [(UTCTime, Int)]
@@ -12,39 +12,16 @@ module Buckets
   , knownDaily -- :: Bucket (UserId, DeckId)
   ) where
 
-import Data.Time
-import qualified Data.UUID as UUID
-import qualified Data.Text as T
-import Data.Text (Text)
+import           Data.Text                  (Text)
+import qualified Data.Text                  as T
+import           Data.Time
+import qualified Data.UUID                  as UUID
 
-import DB
-import Types (UserId, DeckId)
 import           Database.PostgreSQL.Simple
+import           DB
+import           Types                      (DeckId, UserId)
 
 {-
-# Number of words
-KnownWords
- - Indexed by day
-
-# Similar to KnownWords but doesn't count skipped words.
-LearnedWords
-  - Index by day
--}
-
-{-
-Buckets
-
-Key | Value | At
-
-data Bucket = Bucket
-  { bucketKey :: Text
-  , bucket}
-
-
-
-key | tag | user_id | deck_id | at | value
-
-
 Use cases:
 - High score for the last 24 hours.
   key = "highscore"
@@ -106,7 +83,7 @@ pushToBucket conn Bucket{..} tag val = do
   where
     pushBucket =
       case bucketAcc of
-        Sum -> pushBucketSum
+        Sum  -> pushBucketSum
         Last -> pushBucketLast
 
 -- known words: get N readings
@@ -142,14 +119,14 @@ highscoreHourly = Bucket "highscore-hourly" toTag fromTag crimpHour Sum (1*day)
   where
     toTag uid = [T.pack $ show uid]
     fromTag [txt] = read (T.unpack txt)
-    fromTag _ = error "highscoreHourly: invalid tag"
+    fromTag _     = error "highscoreHourly: invalid tag"
 
 highscoreDaily :: Bucket UserId
 highscoreDaily = Bucket "highscore-daily" toTag fromTag crimpDay Sum (30*day)
   where
     toTag uid = [T.pack $ show uid]
     fromTag [txt] = read (T.unpack txt)
-    fromTag _ = error "highscoreDaily: invalid tag"
+    fromTag _     = error "highscoreDaily: invalid tag"
 
 responsesHourly :: Bucket ()
 responsesHourly = Bucket "responses-hourly" toTag fromTag crimpHour Sum (1*day)

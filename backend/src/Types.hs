@@ -1,3 +1,4 @@
+{-# LANGUAGE LambdaCase        #-}
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE RecordWildCards   #-}
 module Types where
@@ -183,7 +184,7 @@ data ServerMessage
   | ReceiveCards DeckId [Card]
   | ReceiveKnownWords Text
   | ReceiveHighlight
-    { highlightRecent :: [Text]
+    { highlightRecent  :: [Text]
     , highlightExpired :: [Text]
     , highlightKnown   :: [Text] }
   | LoginFailed
@@ -195,7 +196,7 @@ data ServerMessage
     { highscoreDailyDelta  :: Highscore
     , highscoreWeeklyDelta :: Highscore }
   | SetOnline
-    { usersOnline :: [UserId]
+    { usersOnline  :: [UserId]
     , usersOffline :: [UserId] }
     deriving (Show)
 
@@ -326,8 +327,8 @@ instance ToJSON DraftEntity where
     , "mutability" .= entityMutability ]
 
 instance FromJSON Mutability where
-  parseJSON = withText "Mutability" $ \txt ->
-    case txt of
+  parseJSON = withText "Mutability" $
+    \case
       "MUTABLE"   -> pure Mutable
       "IMMUTABLE" -> pure Immutable
       "SEGMENTED" -> pure Segmented
@@ -417,8 +418,8 @@ instance ToJSON Response where
     , "factor" .= responseFactor ]
 
 instance FromJSON Style where
-  parseJSON = withText "Style" $ \txt ->
-    case txt of
+  parseJSON = withText "Style" $
+    \case
       "study"  -> pure Study
       "review" -> pure Review
       _        -> fail "invalid study style"
@@ -576,7 +577,7 @@ instance ToJSON ClientMessage where
 
 instance ToJSON Highscore where
   toJSON (Highscore lst) = object
-    [ (pack $ show uid) .= score | (uid, score) <- lst ]
+    [ pack (show uid) .= score | (uid, score) <- lst ]
 
 instance ToJSON ServerMessage where
   toJSON (SetActiveUser user token) =

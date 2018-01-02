@@ -9,9 +9,8 @@ import           Types
 
 
 forEachSentence :: Connection -> (SentenceId -> Text -> IO ()) -> IO ()
-forEachSentence conn action = do
-  forEach_ conn "SELECT id, simplified FROM sentences" $ \(sId, text) ->
-    action sId text
+forEachSentence conn action =
+  forEach_ conn "SELECT id, simplified FROM sentences" $ uncurry action
 
 setSentenceWords :: Connection -> SentenceId -> [Text] -> IO ()
 setSentenceWords conn sid ws = do

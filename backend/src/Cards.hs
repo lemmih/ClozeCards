@@ -44,7 +44,7 @@ tokenToBlock now selectedWord models (KnownWord e) = do
     seen <- gets (entrySimplified e `Set.member`)
     let skip = seen || broken
     modify $ Set.insert (entrySimplified e)
-    pure $ ChineseBlock
+    pure ChineseBlock
       { blockSimplified = entrySimplified e
       , blockPinyin     = entryDefaultPinyin e
       , blockDefinitions =

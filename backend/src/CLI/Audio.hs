@@ -31,7 +31,7 @@ fetchAudio conn dest = do
   let nMax = length rows
   forM_ (zip [1..] rows) $ \(n, (sId, sentence)) -> do
     quit <- hReady stdin
-    when quit $ exitWith ExitSuccess
+    when quit exitSuccess
     putStrLn $ "Need voice for: " ++ show n ++ "/" ++ show nMax ++ " " ++ sentence
     let output = dest </> show (sId::Int) <.> "mp3"
     uninterruptibleMask_ $ do

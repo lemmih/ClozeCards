@@ -46,7 +46,7 @@ instance FromJSON User where
       <*> createdAt.:"$date"
 
 instance FromJSON Email where
-  parseJSON = withObject "Email" $ \o -> do
+  parseJSON = withObject "Email" $ \o ->
     Email
       <$> o.:"address"
       <*> o.:"verified"
@@ -68,7 +68,7 @@ loadUsers :: FilePath -> IO [User]
 loadUsers path = do
   inp <- LB.readFile path
   case Aeson.eitherDecode inp of
-    Left msg -> do
+    Left msg ->
       error $ "Failed to parse: " ++ msg
     Right users ->
       pure users

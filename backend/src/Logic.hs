@@ -67,7 +67,7 @@ knownWordStability = 60*60*24
 
 
 updateModel response model = model
-    { modelStability = round (newStability)
+    { modelStability = round newStability
     , modelCreatedAt = responseCreatedAt response
     , modelReviewAt  = newReviewAt }
   where
@@ -103,7 +103,7 @@ addResponse pool userId response_ = do
   newModel <- runDB pool $ \db -> do
     createResponse db response
     mbModel <- fetchModel db userId word
-    when (responseCompleted response) $ do
+    when (responseCompleted response) $
       case mbModel of
         Nothing -> do
           let newStability | responseShownAnswer response = minStability
@@ -134,19 +134,19 @@ addResponse pool userId response_ = do
           case mbReviewAts of
             Nothing -> return ()
             Just [] -> return ()
-            Just reviewAt -> do
+            Just reviewAt ->
               setSchedule db userId sentenceId now (minimum reviewAt)
     return $ isNothing mbModel
   when (responseCompleted response) $
     -- Marking sentences dirty happens in the background such that
     -- we can continue serving requests as quickly as possible.
-    void $ forkIO $ logExceptions "addReponse-updDirtySentences" $ runDBUnsafe pool $ \db -> do
-      case newModel of
+    void $ forkIO $ logExceptions "addReponse-updDirtySentences" $ runDBUnsafe pool $ \db ->
+      if newModel
+        then
         -- Mark sentences as dirty even if they've never been seen before.
-        True ->
           markAllSentencesDirty db userId word
         -- Only mark sentences that have been seen. That is,
         -- since we're not creating a model, only sentences that
         -- already have a review time are affected
-        False ->
+        else
           markSeenSentencesDirty db userId word

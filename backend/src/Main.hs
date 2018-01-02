@@ -75,19 +75,19 @@ main = do
         group <- Worker.new
         Worker.forkIO group $ forever $ do
           logExceptions "updSentenceWords" $
-            runDBUnsafe pool $ Daemons.updSentenceWords
+            runDBUnsafe pool Daemons.updSentenceWords
           threadDelay oneSecond
         Worker.forkIO group $ forever $ do
           logExceptions "updDirtyDecks" $
-            runDBUnsafe pool $ Daemons.updDirtyDecks
+            runDBUnsafe pool Daemons.updDirtyDecks
           threadDelay oneSecond
         Worker.forkIO group $ forever $ do
           logExceptions "updSchedule" $
-            runDBUnsafe pool $ Daemons.updSchedule
-          threadDelay (oneSecond * 1)
+            runDBUnsafe pool Daemons.updSchedule
+          threadDelay oneSecond
         Worker.forkIO group $ forever $ do
           logExceptions "updDirtyUsers" $
-            runDBUnsafe pool $ Daemons.updDirtyUsers
+            runDBUnsafe pool Daemons.updDirtyUsers
           threadDelay (oneSecond * 10)
         Worker.forkIO group $ forever $ do
           logExceptions "updHighscores" $
@@ -103,7 +103,7 @@ main = do
                   maxRAMSize = 1024*4
               decodeBody $ defaultBodyPolicy "/tmp/" maxDiskSize maxRAMSize maxRAMSize
               (tmpPath, remoteName, contentType) <- lookFile "file"
-              blobId <- liftIO $ UUID.nextRandom
+              blobId <- liftIO UUID.nextRandom
               liftIO $ do
                 lgr <- AWS.newLogger AWS.Error stdout
                 env <- AWS.newEnv AWS.Discover
@@ -113,7 +113,7 @@ main = do
                   AWS.within AWS.Ohio $
                     AWS.send $ AWS.putObject "clozecards-blobs" key body
               let url = "https://clozecards-blobs.s3.amazonaws.com/" <> UUID.toText blobId
-              ok $ toResponse $ url
+              ok $ toResponse url
             ]
           ,dir "segmentation" $ do
             method POST
@@ -133,13 +133,11 @@ main = do
   where
     jsonBody :: Aeson.FromJSON a => ServerPart a
     jsonBody = do
-      -- liftIO $ putStrLn "jsonBody"
       rq <- askRq
       mbBS <- fmap unBody <$> takeRequestBody rq
       case mbBS of
         Nothing -> mzero
-        Just bs -> do
-          -- liftIO $ L.putStrLn bs
+        Just bs ->
           case Aeson.decode bs of
             Nothing    -> liftIO (putStrLn "failed to parse") >> mzero
             Just value -> return value

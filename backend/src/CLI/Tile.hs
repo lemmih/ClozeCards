@@ -1,4 +1,3 @@
-{-# LANGUAGE ParallelListComp #-}
 module CLI.Tile (debugTiling) where
 
 import           Control.Monad

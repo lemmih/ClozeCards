@@ -1,5 +1,4 @@
 {-# LANGUAGE OverloadedStrings #-}
-{-# LANGUAGE RecordWildCards   #-}
 module DB.Misc where
 
 import           Data.Pool
@@ -24,11 +23,11 @@ queryMaybe conn q a = do
 
 
 runDB :: Pool Connection -> (Connection -> IO a) -> IO a
-runDB pool action = do
+runDB pool action =
   withResource pool $ \conn ->
     withTransactionSerializable conn (action conn)
 
 runDBUnsafe :: Pool Connection -> (Connection -> IO a) -> IO a
-runDBUnsafe pool action = do
+runDBUnsafe pool action =
   withResource pool $ \conn ->
     action conn

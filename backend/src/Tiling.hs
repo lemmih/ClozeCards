@@ -143,7 +143,7 @@ costMultiplier self remote =
   where
     diff = fromIntegral (remote - self - lookAhead)
     steepness = 10
-    factor = fromIntegral cutoff/(log steepness)
+    factor = fromIntegral cutoff / log steepness
 
 median :: Ord a => [a] -> a
 median lst = head (drop (length lst `div` 2) (sort lst))

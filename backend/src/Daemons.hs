@@ -1,5 +1,4 @@
 {-# LANGUAGE OverloadedStrings #-}
-{-# LANGUAGE ParallelListComp  #-}
 module Daemons where
 
 import           Control.Monad
@@ -55,10 +54,8 @@ updDirtyUsers conn = do
       timeIt "Recalculating models & schedule" $ do
         markUserClean conn dirtyUser
         mbLastModel <- foldResponses conn dirtyUser Nothing (worker dirtyUser)
-        case mbLastModel of
-          Nothing -> return ()
-          Just lastModel ->
-            createModel conn lastModel
+        forM_ mbLastModel $ \lastModel ->
+          createModel conn lastModel
         markUserSchedule conn dirtyUser
   where
     worker userId Nothing response = do
@@ -76,17 +73,7 @@ updDirtyUsers conn = do
     worker userId (Just model) response
       | modelWord model /= responseWord response = do
         createModel conn model
-        let newStability | responseShownAnswer response = minStability
-                         | otherwise                    = knownWordStability
-            newReviewAt  = updateReviewAt response newStability
-            newModel = Model
-              { modelUserId    = userId
-              , modelWord      = responseWord response
-              , modelStability = round newStability
-              , modelCreatedAt = responseCreatedAt response
-              , modelReviewAt  = newReviewAt
-              }
-        return $ Just newModel
+        worker userId Nothing response
       | otherwise =
         return $ Just $ updateModel response model
 

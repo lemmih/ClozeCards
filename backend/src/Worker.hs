@@ -5,7 +5,7 @@ import           Control.Exception
 import           Control.Monad      (forever)
 import           Data.Time          (UTCTime, getCurrentTime, addUTCTime)
 
-data Worker = Worker (MVar [(ThreadId, MVar ())])
+newtype Worker = Worker (MVar [(ThreadId, MVar ())])
 
 new :: IO Worker
 new = fmap Worker (newMVar [])
@@ -19,8 +19,8 @@ forkIO (Worker mvar) action = do
 killAll :: Worker -> IO ()
 killAll (Worker mvar) = do
     lst <- takeMVar mvar
-    mapM_ killThread (map fst lst)
-    mapM_ takeMVar (map snd lst)
+    mapM_ (killThread.fst) lst
+    mapM_ (takeMVar.snd) lst
 
 timeLoop :: (UTCTime -> UTCTime -> IO ()) -> IO ()
 timeLoop fn = do

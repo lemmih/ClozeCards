@@ -162,7 +162,7 @@ handleClient bc pool conn userId = do
       sendJSON conn $ ReceiveKnownWords (T.unwords ws)
     FetchHighlight deckId -> do
       (recent, expired, known) <- runDB pool $ \db -> deckHighlights db userId deckId
-      sendJSON conn $ ReceiveHighlight
+      sendJSON conn ReceiveHighlight
         { highlightRecent  = recent
         , highlightExpired = expired
         , highlightKnown   = known }

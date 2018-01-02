@@ -1,7 +1,7 @@
 {-# LANGUAGE OverloadedStrings #-}
-{-# LANGUAGE RecordWildCards   #-}
 module DB.Users where
 
+import           Control.Monad
 import           Crypto.BCrypt
 import qualified Data.ByteString            as B
 import qualified Data.Set                   as S
@@ -9,7 +9,6 @@ import qualified Data.Text                  as T
 import qualified Data.Text.Encoding         as T
 import           Data.UUID.V4               as UUID
 import           Database.PostgreSQL.Simple
-import Control.Monad
 
 import           DB.Instances               ()
 import           DB.Misc

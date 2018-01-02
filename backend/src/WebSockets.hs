@@ -1,20 +1,22 @@
 module WebSockets where
 
-import Control.Concurrent                      (forkIO, threadDelay)
-import Control.Exception                       (SomeException, finally, handle)
-import Control.Monad                           (forever)
-import Control.Monad.Trans                     (MonadIO)
-import qualified Data.ByteString.Char8         as BS
-import Data.CaseInsensitive                    (mk)
-import qualified Data.Map                      as Map
-import Happstack.Server                        (ServerMonad, Headers, askRq)
-import Happstack.Server.Internal.Monads        (escapeHTTP)
-import Happstack.Server.Internal.TimeoutIO     (TimeoutIO(..))
-import Happstack.Server.Internal.Types         (Request(..), HeaderPair(..))
--- import Network.WebSockets                      (WebSockets(..))
-import qualified Network.WebSockets            as WS
-import qualified Network.WebSockets.Connection as WS
-import qualified Network.WebSockets.Stream     as WS
+import           Control.Concurrent                  (forkIO, threadDelay)
+import           Control.Exception                   (SomeException, finally,
+                                                      handle)
+import           Control.Monad                       (forever)
+import           Control.Monad.Trans                 (MonadIO)
+import qualified Data.ByteString.Char8               as BS
+import           Data.CaseInsensitive                (mk)
+import qualified Data.Map                            as Map
+import           Happstack.Server                    (Headers, ServerMonad,
+                                                      askRq)
+import           Happstack.Server.Internal.Monads    (escapeHTTP)
+import           Happstack.Server.Internal.TimeoutIO (TimeoutIO (..))
+import           Happstack.Server.Internal.Types     (HeaderPair (..),
+                                                      Request (..))
+import qualified Network.WebSockets                  as WS
+import qualified Network.WebSockets.Connection       as WS
+import qualified Network.WebSockets.Stream           as WS
 
 runWebSocketsHappstackWith
   :: (ServerMonad m, MonadIO m) =>
@@ -34,7 +36,7 @@ runWebSocketsHappstackWith options app =
                   , WS.pendingOnAccept = forkPingThread
                   , WS.pendingStream   = stream
                   }
-       app pc `finally` (WS.close stream)
+       app pc `finally` WS.close stream
          where
 
            mkHeaders :: Headers -> WS.Headers

@@ -1,10 +1,9 @@
 {-# LANGUAGE OverloadedStrings #-}
-{-# LANGUAGE RecordWildCards   #-}
 module DB.Buckets where
 
-import Data.Time
-import Data.Text (Text)
 import           Control.Monad
+import           Data.Text                  (Text)
+import           Data.Time
 import           Database.PostgreSQL.Simple
 
 import           DB.Instances               ()
