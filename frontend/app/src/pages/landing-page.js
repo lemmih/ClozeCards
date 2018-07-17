@@ -9,15 +9,6 @@ class LandingPage extends Component<void> {
       <div>
         <center>
           <h1>ClozeCards Public Beta</h1>
-          <h3>
-            ClozeCards has been undergoing radical changes since late December,
-            2017. If these changes are interfering with your study habits,
-            please{" "}
-            <a href="mailto:david.himmelstrup@clozecards.com">
-              write us an email
-            </a>{" "}
-            and we'll make it a priority to solve the issues.
-          </h3>
           <h2>&nbsp;</h2>
         </center>
         <div>
