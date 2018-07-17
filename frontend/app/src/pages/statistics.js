@@ -33,7 +33,7 @@ export default connect(toProps)(
             <Grid.Row columns={2}>
               <Grid.Column>
                 <Highscore
-                  title="Weekly"
+                  title="Monthly"
                   highscore={weekly}
                   highlight={highlight}
                   mark={online}
