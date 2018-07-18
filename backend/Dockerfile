@@ -1,4 +1,4 @@
-FROM haskell:8.2.1
+FROM haskell:8.4
 RUN apt-get update && apt-get install -y libpq-dev
 COPY clozecards.cabal .
 RUN cabal update && cabal install --only-dependencies

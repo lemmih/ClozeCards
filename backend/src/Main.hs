@@ -10,7 +10,6 @@ import           Data.Aeson                 (Value (..), object, (.=))
 import qualified Data.Aeson                 as Aeson
 import qualified Data.ByteString.Char8      as B8
 import qualified Data.HashMap.Strict        as HM
-import           Data.Monoid
 import           Data.Pool
 import qualified Data.Text                  as T
 import qualified Data.UUID                  as UUID

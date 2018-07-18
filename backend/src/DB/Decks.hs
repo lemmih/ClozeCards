@@ -6,7 +6,6 @@ import           Control.Monad
 import           Data.Char
 import           Data.List
 import           Data.Maybe
-import           Data.Monoid
 import qualified Data.Set                   as Set
 import           Data.Text                  (Text)
 import qualified Data.Text                  as T

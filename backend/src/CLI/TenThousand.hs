@@ -6,7 +6,6 @@ import           Data.Chinese.CCDict
 import           Data.Chinese.Segmentation
 import           Data.List
 import qualified Data.Map                   as Map
-import           Data.Monoid
 import           Data.Ord
 import qualified Data.Text                  as T
 import qualified Database.PostgreSQL.Simple as PSQL
