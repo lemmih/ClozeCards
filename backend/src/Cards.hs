@@ -97,10 +97,12 @@ fetchCards conn userId deckId Study = do
   newStudy <- timeIt "FetchNew" $ fetchStudyCardsNew conn now userId deckId
   let bound = templatesToBound newStudy
   rows <- timeIt "FetchCards" $ fetchStudyCards conn now userId deckId bound
+  overlearn <- timeIt "Overlearn" $ fetchStudyCardsOverlearn conn now userId deckId bound
   putStrLn $ "Bound: " ++ show bound
   putStrLn $ "Review: " ++ show (length rows)
   putStrLn $ "Study: " ++ show (length newStudy)
-  let templates = nubBy ((==) `on` cardTemplateSentenceId) (rows++newStudy)
+  putStrLn $ "Overlearn: " ++ show (length overlearn)
+  let templates = nubBy ((==) `on` cardTemplateSentenceId) (rows++newStudy++overlearn)
   -- putStrLn $ "Templates: " ++ show (head templates)
   mapM (annotateCard conn userId) (cardify now templates)
 

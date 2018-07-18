@@ -146,6 +146,18 @@ fetchStudyCards conn now userId deckId mbBound = query conn
   \ LIMIT 10"
   (userId, deckId, mbBound, mbBound, now)
 
+fetchStudyCardsOverlearn :: Connection -> UTCTime -> UserId -> DeckId -> Maybe Int -> IO [CardTemplate]
+fetchStudyCardsOverlearn conn now userId deckId mbBound = query conn
+  "SELECT DISTINCT ON (review_at) index, word, id, simplified, english[1], words, models\
+  \  FROM schedule_by_deck, sentences\
+  \ WHERE user_id = ? AND deck_id = ? AND\
+  \       (? IS NULL OR index < ?) AND\
+  \       review_at > ? AND\
+  \       sentence_id = id\
+  \ ORDER BY review_at asc, seen_at NULLS FIRST, sentence_id\
+  \ LIMIT 10"
+  (userId, deckId, mbBound, mbBound, now)
+
 fetchStudyCardsNew :: Connection -> UTCTime -> UserId -> DeckId -> IO [CardTemplate]
 fetchStudyCardsNew conn now userId deckId = query conn
   "SELECT index, s.word, id, simplified, english, array_agg(sw.word) as words, array_agg(models.review_at) as model\
