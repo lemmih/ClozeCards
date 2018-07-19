@@ -3,6 +3,7 @@ module Logic
   ( answerScore
   , addResponse
   , updateModel
+  , computeModel
   , updateReviewAt
   , knownWordStability
   , minStability) where
@@ -78,6 +79,7 @@ updateStability Response{..} Model{..}
   | responseShownAnswer && extremeFactor     = minStability
   | not responseShownAnswer && extremeFactor = maxStability
   | not responseShownAnswer && earlyReview = stability + fasttrack
+  | not responseShownAnswer && recovery    = stability
   | responseShownAnswer                    = max minStability (stability / factor)
   | otherwise                              = max stability fasttrack * factor
   where
@@ -86,6 +88,7 @@ updateStability Response{..} Model{..}
     factor = realToFrac responseFactor
     fasttrack = diffUTCTime responseCreatedAt modelCreatedAt
     earlyReview = responseCreatedAt < modelReviewAt
+    recovery = modelReviewAt < addUTCTime stability modelCreatedAt
 
 updateReviewAt Response{..} stability
   | responseShownAnswer = min earlyRepeat desiredRepeat
@@ -94,37 +97,36 @@ updateReviewAt Response{..} stability
     earlyRepeat   = addUTCTime failureRecap responseCreatedAt
     desiredRepeat = addUTCTime stability responseCreatedAt
 
+computeModel :: Maybe Model -> Response -> Model
+computeModel mbModel response@Response{..} =
+  case mbModel of
+    Nothing ->
+      let newStability | responseShownAnswer = minStability
+                       | otherwise           = knownWordStability
+          newModel = Model
+            { modelUserId    = responseUserId
+            , modelWord      = responseWord
+            , modelStability = round newStability
+            , modelCreatedAt = responseCreatedAt
+            , modelReviewAt  = updateReviewAt response newStability
+            }
+      in newModel
+    Just model -> updateModel response model
+
 addResponse :: Pool Connection -> UserId -> Response -> IO ()
-addResponse pool userId response_ = do
-  now <- getCurrentTime
-  let response = response_{responseUserId = userId, responseCreatedAt = now}
-      word = responseWord response
+addResponse pool userId response = do
+  let word = responseWord response
+      now = responseCreatedAt response
       mbSentenceId = responseSentenceId response
   newModel <- runDB pool $ \db -> do
     createResponse db response
     mbModel <- fetchModel db userId word
-    when (responseCompleted response) $
+    when (responseCompleted response) $ do
       case mbModel of
-        Nothing -> do
-          let newStability | responseShownAnswer response = minStability
-                           | otherwise                    = knownWordStability
-              newReviewAt  = updateReviewAt response newStability
-              newModel = Model
-                { modelUserId    = userId
-                , modelWord      = word
-                , modelStability = round newStability
-                , modelCreatedAt = now
-                , modelReviewAt  = newReviewAt
-                }
-              reviewIn = diffUTCTime (modelReviewAt newModel) now
-          noticeLog $ T.unpack word ++ " NEW " ++ " -> " ++ show newStability ++ " in " ++ show reviewIn
-          createModel db newModel
-        Just model -> do
-          clearSchedule db userId (modelReviewAt model)
-          let newModel = updateModel response model
-              reviewIn = diffUTCTime (modelReviewAt newModel) now
-          noticeLog $ T.unpack word ++ " UPD " ++ " " ++ show (modelStability model) ++ " -> " ++ show (modelStability newModel) ++ " in " ++ show reviewIn
-          createModel db newModel
+        Nothing -> return ()
+        Just model -> clearSchedule db userId (modelReviewAt model)
+      let newModel = computeModel mbModel response
+      createModel db newModel
     case mbSentenceId of
       Nothing -> return ()
       Just sentenceId ->

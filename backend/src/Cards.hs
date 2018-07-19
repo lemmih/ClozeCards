@@ -36,9 +36,11 @@ instantiate now CardTemplate{..} = do
           , cardChinese = blocks
           , cardEnglish = cardTemplateEnglish
           , cardNow     = now
+          , cardSeen = cardTemplateCreatedAt
           }
 
-tokenToBlock :: UTCTime -> Text -> [(Text, Maybe UTCTime)] -> CC.Token -> State (Set Text) CardBlock
+tokenToBlock :: UTCTime -> Text -> [(Text, Maybe UTCTime)]
+             -> CC.Token -> State (Set Text) CardBlock
 tokenToBlock _now _ _ (UnknownWord w) = pure $ EscapedBlock w
 tokenToBlock now selectedWord models (KnownWord e) = do
     seen <- gets (entrySimplified e `Set.member`)
@@ -97,12 +99,12 @@ fetchCards conn userId deckId Study = do
   newStudy <- timeIt "FetchNew" $ fetchStudyCardsNew conn now userId deckId
   let bound = templatesToBound newStudy
   rows <- timeIt "FetchCards" $ fetchStudyCards conn now userId deckId bound
-  overlearn <- timeIt "Overlearn" $ fetchStudyCardsOverlearn conn now userId deckId bound
+  -- overlearn <- timeIt "Overlearn" $ fetchStudyCardsOverlearn conn now userId deckId bound
   putStrLn $ "Bound: " ++ show bound
   putStrLn $ "Review: " ++ show (length rows)
   putStrLn $ "Study: " ++ show (length newStudy)
-  putStrLn $ "Overlearn: " ++ show (length overlearn)
-  let templates = nubBy ((==) `on` cardTemplateSentenceId) (rows++newStudy++overlearn)
+  -- putStrLn $ "Overlearn: " ++ show (length overlearn)
+  let templates = nubBy ((==) `on` cardTemplateSentenceId) (rows++newStudy)
   -- putStrLn $ "Templates: " ++ show (head templates)
   mapM (annotateCard conn userId) (cardify now templates)
 

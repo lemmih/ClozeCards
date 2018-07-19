@@ -92,6 +92,7 @@ data Card = Card
   , cardChinese    :: [CardBlock]
   , cardEnglish    :: Text
   , cardNow        :: UTCTime
+  , cardSeen       :: Maybe UTCTime
   } deriving (Show)
 
 data CardBlock
@@ -116,6 +117,7 @@ data Definition = Definition
 data CardTemplate = CardTemplate
   { cardTemplateIndex      :: Int
   , cardTemplateWord       :: Text
+  , cardTemplateCreatedAt  :: Maybe UTCTime
   , cardTemplateSentenceId :: SentenceId
   , cardTemplateSimplified :: Text
   , cardTemplateEnglish    :: Text
@@ -198,6 +200,13 @@ data ServerMessage
   | SetOnline
     { usersOnline  :: [UserId]
     , usersOffline :: [UserId] }
+  | UpdateBrain
+    { diagnoseWord :: Text
+    , diagnoseInterval :: Maybe Integer -- Time size last recall in seconds
+    , diagnoseSeen   :: UTCTime
+    , diagnoseReview :: UTCTime
+    , diagnoseStability :: Int
+    , diagnoseStabilityDelta :: Int }
     deriving (Show)
 
 
@@ -347,6 +356,7 @@ instance FromJSON Card where
       <*> o.:"chinese"
       <*> o.:"english"
       <*> o.:"now"
+      <*> o.:"seen"
 
 instance ToJSON Card where
   toJSON Card{..} = object
@@ -355,6 +365,7 @@ instance ToJSON Card where
     , "chinese"    .= cardChinese
     , "english"    .= cardEnglish
     , "now"        .= cardNow
+    , "seen"       .= cardSeen
     ]
 
 instance FromJSON CardBlock where
@@ -618,3 +629,11 @@ instance ToJSON ServerMessage where
     toAction "SET_ONLINE" $ object
       [ "online" .= online
       , "offline" .= offline ]
+  toJSON (UpdateBrain word interval seen review stab stabDelta) =
+    toAction "UPDATE_BRAIN" $ object
+      [ "word" .= word
+      , "interval" .= interval
+      , "seen" .= seen
+      , "review" .= review
+      , "stability" .= stab
+      , "delta" .= stabDelta ]

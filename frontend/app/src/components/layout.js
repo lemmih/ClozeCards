@@ -6,6 +6,7 @@ import { connect } from "react-redux";
 
 import LandingPage from "../pages/landing-page";
 import { ViewDeck, NewDeck } from "../pages/decks";
+import { DiagnoseDeck } from "../pages/diagnose";
 import BrowseDecks from "../pages/browse-decks";
 import { SignIn, SignUp } from "../pages/sign-in-up";
 import MarkWords from "../pages/mark";
@@ -112,6 +113,11 @@ class Layout extends Component {
               path="/decks/:slug/study"
               exact={true}
               render={this.matchStudy}
+            />
+            <Route
+              path="/decks/:slug/diagnose"
+              exact={true}
+              render={({match}) => <DiagnoseDeck slug={match.params.slug} />}
             />
             <Route path="/sign-in" exact={true} render={() => <SignIn />} />
             <Route path="/sign-up" exact={true} render={() => <SignUp />} />

@@ -13,6 +13,7 @@ import           Data.Maybe
 import qualified Data.Text                  as T
 import           System.Console.ANSI
 import           System.IO
+import           Data.Time
 
 import           Data.Pool                  (Pool)
 import qualified Database.PostgreSQL.Simple as PSQL
@@ -88,7 +89,10 @@ handleClient bc pool conn userId = do
       runDB pool $ \db -> do
         cards <- fetchCards db userId deckId style
         sendJSON conn $ ReceiveCards deckId cards
-    ReceiveResponse response -> do
+    ReceiveResponse response_ -> do
+      now <- getCurrentTime
+      let response = response_{responseUserId = userId, responseCreatedAt = now}
+
       when (responseCompleted response) $ runDB pool $ \db -> do
         mbModel <- fetchModel db userId (responseWord response)
         let earlyReview =
@@ -105,6 +109,20 @@ handleClient bc pool conn userId = do
         daily <- readBucketSnapshot db Buckets.highscoreHourly userId
         weekly <- readBucketSnapshot db Buckets.highscoreDaily userId
         forkIO $ broadcast bc $ UpdateHighscore (Highscore [(userId, daily)]) (Highscore [(userId, weekly)])
+        unless (responseFactor response > 1000) $ do
+          let interval = do
+                model <- mbModel
+                pure (round $ diffUTCTime (responseCreatedAt response) (modelCreatedAt model))
+              nextModel = computeModel mbModel response
+              stability = modelStability nextModel
+              delta = stability - maybe 0 modelStability mbModel
+          sendJSON conn $ UpdateBrain
+              { diagnoseWord     = responseWord response
+              , diagnoseInterval = interval
+              , diagnoseSeen     = responseCreatedAt response
+              , diagnoseReview   = modelReviewAt nextModel
+              , diagnoseStability = stability
+              , diagnoseStabilityDelta = delta }
         return ()
       addResponse pool userId response
     FetchSearchResults _query ordering offset ->

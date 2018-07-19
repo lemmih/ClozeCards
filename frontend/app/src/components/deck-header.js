@@ -94,14 +94,23 @@ class DeckHeader extends Component {
     );
     const studyActive = <Link to={deckLink + "/study"}>{studyBase}</Link>;
 
-    const notesBase = (
+    // const notesBase = (
+    //   <Popup
+    //     content="Notes"
+    //     position="top center"
+    //     trigger={<Icon name="edit" size="big" />}
+    //   />
+    // );
+    // const notesActive = <Link to={deckLink + "/notes"}>{notesBase}</Link>;
+
+    const diagnoseBase = (
       <Popup
-        content="Notes"
+        content="Diagnostic"
         position="top center"
-        trigger={<Icon name="edit" size="big" />}
+        trigger={<Icon name="list alternate outline" size="big" />}
       />
     );
-    const notesActive = <Link to={deckLink + "/notes"}>{notesBase}</Link>;
+    const diagnoseActive = <Link to={deckLink + "/diagnose"}>{diagnoseBase}</Link>;
 
     const editBase = (
       <Popup
@@ -197,7 +206,7 @@ class DeckHeader extends Component {
               <Grid.Row>
                 <Grid.Column>
                   {editable ? studyBase : studyActive}
-                  {editable ? notesBase : notesActive}
+                  {editable ? diagnoseBase : diagnoseActive}
                 </Grid.Column>
 
                 {mayEdit ? (

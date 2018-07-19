@@ -10,6 +10,7 @@ import { activeWord, cache } from "./dictionary";
 import highlight from "./highlight";
 import highscore from "./highscore";
 import online from "./online";
+import diagnose from "./diagnose";
 
 export default combineReducers({
   decks,
@@ -22,5 +23,6 @@ export default combineReducers({
   dictionary: combineReducers({ activeWord, cache }),
   highlight,
   highscore,
-  online
+  online,
+  diagnose
 });

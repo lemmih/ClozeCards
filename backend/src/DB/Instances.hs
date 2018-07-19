@@ -39,8 +39,9 @@ instance FromRow Deck where
 
 instance FromRow CardTemplate where
   fromRow = do
-    ( cardTemplateIndex, cardTemplateWord, cardTemplateSentenceId
-     ,cardTemplateSimplified, cardTemplateEnglish, ws, models) <- fromRow
+    ( cardTemplateIndex, cardTemplateWord, cardTemplateCreatedAt
+     , cardTemplateSentenceId
+     , cardTemplateSimplified, cardTemplateEnglish, ws, models) <- fromRow
     let cardTemplateModels = zip (V.toList ws) (V.toList models)
     return CardTemplate{..}
 
